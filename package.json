@@ -1,0 +1,22 @@
+{
+  "name": "steemitgame",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "nodemon -L app/bin/www"
+  },
+  "dependencies": {
+    "body-parser": "~1.10.2",
+    "cookie-parser": "~1.3.3",
+    "debug": "~2.1.1",
+    "express": "~4.16.2",
+    "jade": "~1.9.1",
+    "morgan": "~1.5.1",
+    "formidable": "~1.1.1",
+    "mysql": "github:mysqljs/mysql",
+    "redis": "^2.8.0",
+    "steem": "~0.6.6",
+    "config": "~1.28.1",
+    "serve-favicon": "~2.2.0"
+  }
+}
