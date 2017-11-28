@@ -5,6 +5,7 @@ module.exports = function(app) {
 
   app.post('/upload', api.upload);
   app.post('/post', api.upload);
+  app.get('/me', api.me);
   app.get('/', api.index);
 
   var callback  = require('../controllers/callbackController');

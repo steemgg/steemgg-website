@@ -5,7 +5,8 @@ var formidable = require('formidable'),
     path = require('path'),
     util = require('util'),
     steem = require('steem'),
-    config = require('config');
+    config = require('config'),
+    request = require('request');
 
 exports.upload = function(req, res) {
     var uploadDir = config.get('Steemit.dev.username');
@@ -26,15 +27,32 @@ exports.upload = function(req, res) {
     })
 };
 
+exports.me = function(req, res) {
+    var sc2 = config.get('Steemit.app.sc2') + '/api/me';
+    var clientServerOptions = {
+        uri: sc2,
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': req.query.token
+        }
+    }
+    request(clientServerOptions, function (error, response) {
+        console.log(error,response.body);
+        res.status(200).json(JSON.parse(response.body))
+        return;
+    });
+};
+
 exports.index = function(req, res, next) {
     var username = config.get('Steemit.dev.username');
     var password = config.get('Steemit.dev.password');
     var permlink = new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
     var wif = steem.auth.toWif(username, password, 'posting');
     console.log(wif);
-    steem.broadcast.comment(password, '', 'test', username, permlink, "test", "testbody", { tags: ['test'], app: 'steemgame/examples' }, function(err, result) {
-        console.log(err, result);
-    });
+    //steem.broadcast.comment(password, '', 'test', username, permlink, "test", "testbody", { tags: ['test'], app: 'steemgame/examples' }, function(err, result) {
+    //    console.log(err, result);
+    //});
     //steem.api.getDiscussionsByCreated({'tag':'cn','limit':1}, function(err, result) {
     //    console.log(err, result);
     //});
