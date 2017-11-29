@@ -14,7 +14,10 @@
   },
   "dependencies": {
     "element-ui": "^2.0.5",
+    "owl.carousel": "^2.2.0",
     "vue": "^2.5.2",
+    "vue-awesome-swiper": "^2.6.7",
+    "vue-input-tag": "0.0.16",
     "vue-router": "^3.0.1"
   },
   "devDependencies": {
@@ -46,6 +49,7 @@
     "eventsource-polyfill": "^0.9.6",
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^1.1.4",
+    "font-awesome": "^4.7.0",
     "friendly-errors-webpack-plugin": "^1.6.1",
     "html-webpack-plugin": "^2.30.1",
     "inject-loader": "^3.0.0",
@@ -60,6 +64,7 @@
     "karma-webpack": "^2.0.2",
     "mocha": "^3.2.0",
     "node-notifier": "^5.1.2",
+    "node-sass": "^4.7.2",
     "optimize-css-assets-webpack-plugin": "^3.2.0",
     "ora": "^1.2.0",
     "phantomjs-prebuilt": "^2.1.14",
@@ -67,6 +72,8 @@
     "postcss-import": "^11.0.0",
     "postcss-loader": "^2.0.8",
     "rimraf": "^2.6.0",
+    "roboto-fontface": "^0.8.0",
+    "sass-loader": "^6.0.6",
     "semver": "^5.3.0",
     "shelljs": "^0.7.6",
     "sinon": "^4.0.0",
@@ -75,7 +82,7 @@
     "vue-loader": "^13.3.0",
     "vue-style-loader": "^3.0.1",
     "vue-template-compiler": "^2.5.2",
-    "webpack": "^3.6.0",
+    "webpack": "^3.8.1",
     "webpack-bundle-analyzer": "^2.9.0",
     "webpack-dev-server": "^2.9.1",
     "webpack-merge": "^4.1.0"

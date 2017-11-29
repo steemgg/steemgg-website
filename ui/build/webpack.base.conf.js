@@ -29,7 +29,7 @@ module.exports = {
   },
   module: {
     rules: [
-      ...(config.dev.useEslint? [{
+      ...(config.dev.useEslint ? [{
         test: /\.(js|vue)$/,
         loader: 'eslint-loader',
         enforce: 'pre',
@@ -71,6 +71,15 @@ module.exports = {
         options: {
           limit: 10000,
           name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
+        }
+      },
+      {
+        test: /\*.jsx?$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader',
+
+        query: {
+          presets: ['es2015', 'react']
         }
       }
     ]
