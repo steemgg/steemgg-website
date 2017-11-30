@@ -38,24 +38,15 @@ exports.upload = function(req, res) {
 exports.me = function(req, res) {
     var api = sc2.Initialize({
         app: config.get('steemit.sc.app'),
-        callbackURL: config.get('steemit.sc.cburl'),
+        scope: config.get('steemit.sc.scope'),
         baseURL: config.get('steemit.sc.url'),
-        scope: config.get('steemit.sc.scope')
+        callbackURL: config.get('steemit.sc.cburl')
     });
 
-    var sc2url = config.get('steemit.app.sc2') + '/api/me';
-    var clientServerOptions = {
-        uri: sc2url,
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': req.query.token
-        }
-    }
-    request(clientServerOptions, function (error, response) {
-        console.log(error,response.body);
-        res.status(200).json(JSON.parse(response.body))
-        return;
+    api.setAccessToken(req.query.token);
+    api.me(function (err, result) {
+        console.log(err, res);
+        res.status(200).json(JSON.parse(result.body));
     });
 };
 
