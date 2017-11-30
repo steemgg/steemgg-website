@@ -42,10 +42,11 @@ exports.me = function(req, res) {
         baseURL: config.get('steemit.sc.url'),
         callbackURL: config.get('steemit.sc.cburl')
     });
-
-    api.setAccessToken(req.query.token);
+    //console.log(req);
+    console.log(req.session.accessToken);
+    api.setAccessToken(req.session.accessToken);
     api.me(function (err, result) {
-        console.log(err, res);
+        //console.log(err, res);
         res.status(200).json(JSON.parse(result.body));
     });
 };
