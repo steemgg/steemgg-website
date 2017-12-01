@@ -43,10 +43,14 @@ exports.me = function(req, res) {
         callbackURL: config.get('steemit.sc.cburl')
     });
     //console.log(req);
-    console.log(req.session.accessToken);
-    api.setAccessToken(req.session.accessToken);
+    if (req.session.accessToken == null && process.env.NODE_ENV === 'development') {
+        console.log(req.cookies);
+        api.setAccessToken(req.cookies['at']);
+    } else {
+        console.log(req.session.accessToken);
+        api.setAccessToken(req.session.accessToken);
+    } 
     api.me(function (err, result) {
-        //console.log(err, res);
         res.status(200).json(JSON.parse(result.body));
     });
 };
