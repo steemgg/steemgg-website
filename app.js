@@ -11,7 +11,9 @@ var app = express();
 
 var sess = {
   secret: config.get('steemit.app.secret'),
-  cookie: {}
+  cookie: {},
+  resave: false,
+  saveUninitialized: false 
 }
 
 if (app.get('env') === 'production') {

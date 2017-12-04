@@ -11,11 +11,5 @@ var formidable = require('formidable'),
 exports.auth = function(req, res, next) {
     req.session.accessToken = req.query.access_token;
     res.redirect('./me');
-    //res.redirect(url.format({
-    //   pathname:"./me"
-    //   //query: {
-    //   //   "token": req.query.access_token
-    //   // }
-    // }));
 };
 
