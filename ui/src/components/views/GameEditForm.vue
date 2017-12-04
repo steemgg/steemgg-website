@@ -7,33 +7,24 @@
       </div>
       <div class="editFormContainer">
         <div class='gameEditForm'>
-          <el-form ref='game' :model='game' label-width='120px'>
-            <el-form-item label='Game name'>
-              <el-input v-model='game.name'></el-input>
+          <el-form ref='game' :model='game' label-width='150px'>
+            <el-form-item label='Game Title'>
+              <el-input v-model='game.title'></el-input>
             </el-form-item>
-            <el-form-item label='Game description'>
+            <el-form-item label='Game Description'>
               <el-input v-model='game.description' type="textarea" :rows="2" placeholder="Please input description of your game"></el-input>
             </el-form-item>
-            <el-form-item label='Thumbnail'>
-              <el-upload
-                class="game-resource-upload"
-                action="https://jsonplaceholder.typicode.com/posts/"
-                :on-preview="handlePreview"
-                :on-remove="handleRemove"
-                :file-list="game.image"
-                :limit="1"
-                list-type="picture">
-                <el-button size="small" type="primary">Click to upload</el-button>
-                <div slot="tip" class="el-upload__tip">jpg/png files with a size less than 500kb</div>
-              </el-upload>
+            <el-form-item label='Cover Image'>
+              <vue-dropzone ref="myVueDropzone" id="dropzone" :options="dropzoneOptions"></vue-dropzone>
+              <div slot="tip" class="el-upload__tip">jpg/png files with a size less than 500kb</div>
             </el-form-item>
             <el-form-item label='Play in browser?'>
               <el-switch v-model='game.inbrowser'></el-switch>
             </el-form-item>
-            <el-form-item label='Tag'>
+            <el-form-item label='Tags'>
               <input-tag :on-change='onTagChange' :tags='game.tags'></input-tag>
             </el-form-item>
-            <el-form-item label='Game type'>
+            <el-form-item label='Game Type'>
               <el-checkbox-group v-model='game.type'>
                 <el-checkbox label='Pixel Art' name='type'></el-checkbox>
                 <el-checkbox label='Action' name='type'></el-checkbox>
@@ -41,24 +32,25 @@
                 <el-checkbox label='Shooter' name='type'></el-checkbox>
               </el-checkbox-group>
             </el-form-item>
-            <el-form-item label='Access'>
-              <el-radio-group v-model='game.access'>
-                <el-radio label='Private'></el-radio>
-                <el-radio label='Public'></el-radio>
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item label="Game File">
+            <el-form-item label="File">
               <el-upload
                 class="game-resource-upload"
-                action="https://jsonplaceholder.typicode.com/posts/"
+                action="/api/upload"
                 :on-preview="handlePreview"
                 :on-remove="handleRemove"
                 :file-list="game.fileList"
+                :on-success="handleUploadSuccess"
                 :limit="1"
                 list-type="text">
                 <el-button size="small" type="primary">Click to upload</el-button>
                 <div slot="tip" class="el-upload__tip">game files with a size less than 500kb</div>
               </el-upload>
+            </el-form-item>
+            <el-form-item label='Activity Title'>
+              <el-input v-model='game.activityTitle'></el-input>
+            </el-form-item>
+            <el-form-item label='Activity Description'>
+              <el-input v-model='game.activityDesc' type="textarea" :rows="2" placeholder="This will be posted to steemit, game description will be used if empty"></el-input>
             </el-form-item>
             <el-form-item>
               <el-button type='primary' @click='onSubmit'>Create</el-button>
@@ -91,15 +83,15 @@
     Upload,
     RadioGroup
   } from 'element-ui'
-  import ElForm from '../../../node_modules/element-ui/packages/form/src/form'
+  import vue2Dropzone from 'vue2-dropzone'
+  import 'vue2-dropzone/dist/vue2Dropzone.css'
 
   export default {
     components: {
-      ElForm,
-      FormItem,
       Checkbox,
       CheckboxGroup,
       Form,
+      FormItem,
       Col,
       Switch,
       Button,
@@ -113,21 +105,30 @@
       CommonFooter,
       Main,
       Upload,
-      RadioGroup
+      RadioGroup,
+      vueDropzone: vue2Dropzone
     },
     name: 'GameEditForm',
     data () {
       return {
         game: {
-          name: '',
+          title: '',
           description: '',
+          activityTitle: '',
+          activityDesc: '',
           image: [],
           inbrowser: '',
           tags: ['abc', 'eef'],
           delivery: false,
           type: [],
-          access: '',
           fileList: []
+        },
+        dropzoneOptions: {
+          url: '/api/upload',
+          maxFilesize: 0.5,
+          thumbnailWidth: 330,
+          addRemoveLinks: true,
+          dictDefaultMessage: "<i class='fa fa-cloud-upload'></i>UPLOAD Cover Image"
         }
       }
     },
@@ -144,6 +145,11 @@
       },
       handlePreview (file) {
         console.log(file)
+      },
+      handleUploadSuccess (response, file, fileList) {
+        console.log(response)
+        console.log(file)
+        console.log(fileList)
       }
     }
   }
@@ -164,6 +170,12 @@
       box-shadow: 2px 2px 2px #999999;
       border-radius: 3px;
       padding: 20px;
+    }
+  }
+  .dropzone {
+    padding: 0;
+    .dz-preview {
+      margin: 0;
     }
   }
 </style>

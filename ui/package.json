@@ -18,7 +18,8 @@
     "vue": "^2.5.2",
     "vue-awesome-swiper": "^2.6.7",
     "vue-input-tag": "0.0.16",
-    "vue-router": "^3.0.1"
+    "vue-router": "^3.0.1",
+    "vue2-dropzone": "^3.0.0"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
