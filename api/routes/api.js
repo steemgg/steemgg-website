@@ -17,6 +17,7 @@ module.exports = function(app) {
 };
 
 function morkMiddleware (req, res, next) {
+    console.log(req.cookies['at']);
     if (!req.session.accessToken && process.env.NODE_ENV === 'development' && req.cookies['at'] == 'test') {
         fs.readFile( config.get('steemit.app.rooturl') + '/test.json', 'utf8', function (err, result) {
             if (err) {

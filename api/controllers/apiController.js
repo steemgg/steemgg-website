@@ -116,6 +116,12 @@ exports.logout = function(req, res, next) {
             return res.status(401).json({ error: err })
         }
     });
+    req.session.destroy(function(err) {
+        if(err){
+            return res.json({ error: 'failed'});
+        }
+        res.clearCookie(at);
+    });
     res.status(200).json('ok');
 };
 
