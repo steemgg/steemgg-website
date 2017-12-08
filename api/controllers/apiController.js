@@ -10,7 +10,8 @@ var formidable = require('formidable'),
     decompress = require('decompress'),
     ipfsAPI = require('ipfs-api'),
     mysql = require('mysql'),
-    sc2 = require('../lib/sc2');
+    sc2 = require('../lib/sc2'),
+    CODE = require('../lib/code');
 
 exports.upload = function(req, res) {
     var userid = req.session.user.account.id;
@@ -20,25 +21,27 @@ exports.upload = function(req, res) {
     form.keepExtensions = true
     form.uploadDir = uploadDir
     form.parse(req, function(err, fields, files) {
-        if (err) return res.status(500).json({ error: err })
+        if (err || !files['file']){
+            console.log(err);
+            return res.status(500).json({ resCode:CODE.FILE_UPLOAD_ERROR.RESCODE, err: CODE.FILE_UPLOAD_ERROR.DESC });
+        }
         var ipfs = ipfsAPI({host: config.get('steemit.ipfs.ip'), port: config.get('steemit.ipfs.port'), protocol: 'http'});
         if(files['file'].type == 'application/zip') {
-            console.log('unzip file');
             unzipFile(files['file'].path, userid, function cb(unzips){
                 console.log(config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[0].path);
                 ipfs.util.addFromFs(config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[0].path, { recursive: true }, (err, result) => {
                     if (err) { 
-                        return res.status(500).json({ error: err });
+                        return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS.DESC });
                     }
-                    res.status(200).json({ uploaded: true, ret: result.slice(-1) });
+                    res.status(200).json({ resCode:CODE.SUCCESS.RESCODE, resData: result.slice(-1) });
                 })
             });
         } else {
             ipfs.util.addFromFs(files['file'].path, { recursive: true }, (err, result) => {
                 if (err) { 
-                    return res.status(500).json({ error: err });
+                    return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS.DESC });
                 }
-                res.status(200).json({ uploaded: true, ret: result });
+                res.status(200).json({ resCode:CODE.SUCCESS.RESCODE, resData: result });
             })
         }
     })
@@ -58,17 +61,13 @@ exports.me = function(req, res) {
         baseURL: config.get('steemit.sc.url'),
         callbackURL: config.get('steemit.sc.cburl')
     });
-    //if (req.session.accessToken == null && process.env.NODE_ENV === 'development') {
-    //    api.setAccessToken(req.cookies['at']);
-    //} else {
     api.setAccessToken(req.session.accessToken);
-    //}
     api.me(function (err, result) {
         if(err != null){
-            return res.status(401).json({ error: err });
+            return res.status(401).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err: err.error_description });
         }
         req.session.user = result;
-        res.status(200).json(result);
+        res.status(200).json({ resCode:CODE.SUCCESS.RESCODE, resData:result});
     });
 };
 
@@ -80,15 +79,12 @@ exports.addGame = function(req, res, next) {
     game.createtime = unix;
     game.updatetime = unix;
     cmysql(function cb(con){
-        console.log('con is ok');
         con.query('INSERT INTO games SET ?', game, (err, dbRes) => {
             if(err) {
-                console.log(err);
+                return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
             }
-            console.log('Last insert ID:', dbRes.insertId);
             game.id = dbRes.insertId;
-            con.end();
-            res.status(200).json(game);
+            return res.status(200).json({ resCode:CODE.SUCCESS.RESCODE, resData:game} );
         });
     });
 };
@@ -113,16 +109,16 @@ exports.logout = function(req, res, next) {
     });
     api.revokeToken(function (err, res) {
         if(err != null){
-            return res.status(401).json({ error: err })
+            return res.status(401).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err: err.error_description });
         }
     });
     req.session.destroy(function(err) {
         if(err){
-            return res.json({ error: 'failed'});
+            return res.status(500).json({ resultCode: CODE.SESSION_ERROR.RESCODE, err: CODE.SESSION_ERROR.DESC });
         }
-        res.clearCookie(at);
+        res.clearCookie();
     });
-    res.status(200).json('ok');
+    return res.status(200).json({ resCode:CODE.SUCCESS.RESCODE} );
 };
 
 function unzipFile(file, userid, cb) {
@@ -150,11 +146,5 @@ function cmysql(cb) {
         console.log('Connection established');
     });
     cb(con);
-
-    //con.end((err) => {
-    //    // The connection is terminated gracefully
-    //    // Ensures all previously enqueued queries are still
-    //    // before sending a COM_QUIT packet to the MySQL server.
-    //});
 }
 
