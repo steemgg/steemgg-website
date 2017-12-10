@@ -31,7 +31,7 @@ exports.upload = function(req, res) {
                 console.log(config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[0].path);
                 ipfs.util.addFromFs(config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[0].path, { recursive: true }, (err, result) => {
                     if (err) { 
-                        return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS.DESC });
+                        return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC });
                     }
                     res.status(200).json({ resCode:CODE.SUCCESS.RESCODE, resData: result.slice(-1) });
                 })
@@ -39,7 +39,7 @@ exports.upload = function(req, res) {
         } else {
             ipfs.util.addFromFs(files['file'].path, { recursive: true }, (err, result) => {
                 if (err) { 
-                    return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS.DESC });
+                    return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC + err });
                 }
                 res.status(200).json({ resCode:CODE.SUCCESS.RESCODE, resData: result });
             })
@@ -75,6 +75,7 @@ exports.addGame = function(req, res, next) {
     var game = req.body;
     var unix = Math.round(+new Date()/1000);
     game.userid = req.session.user.account.id;
+    game.account = req.session.user.account.name;
     game.status = 1;
     game.createtime = unix;
     game.updatetime = unix;
