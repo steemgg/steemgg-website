@@ -38,7 +38,7 @@ exports.upload = function(req, res) {
             });
         } else {
             ipfs.util.addFromFs(files['file'].path, { recursive: true }, (err, result) => {
-                if (err) { 
+                if (err) {
                     return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC + err });
                 }
                 res.status(200).json({ resCode:CODE.SUCCESS.RESCODE, resData: result });
@@ -66,6 +66,23 @@ exports.me = function(req, res) {
         if(err != null){
             return res.status(401).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err: err.error_description });
         }
+        //check user
+        cmysql(function cb(con){
+            con.query('select * from user where username = ?' , result.user,(err, dbRes) => {
+                if(err) {
+                    return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+                }
+                if(dbRes.id) {
+                    var user = {'username':result.user, 'userid':result.account.id, 'createtime':Math.round(+new Date()/1000)};
+                    con.query('INSERT INTO user SET ?', user, (err, dbRes) => {
+                        if(err) {
+                            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+                        }
+                    });
+                }
+            });
+        });
+
         req.session.user = result;
         res.status(200).json({ resCode:CODE.SUCCESS.RESCODE, resData:result});
     });
@@ -110,16 +127,19 @@ exports.logout = function(req, res, next) {
     });
     api.revokeToken(function (err, res) {
         if(err != null){
-            return res.status(401).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err: err.error_description });
+            res.status(401).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err: err.error_description });
         }
+        console.log(err);
+        return;
     });
+    res.clearCookie('at');
     req.session.destroy(function(err) {
         if(err){
-            return res.status(500).json({ resultCode: CODE.SESSION_ERROR.RESCODE, err: CODE.SESSION_ERROR.DESC });
+            res.status(500).json({ resultCode: CODE.SESSION_ERROR.RESCODE, err: CODE.SESSION_ERROR.DESC });
         }
-        res.clearCookie();
+        return;
     });
-    return res.status(200).json({ resCode:CODE.SUCCESS.RESCODE} );
+    res.status(200).json({ resCode:CODE.SUCCESS.RESCODE} );
 };
 
 function unzipFile(file, userid, cb) {
