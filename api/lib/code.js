@@ -1,0 +1,13 @@
+const CODE = {
+    SUCCESS: {RESCODE:0,DESC:'success'},
+    ERROR: {RESCODE:500,DESC:'error'},
+    TEST_DATA_ERROR: {RESCODE:701,DESC:'get test data failed'},
+    FILE_UPLOAD_ERROR: {RESCODE:702,DESC:'file upload failed'},
+    NO_LOGIN_ERROR: {RESCODE:703,DESC:'must be connect steemit'},
+    STEEMIT_API_ERROR: {RESCODE:704,DESC:'steemit api failed'},
+    IPFS_ERROR: {RESCODE:705,DESC:'upload ipfs failed'},
+    DB_ERROR: {RESCODE:706,DESC:'db error'},
+    SESSION_ERROR: {RESCODE:707,DESC:'session error'},
+}
+
+module.exports = CODE;
