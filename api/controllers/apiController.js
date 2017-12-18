@@ -14,7 +14,7 @@ var formidable = require('formidable'),
     CODE = require('../lib/code');
 
 exports.upload = function(req, res) {
-    var userid = req.session.user.account.id;
+    var userid = req.session.user.userid;
     var uploadDir = config.get('steemit.app.uploadurl');
     var form = new formidable.IncomingForm()
     form.multiples = true
@@ -33,7 +33,7 @@ exports.upload = function(req, res) {
                     if (err) { 
                         return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC });
                     }
-                    res.status(200).json({ resCode:CODE.SUCCESS.RESCODE, resData: result.slice(-1) });
+                    res.status(200).json(result.slice(-1));
                 })
             });
         } else {
@@ -41,7 +41,7 @@ exports.upload = function(req, res) {
                 if (err) {
                     return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC + err });
                 }
-                res.status(200).json({ resCode:CODE.SUCCESS.RESCODE, resData: result });
+                res.status(200).json(result);
             })
         }
     })
@@ -62,6 +62,7 @@ exports.me = function(req, res) {
         callbackURL: config.get('steemit.sc.cburl')
     });
     api.setAccessToken(req.session.accessToken);
+    var user;
     api.me(function (err, result) {
         if(err != null){
             return res.status(401).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err: err.error_description });
@@ -72,28 +73,28 @@ exports.me = function(req, res) {
                 if(err) {
                     return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
                 }
-                if(dbRes.id) {
-                    var user = {'username':result.user, 'userid':result.account.id, 'createtime':Math.round(+new Date()/1000)};
+                user = dbRes[0];
+                if(!dbRes[0].id) {
+                    user = {'username':result.user, 'userid':result.account.id, 'role':0, 'status':1, 'createtime':Math.round(+new Date()/1000)};
                     con.query('INSERT INTO user SET ?', user, (err, dbRes) => {
                         if(err) {
                             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
                         }
                     });
                 }
+                req.session.user = user;
+                res.status(200).json(user);
             });
         });
-
-        req.session.user = result;
-        res.status(200).json({ resCode:CODE.SUCCESS.RESCODE, resData:result});
     });
 };
 
 exports.addGame = function(req, res, next) {
     var game = req.body;
     var unix = Math.round(+new Date()/1000);
-    game.userid = req.session.user.account.id;
-    game.account = req.session.user.account.name;
-    game.status = 1;
+    game.userid = req.session.user.userid;
+    game.account = req.session.user.username;
+    game.status = 0;
     game.createtime = unix;
     game.updatetime = unix;
     cmysql(function cb(con){
@@ -102,9 +103,140 @@ exports.addGame = function(req, res, next) {
                 return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
             }
             game.id = dbRes.insertId;
-            return res.status(200).json({ resCode:CODE.SUCCESS.RESCODE, resData:game} );
+            return res.status(200).json(game);
         });
     });
+};
+
+exports.getGameDetail = function(req, res, next) {
+        cmysql(function cb(con){
+            con.query('select * from games where id=?', [req.params.id] , (err, dbRes) => {
+                if(err) {
+                    return res.status(500).json({resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC});
+                } else {
+                    return res.status(200).json(dbRes);
+                }
+            });
+        });
+};
+exports.updateGame = function(req, res, next) {
+    var unix = Math.round(+new Date()/1000);
+    var game = req.body;
+    cmysql(function cb(con){
+        console.log(game);
+        console.log(req.session.user.userid);
+        con.query('update games set ? where id= ? and userid= ?', [{title:game.title,coverImg:game.coverImg,desc:game.desc,category:game.category,activity:game.activity,comment:game.comment,gameIndex:game.gameIndex,updatetime:unix}, req.params.id, req.session.user.userid], (err, dbRes) => {
+            if(err) {
+                return res.status(500).json({resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC});
+            } else {
+                if (dbRes.changedRows == 1){
+                    return res.status(200).json(game);
+                } else {
+                    return res.status(500).json({resultCode: CODE.UPDATE_ERROR.RESCODE, err: CODE.UPDATE_ERROR.DESC});
+                }
+            }
+        });
+    });
+};
+exports.deleteGame = function(req, res, next) {
+    var unix = Math.round(+new Date()/1000);
+    cmysql(function cb(con){
+        con.query('update games set status = 0 where id= ? and userid= ?', [req.params.id, req.session.user.userid], (err, dbRes) => {
+            if(err) {
+                return res.status(500).json({resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC});
+            } else {
+                if (dbRes.changedRows == 1){
+                    return res.status(200).json(game);
+                } else {
+                    return res.status(500).json({resultCode: CODE.UPDATE_ERROR.RESCODE, err: CODE.UPDATE_ERROR.DESC});
+                }
+            }
+        });
+    });
+    return res.status(200).json({ resCode:CODE.SUCCESS.RESCODE, ret:req.params.id} );
+};
+
+exports.listGame = function(req, res, next) {
+    var data = req.body;
+    var offset = (typeof req.query.offset !== 'undefined') ?  parseInt(req.query.offset,10) : 0;
+    var pageSize = (typeof req.query.limit !== 'undefined') ? parseInt(req.query.limit, 10) : 20;
+    var href = 'games?offset='+offset+'&limit='+pageSize+'&type='+req.query.type;
+    if (req.query.type === 'index') {
+        cmysql(function cb(con){
+            con.query('select count(1) as nums from games' , (err, dbRes) => {
+                if(err) {
+                    return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+                }
+                var count = dbRes[0]['nums'];
+                if(count>0) {
+                    con.query('select * from games order by updatetime desc limit ?,?' , [offset, pageSize] , (err, dbRes) => {
+                        if(err) {
+                            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+                        }
+                        var next = 'games?offset='+(offset+pageSize)+'&limit='+pageSize+'&type='+req.query.type;
+                        if (count<(offset+pageSize)) {
+                            next = '';
+                        }
+                        return res.status(200).json({offset:offset,limit:pageSize,next:next,href:href,items:dbRes,totalCount:count });
+                    });
+                } else {
+                    return res.status(200).json({offset:offset,limit:pageSize,next:next,href:href,items:[],totalCount:count});
+                }
+            });
+        });
+    } else if(req.query.type === 'me') {
+        var userid = req.session.user.userid;
+        cmysql(function cb(con){
+            con.query('select count(1) as nums from games where userid=?', [userid] , (err, dbRes) => {
+                if(err) {
+                    return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+                }
+                var count = dbRes[0]['nums'];
+                if(count>0) {
+                    con.query('select * from games where userid=? order by updatetime desc limit ?,?' , [userid, offset, pageSize] , (err, dbRes) => {
+                        if(err) {
+                            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+                        }
+                        var next = 'games?offset='+(offset+pageSize)+'&limit='+pageSize+'&type='+req.query.type;
+                        if (count<(offset+pageSize)) {
+                            next = '';
+                        }
+                        return res.status(200).json({offset:offset,limit:pageSize,next:next,href:href,items:dbRes,totalCount:count });
+                    });
+                } else {
+                    return res.status(200).json({offset:offset,limit:pageSize,next:next,href:href,items:[],totalCount:count});
+                }
+            });
+        });
+    } else if(req.query.type === 'audit') {
+        if(req.session.user.role === 0) {
+            return res.status(401).json({ resultCode: CODE.NO_AUDIT_ERROR.RESCODE, err: CODE.NO_AUDIT_ERROR.DESC });
+        }
+        cmysql(function cb(con){
+            con.query('select count(1) as nums from games where status=0', (err, dbRes) => {
+                if(err) {
+                    return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+                }
+                var count = dbRes[0]['nums'];
+                if(count>0) {
+                    con.query('select * from games where status=0 order by updatetime desc limit ?,?' , [offset, pageSize] , (err, dbRes) => {
+                        if(err) {
+                            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+                        }
+                        var next = 'games?offset='+(offset+pageSize)+'&limit='+pageSize+'&type='+req.query.type;
+                        if (count<(offset+pageSize)) {
+                            next = '';
+                        }
+                        return res.status(200).json({offset:offset,limit:pageSize,next:next,href:href,items:dbRes,totalCount:count });
+                    });
+                } else {
+                    return res.status(200).json({offset:offset,limit:pageSize,next:next,href:href,items:[],totalCount:count});
+                }
+            });
+        });
+    } else {
+        return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err: CODE.ERROR.DESC });
+    }
 };
 
 exports.index = function(req, res, next) {
@@ -129,7 +261,6 @@ exports.logout = function(req, res, next) {
         if(err != null){
             res.status(401).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err: err.error_description });
         }
-        console.log(err);
         return;
     });
     res.clearCookie('at');
@@ -139,7 +270,7 @@ exports.logout = function(req, res, next) {
         }
         return;
     });
-    res.status(200).json({ resCode:CODE.SUCCESS.RESCODE} );
+    res.status(200).json([]);
 };
 
 function unzipFile(file, userid, cb) {
@@ -147,7 +278,6 @@ function unzipFile(file, userid, cb) {
         filter: file => path.extname(file.path) !== '.exe'
     }).then(files => {
         cb(files);
-        console.log(files);
     });
 }
 
@@ -164,7 +294,6 @@ function cmysql(cb) {
             console.log('Error connecting to Db');
             return;
         }
-        console.log('Connection established');
     });
     cb(con);
 }

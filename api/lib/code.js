@@ -8,6 +8,8 @@ const CODE = {
     IPFS_ERROR: {RESCODE:705,DESC:'upload ipfs failed'},
     DB_ERROR: {RESCODE:706,DESC:'db error'},
     SESSION_ERROR: {RESCODE:707,DESC:'session error'},
+    NO_AUDIT_ERROR: {RESCODE:708,DESC:'permission denied'},
+    UPDATE_ERROR: {RESCODE:709,DESC:'update data failed'}
 }
 
 module.exports = CODE;

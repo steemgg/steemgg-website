@@ -6,10 +6,14 @@ var fs = require('fs'),
 module.exports = function(app) {
   var api  = require('../controllers/apiController');
 
-  app.post('/upload', [morkSessionMiddleware, userMiddleware], api.upload);
-  app.post('/add', [morkSessionMiddleware, userMiddleware], api.addGame);
-  app.get('/me', [morkMiddleware], api.me);
-  app.get('/logout', api.logout);
+  app.post('/v1/upload', [morkSessionMiddleware, userMiddleware], api.upload);
+  app.get('/v1/games', [morkSessionMiddleware, userMiddleware], api.listGame);
+  app.post('/v1/game', [morkSessionMiddleware, userMiddleware], api.addGame);
+  app.get('/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.getGameDetail);
+  app.patch('/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.updateGame);
+  app.delete('/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.deleteGame);
+  app.get('/v1/me', [morkMiddleware], api.me);
+  app.get('/v1/logout', api.logout);
   app.get('/', api.index);
 
   var callback  = require('../controllers/callbackController');
@@ -24,7 +28,7 @@ function morkMiddleware (req, res, next) {
                 next();
             } else {
                 req.session.user = JSON.parse(result);
-                res.status(200).json({resCode:CODE.SUCCESS.RESCODE, resData:JSON.parse(result)});
+                res.status(200).json(JSON.parse(result));
             }
         });
         return;
