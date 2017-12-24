@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-header>this is the header <common-header></common-header></el-header>
+    <el-header>this is the header</el-header>
     <el-main>
       <div class="editTitle">
         <h1>Create a new game</h1>
@@ -85,11 +85,9 @@
   } from 'element-ui'
   import vue2Dropzone from 'vue2-dropzone'
   import 'vue2-dropzone/dist/vue2Dropzone.css'
-  import CommonHeader from '../common/CommonHeader'
 
   export default {
     components: {
-      CommonHeader,
       Checkbox,
       CheckboxGroup,
       Form,
@@ -160,32 +158,5 @@
 
 <!-- Add 'scoped' attribute to limit CSS to this component only -->
 <style lang='scss' scoped>
-  .game-resource-upload {
-  }
-  .editFormContainer {
-    display: flex;
-    justify-content: center;
-    .gameEditForm {
-      display: flex;
-      justify-content: center;
-      width: 600px;
-      border: 1px solid gray;
-      box-shadow: 2px 2px 2px #999999;
-      border-radius: 3px;
-      padding: 20px;
-    }
-  }
-  .dropzone {
-    padding: 0;
-    .dz-preview {
-      margin: 0;
-    }
-    .dz-error-message {
-      display: none;
-    }
-  }
 
-  .dropzone .dz-preview.dz-error .dz-error-message {
-    display: none;
-  }
 </style>
