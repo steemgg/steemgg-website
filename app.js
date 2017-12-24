@@ -4,8 +4,24 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var session = require('express-session');
+var config = require('config');
 
 var app = express();
+
+var sess = {
+  secret: config.get('steemit.app.secret'),
+  cookie: {},
+  resave: false,
+  saveUninitialized: false 
+}
+
+if (app.get('env') === 'production') {
+  app.set('trust proxy', 1) // trust first proxy
+  sess.cookie.secure = true // serve secure cookies
+}
+
+app.use(session(sess))
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
