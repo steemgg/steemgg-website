@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-header>this is the header <common-header></common-header></el-header>
+    <el-header><common-header></common-header></el-header>
     <el-main>
       <div class="editTitle">
         <h1>Create a new game</h1>
@@ -15,27 +15,22 @@
               <el-input v-model='game.description' type="textarea" :rows="2" placeholder="Please input description of your game"></el-input>
             </el-form-item>
             <el-form-item label='Cover Image'>
-              <vue-dropzone ref="myVueDropzone" id="dropzone" :options="dropzoneOptions"></vue-dropzone>
+              <vue-dropzone ref="myVueDropzone" @vdropzone-success="coverImageUploaded" @vdropzone-error="coverImageUploadFail" id="dropzone" :options="dropzoneOptions"></vue-dropzone>
               <div slot="tip" class="el-upload__tip">jpg/png files with a size less than 500kb</div>
-            </el-form-item>
-            <el-form-item label='Play in browser?'>
-              <el-switch v-model='game.inbrowser'></el-switch>
             </el-form-item>
             <el-form-item label='Tags'>
               <input-tag :on-change='onTagChange' :tags='game.tags'></input-tag>
             </el-form-item>
             <el-form-item label='Game Type'>
-              <el-checkbox-group v-model='game.type'>
-                <el-checkbox label='Pixel Art' name='type'></el-checkbox>
-                <el-checkbox label='Action' name='type'></el-checkbox>
-                <el-checkbox label='Music' name='type'></el-checkbox>
-                <el-checkbox label='Shooter' name='type'></el-checkbox>
-              </el-checkbox-group>
+              <el-select v-model="game.category" filterable placeholder="Select">
+                <el-option v-for="item in gameTypeOptions" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="File">
               <el-upload
                 class="game-resource-upload"
-                action="/api/upload"
+                action="/v1/upload"
                 :on-preview="handlePreview"
                 :on-remove="handleRemove"
                 :file-list="game.fileList"
@@ -122,23 +117,36 @@
           inbrowser: '',
           tags: ['abc', 'eef'],
           delivery: false,
-          type: [],
+          category: '',
           fileList: []
         },
         dropzoneOptions: {
-          url: '/api/upload',
+          url: '/v1/upload',
           maxFilesize: 4,
           thumbnailWidth: 330,
           addRemoveLinks: true,
           acceptedFiles: 'image/*',
           dictDefaultMessage: "<i class='fa fa-cloud-upload'></i>UPLOAD Cover Image"
-        }
+        },
+        gameTypeOptions: [{
+          value: 'Pixel Art',
+          label: 'Pixel Art'
+        }, {
+          value: 'Action',
+          label: 'Action'
+        }, {
+          value: 'Music',
+          label: 'Music'
+        }, {
+          value: 'Shooting',
+          label: 'Shooting'
+        }]
       }
     },
     methods: {
       onSubmit () {
         console.log('submit!')
-        console.log()
+        console.log(this.game)
       },
       onTagChange () {
         console.log('tag changed')
@@ -153,6 +161,12 @@
         console.log(response)
         console.log(file)
         console.log(fileList)
+      },
+      coverImageUploaded (file, response) {
+        console.log('file uploaded', response)
+      },
+      coverImageUploadFail (file) {
+        console.log('file upload fail')
       }
     }
   }

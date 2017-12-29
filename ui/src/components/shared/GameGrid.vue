@@ -19,6 +19,10 @@
           <!--<span data-icon="B">124</span>-->
           <!--<a href="#" class="info">Play</a>-->
         <!--</div>-->
+        <span class="like">
+          <i class="fa fa-heart" aria-hidden="true"></i>
+          55
+        </span>
         <a href="#" class="play">→</a>
       </div>
     </div>
@@ -32,6 +36,7 @@
     props: ['game'],
     name: 'GameGrid',
     data () {
+      return {}
     },
     computed: {
     },
@@ -59,6 +64,7 @@
     -moz-box-shadow: 1px 1px 2px #e6e6e6;
     box-shadow: 1px 1px 2px #e6e6e6;
     cursor: default;
+    word-break: break-all;
     /*background: #fff url(../images/bgimg.jpg) no-repeat center center;*/
   }
   .game-info-view .mask,.game-info-view .content {
@@ -72,6 +78,17 @@
   .game-info-view img {
     display: block;
     position: relative;
+    width:300px;
+    height: 200px;
+  }
+  .game-info-view .like {
+    position: absolute;
+    bottom: 10px;
+    right: 60px;
+    color: white;
+  }
+  .game-info-view .like i {
+    color: red;
   }
   .game-info-view h2 {
     text-transform: uppercase;
@@ -79,7 +96,7 @@
     text-align: center;
     position: relative;
     font-size: 17px;
-    padding: 10px;
+    padding: 10px 25px 10px 10px;
     background: rgba(0, 0, 0, 0.8);
     margin: 20px 0 0 0;
   }
@@ -216,7 +233,7 @@
     -ms-transform: rotate(56.5deg) translateX(-1px);
     transform: rotate(56.5deg) translateX(-1px);
   }
-  
+
   .play {
     display: block;
     font-size: 18px;

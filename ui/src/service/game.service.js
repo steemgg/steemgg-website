@@ -2,10 +2,11 @@
  * Created by Erik on 4/12/17.
  */
 import GameList from '../mocks/gameListMock'
+import axios from 'axios'
 
 export default class GameService {
-  create () {
-    return {}
+  create (game) {
+    axios.post('/')
   }
 
   list () {

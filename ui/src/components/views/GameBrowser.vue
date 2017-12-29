@@ -6,7 +6,6 @@
         <site-navigation></site-navigation>
       </el-aside>
       <el-main>
-        <game-slider></game-slider>
         <game-list></game-list>
       </el-main>
     </el-container>
@@ -37,7 +36,7 @@
       CommonHeader,
       SiteNavigation
     },
-    name: 'HomePage',
+    name: 'GameEditForm',
     data () {
       return {
         title: '',
