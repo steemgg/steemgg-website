@@ -1,17 +1,20 @@
 'use strict';
 
-var formidable = require('formidable'),
-    fs = require('fs'),
-    path = require('path'),
-    util = require('util'),
-    steem = require('steem'),
-    config = require('config'),
-    request = require('request'),
-    decompress = require('decompress'),
-    ipfsAPI = require('ipfs-api'),
-    mysql = require('mysql'),
-    sc2 = require('../lib/sc2'),
-    CODE = require('../lib/code');
+
+const fs = require('fs');
+const path = require('path');
+const util = require('util');
+const steem = require('steem');
+const mysql = require('mysql');
+const config = require('config');
+const sc2 = require('../lib/sc2');
+const request = require('request');
+const ipfsAPI = require('ipfs-api');
+const CODE = require('../lib/code');
+const decompress = require('decompress');
+const formidable = require('formidable');
+const steemitHelpers = require('../vendor/steemitHelpers');
+const user = require('../models/user');
 
 exports.upload = function(req, res) {
     var userid = req.session.user.userid;
@@ -30,7 +33,7 @@ exports.upload = function(req, res) {
             unzipFile(files['file'].path, userid, function cb(unzips){
                 console.log(config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[0].path);
                 ipfs.util.addFromFs(config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[0].path, { recursive: true }, (err, result) => {
-                    if (err) { 
+                    if (err) {
                         return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC });
                     }
                     res.status(200).json(result.slice(-1));
@@ -55,55 +58,110 @@ exports.upload = function(req, res) {
 };
 
 exports.me = function(req, res) {
-    var api = sc2.Initialize({
-        app: config.get('steemit.sc.app'),
-        scope: config.get('steemit.sc.scope'),
-        baseURL: config.get('steemit.sc.url'),
-        callbackURL: config.get('steemit.sc.cburl')
-    });
-    api.setAccessToken(req.session.accessToken);
-    var user;
-    api.me(function (err, result) {
-        if(err != null){
-            return res.status(401).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err: err.error_description });
+    user.me(req, res, function(err, users){
+        if(!users) {
+               return res.status(401).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE });
+        } else {
+               return res.status(200).json(users);
         }
-        //check user
-        cmysql(function cb(con){
-            con.query('select * from user where username = ?' , result.user,(err, dbRes) => {
-                if(err) {
-                    return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-                }
-                user = dbRes[0];
-                if(!dbRes[0].id) {
-                    user = {'username':result.user, 'userid':result.account.id, 'role':0, 'status':1, 'createtime':Math.round(+new Date()/1000)};
-                    con.query('INSERT INTO user SET ?', user, (err, dbRes) => {
-                        if(err) {
-                            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-                        }
-                    });
-                }
-                req.session.user = user;
-                res.status(200).json(user);
-            });
-        });
     });
 };
 
 exports.addGame = function(req, res, next) {
+    var user = req.session.user;
     var game = req.body;
-    var unix = Math.round(+new Date()/1000);
-    game.userid = req.session.user.userid;
-    game.account = req.session.user.username;
-    game.status = 0;
-    game.createtime = unix;
-    game.updatetime = unix;
-    cmysql(function cb(con){
-        con.query('INSERT INTO games SET ?', game, (err, dbRes) => {
-            if(err) {
-                return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+    var api = sc2.Initialize({
+        app: config.get('steemit.sc.app'),
+        callbackURL: config.get('steemit.sc.cburl'),
+        baseURL: config.get('steemit.sc.url'),
+        scope: config.get('steemit.sc.scope')
+    });
+    api.setAccessToken(req.session.accessToken);
+    var parentAuthor = "";
+    var parentPermlink = "";
+
+    const extensions = [[0, {
+        beneficiaries: [
+            {
+                account: 'steemitgame.dev',
+                weight: 2500
             }
-            game.id = dbRes.insertId;
-            return res.status(200).json(game);
+        ]
+    }]];
+
+    const operations = [];
+
+    const metaData = {
+        community: 'steemitgame',
+        tags: ['steemitgame','test'],
+        app: `steemitgame.app/test`
+    };
+
+    const getPermLink = steemitHelpers.createPermlink(game.title, user.username, '', '');
+    getPermLink.then(permlink => {
+        console.log("permlink:"+ permlink);
+        const commentOp = [
+            'comment',
+            {
+                parent_author: "",
+                parent_permlink: "steemitgame",
+                author: req.session.user.username,
+                permlink,
+                title: game.title,
+                body: game.desc,
+                json_metadata: JSON.stringify(metaData)
+            },
+        ];
+        operations.push(commentOp);
+
+        const commentOptionsConfig = {
+            author: req.session.user.username,
+            permlink,
+            allow_votes: true,
+            allow_curation_rewards: true,
+            extensions,
+        };
+
+        if (extensions) {
+            commentOptionsConfig.extensions = extensions;
+
+            if (game.reward === '100') {
+                commentOptionsConfig.percent_steem_dollars = 0;
+            } else {
+                commentOptionsConfig.percent_steem_dollars = 10000;
+            }
+
+            commentOptionsConfig.max_accepted_payout = '1000000.000 SBD';
+
+            operations.push(['comment_options', commentOptionsConfig]);
+        }
+
+        console.log("OPERATIONS", operations)
+        api.broadcast(operations, function(err, result){
+            console.log(err, result);
+            if(err) {
+                return res.status(500).json({ resultCode: CODE.POST_ERROR.RESCODE, err: err.name });
+            }
+            var unix = Math.round(+new Date()/1000);
+            game.userid = req.session.user.userid;
+            game.account = req.session.user.username;
+            game.status = 0;
+            game.createtime = unix;
+            game.updatetime = unix;
+            game.permlink = permlink;
+            cmysql(function cb(con){
+                con.query('INSERT INTO games SET ?', game, (err, dbRes) => {
+                    if(err) {
+                        console.log(err);
+                        con.end();
+                        return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+                    }
+                    game.id = dbRes.insertId;
+                    con.end();
+                    return res.status(200).json(game);
+                });
+            });
+            return;
         });
     });
 };
@@ -112,8 +170,10 @@ exports.getGameDetail = function(req, res, next) {
         cmysql(function cb(con){
             con.query('select * from games where id=?', [req.params.id] , (err, dbRes) => {
                 if(err) {
+                    con.end();
                     return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
                 } else {
+                    con.end();
                     return res.status(200).json(dbRes);
                 }
             });
@@ -125,6 +185,7 @@ exports.updateGame = function(req, res, next) {
     cmysql(function cb(con){
         con.query('update games set ? where id= ? and userid= ?', [{ title:game.title,coverImg:game.coverImg,desc:game.desc,category:game.category,activity:game.activity,comment:game.comment,gameIndex:game.gameIndex,updatetime:unix }, req.params.id, req.session.user.userid], (err, dbRes) => {
             if(err) {
+                con.end();
                 return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
             } else {
                 if (dbRes.changedRows == 1){
@@ -132,6 +193,7 @@ exports.updateGame = function(req, res, next) {
                 } else {
                     return res.status(500).json({ resultCode: CODE.UPDATE_ERROR.RESCODE, err: CODE.UPDATE_ERROR.DESC });
                 }
+                con.end();
             }
         });
     });
@@ -141,6 +203,7 @@ exports.deleteGame = function(req, res, next) {
     cmysql(function cb(con){
         con.query('update games set status = 3 where id= ? and userid= ?', [req.params.id, req.session.user.userid], (err, dbRes) => {
             if(err) {
+                con.end();
                 return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
             } else {
                 console.log(dbRes);
@@ -149,6 +212,7 @@ exports.deleteGame = function(req, res, next) {
                 } else {
                     return res.status(500).json({ resultCode: CODE.UPDATE_ERROR.RESCODE, err: CODE.UPDATE_ERROR.DESC } );
                 }
+                con.end();
             }
         });
     });
@@ -163,21 +227,25 @@ exports.listGame = function(req, res, next) {
         cmysql(function cb(con){
             con.query('select count(1) as nums from games where status != 3' , (err, dbRes) => {
                 if(err) {
+                    con.end();
                     return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
                 }
                 var count = dbRes[0]['nums'];
                 if(count>0) {
                     con.query('select * from games where status != 3 order by updatetime desc limit ?,?' , [offset, pageSize] , (err, dbRes) => {
                         if(err) {
+                            con.end();
                             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
                         }
                         var next = 'games?offset='+(offset+pageSize)+'&limit='+pageSize+'&type='+req.query.type;
                         if (count<(offset+pageSize)) {
                             next = '';
                         }
+                        con.end();
                         return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:dbRes,totalCount:count });
                     });
                 } else {
+                    con.end();
                     return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:[],totalCount:count });
                 }
             });
@@ -187,21 +255,25 @@ exports.listGame = function(req, res, next) {
         cmysql(function cb(con){
             con.query('select count(1) as nums from games where userid=? and status !=3', [userid] , (err, dbRes) => {
                 if(err) {
+                    con.end();
                     return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
                 }
                 var count = dbRes[0]['nums'];
                 if(count>0) {
                     con.query('select * from games where userid=? and status !=3 order by updatetime desc limit ?,?' , [userid, offset, pageSize] , (err, dbRes) => {
                         if(err) {
+                            con.end();
                             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
                         }
                         var next = 'games?offset='+(offset+pageSize)+'&limit='+pageSize+'&type='+req.query.type;
                         if (count<(offset+pageSize)) {
                             next = '';
                         }
+                        con.end();
                         return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:dbRes,totalCount:count });
                     });
                 } else {
+                    con.end();
                     return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:[],totalCount:count });
                 }
             });
@@ -213,21 +285,25 @@ exports.listGame = function(req, res, next) {
         cmysql(function cb(con){
             con.query('select count(1) as nums from games where status=0', (err, dbRes) => {
                 if(err) {
+                    con.end();
                     return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
                 }
                 var count = dbRes[0]['nums'];
                 if(count>0) {
                     con.query('select * from games where status=0 order by updatetime desc limit ?,?' , [offset, pageSize] , (err, dbRes) => {
                         if(err) {
+                            con.end();
                             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
                         }
                         var next = 'games?offset='+(offset+pageSize)+'&limit='+pageSize+'&type='+req.query.type;
                         if (count<(offset+pageSize)) {
                             next = '';
                         }
+                        con.end();
                         return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:dbRes,totalCount:count });
                     });
                 } else {
+                    con.end();
                     return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:[],totalCount:count });
                 }
             });
@@ -256,8 +332,10 @@ exports.logout = function(req, res, next) {
         scope: config.get('steemit.sc.scope')
     });
     api.revokeToken(function (err, res) {
-        if(err != null){
-            res.status(401).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err: err.error_description });
+        if(err){
+            console.log(err);
+            //res.status(401).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err: err.error_description });
+            return;
         }
         return;
     });
@@ -265,10 +343,11 @@ exports.logout = function(req, res, next) {
     req.session.destroy(function(err) {
         if(err){
             res.status(500).json({ resultCode: CODE.SESSION_ERROR.RESCODE, err: CODE.SESSION_ERROR.DESC });
+            return;
         }
         return;
     });
-    res.status(200).json([]);
+    res.status(200).send();
 };
 
 function unzipFile(file, userid, cb) {

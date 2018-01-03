@@ -9,7 +9,8 @@ const CODE = {
     DB_ERROR: {RESCODE:706,DESC:'db error'},
     SESSION_ERROR: {RESCODE:707,DESC:'session error'},
     NO_AUDIT_ERROR: {RESCODE:708,DESC:'permission denied'},
-    UPDATE_ERROR: {RESCODE:709,DESC:'update data failed'}
+    UPDATE_ERROR: {RESCODE:709,DESC:'update data failed'},
+    POST_ERROR: {RESCODE:710,DESC:'post failed'}
 }
 
 module.exports = CODE;
