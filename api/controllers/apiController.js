@@ -107,8 +107,8 @@ exports.addGame = function(req, res, next) {
                 parent_permlink: "steemitgame",
                 author: req.session.user.username,
                 permlink,
-                title: game.title,
-                body: game.desc,
+                title: game.activityTitle,
+                body: game.activityDescription,
                 json_metadata: JSON.stringify(metaData)
             },
         ];
@@ -146,8 +146,8 @@ exports.addGame = function(req, res, next) {
             game.userid = req.session.user.userid;
             game.account = req.session.user.username;
             game.status = 0;
-            game.createtime = unix;
-            game.updatetime = unix;
+            game.created = unix;
+            game.lastModified = unix;
             game.permlink = permlink;
             cmysql(function cb(con){
                 con.query('INSERT INTO games SET ?', game, (err, dbRes) => {
