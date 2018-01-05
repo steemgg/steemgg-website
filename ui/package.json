@@ -13,13 +13,17 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "axios": "^0.17.1",
+    "bootstrap": "^4.0.0-beta.2",
+    "bootstrap-vue": "^1.4.0",
     "element-ui": "^2.0.5",
     "owl.carousel": "^2.2.0",
     "vue": "^2.5.2",
     "vue-awesome-swiper": "^2.6.7",
     "vue-input-tag": "0.0.16",
     "vue-router": "^3.0.1",
-    "vue2-dropzone": "^3.0.0"
+    "vue2-dropzone": "^3.0.0",
+    "vuex": "^3.0.1"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",

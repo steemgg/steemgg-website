@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-header><common-header></common-header></el-header>
+    <el-header>this is the header</el-header>
     <el-main>
       <div class="editTitle">
         <h1>Create a new game</h1>
@@ -15,22 +15,27 @@
               <el-input v-model='game.description' type="textarea" :rows="2" placeholder="Please input description of your game"></el-input>
             </el-form-item>
             <el-form-item label='Cover Image'>
-              <vue-dropzone ref="myVueDropzone" @vdropzone-success="coverImageUploaded" @vdropzone-error="coverImageUploadFail" id="dropzone" :options="dropzoneOptions"></vue-dropzone>
+              <vue-dropzone ref="myVueDropzone" id="dropzone" :options="dropzoneOptions"></vue-dropzone>
               <div slot="tip" class="el-upload__tip">jpg/png files with a size less than 500kb</div>
+            </el-form-item>
+            <el-form-item label='Play in browser?'>
+              <el-switch v-model='game.inbrowser'></el-switch>
             </el-form-item>
             <el-form-item label='Tags'>
               <input-tag :on-change='onTagChange' :tags='game.tags'></input-tag>
             </el-form-item>
             <el-form-item label='Game Type'>
-              <el-select v-model="game.category" filterable placeholder="Select">
-                <el-option v-for="item in gameTypeOptions" :key="item.value" :label="item.label" :value="item.value">
-                </el-option>
-              </el-select>
+              <el-checkbox-group v-model='game.type'>
+                <el-checkbox label='Pixel Art' name='type'></el-checkbox>
+                <el-checkbox label='Action' name='type'></el-checkbox>
+                <el-checkbox label='Music' name='type'></el-checkbox>
+                <el-checkbox label='Shooter' name='type'></el-checkbox>
+              </el-checkbox-group>
             </el-form-item>
             <el-form-item label="File">
               <el-upload
                 class="game-resource-upload"
-                action="/v1/upload"
+                action="/api/upload"
                 :on-preview="handlePreview"
                 :on-remove="handleRemove"
                 :file-list="game.fileList"
@@ -80,11 +85,9 @@
   } from 'element-ui'
   import vue2Dropzone from 'vue2-dropzone'
   import 'vue2-dropzone/dist/vue2Dropzone.css'
-  import CommonHeader from '../common/CommonHeader'
 
   export default {
     components: {
-      CommonHeader,
       Checkbox,
       CheckboxGroup,
       Form,
@@ -117,36 +120,23 @@
           inbrowser: '',
           tags: ['abc', 'eef'],
           delivery: false,
-          category: '',
+          type: [],
           fileList: []
         },
         dropzoneOptions: {
-          url: '/v1/upload',
+          url: '/api/upload',
           maxFilesize: 4,
           thumbnailWidth: 330,
           addRemoveLinks: true,
           acceptedFiles: 'image/*',
           dictDefaultMessage: "<i class='fa fa-cloud-upload'></i>UPLOAD Cover Image"
-        },
-        gameTypeOptions: [{
-          value: 'Pixel Art',
-          label: 'Pixel Art'
-        }, {
-          value: 'Action',
-          label: 'Action'
-        }, {
-          value: 'Music',
-          label: 'Music'
-        }, {
-          value: 'Shooting',
-          label: 'Shooting'
-        }]
+        }
       }
     },
     methods: {
       onSubmit () {
         console.log('submit!')
-        console.log(this.game)
+        console.log()
       },
       onTagChange () {
         console.log('tag changed')
@@ -161,12 +151,6 @@
         console.log(response)
         console.log(file)
         console.log(fileList)
-      },
-      coverImageUploaded (file, response) {
-        console.log('file uploaded', response)
-      },
-      coverImageUploadFail (file) {
-        console.log('file upload fail')
       }
     }
   }
@@ -174,32 +158,5 @@
 
 <!-- Add 'scoped' attribute to limit CSS to this component only -->
 <style lang='scss' scoped>
-  .game-resource-upload {
-  }
-  .editFormContainer {
-    display: flex;
-    justify-content: center;
-    .gameEditForm {
-      display: flex;
-      justify-content: center;
-      width: 600px;
-      border: 1px solid gray;
-      box-shadow: 2px 2px 2px #999999;
-      border-radius: 3px;
-      padding: 20px;
-    }
-  }
-  .dropzone {
-    padding: 0;
-    .dz-preview {
-      margin: 0;
-    }
-    .dz-error-message {
-      display: none;
-    }
-  }
 
-  .dropzone .dz-preview.dz-error .dz-error-message {
-    display: none;
-  }
 </style>
