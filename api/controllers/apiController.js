@@ -183,7 +183,7 @@ exports.updateGame = function(req, res, next) {
     var unix = Math.round(+new Date()/1000);
     var game = req.body;
     cmysql(function cb(con){
-        con.query('update games set ? where id= ? and userid= ?', [{ title:game.title,coverImg:game.coverImg,desc:game.desc,category:game.category,activity:game.activity,comment:game.comment,gameIndex:game.gameIndex,updatetime:unix }, req.params.id, req.session.user.userid], (err, dbRes) => {
+        con.query('update games set ? where id= ? and userid= ?', [{ title:game.title,coverImage:game.coverImage,description:game.description,category:game.category,gameUrl:game.gameUrl,lastModified:unix }, req.params.id, req.session.user.userid], (err, dbRes) => {
             if(err) {
                 con.end();
                 return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
@@ -232,7 +232,7 @@ exports.listGame = function(req, res, next) {
                 }
                 var count = dbRes[0]['nums'];
                 if(count>0) {
-                    con.query('select * from games where status != 3 order by updatetime desc limit ?,?' , [offset, pageSize] , (err, dbRes) => {
+                    con.query('select * from games where status != 3 order by created desc limit ?,?' , [offset, pageSize] , (err, dbRes) => {
                         if(err) {
                             con.end();
                             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
@@ -260,7 +260,7 @@ exports.listGame = function(req, res, next) {
                 }
                 var count = dbRes[0]['nums'];
                 if(count>0) {
-                    con.query('select * from games where userid=? and status !=3 order by updatetime desc limit ?,?' , [userid, offset, pageSize] , (err, dbRes) => {
+                    con.query('select * from games where userid=? and status !=3 order by lastModified desc limit ?,?' , [userid, offset, pageSize] , (err, dbRes) => {
                         if(err) {
                             con.end();
                             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
@@ -290,7 +290,7 @@ exports.listGame = function(req, res, next) {
                 }
                 var count = dbRes[0]['nums'];
                 if(count>0) {
-                    con.query('select * from games where status=0 order by updatetime desc limit ?,?' , [offset, pageSize] , (err, dbRes) => {
+                    con.query('select * from games where status=0 order by lastModified desc limit ?,?' , [offset, pageSize] , (err, dbRes) => {
                         if(err) {
                             con.end();
                             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
