@@ -10,6 +10,7 @@ var formidable = require('formidable'),
 
 exports.auth = function(req, res, next) {
     req.session.accessToken = req.query.access_token;
+    //console.log(req.query.refresh_token);
     res.redirect('./v1/me');
 };
 
