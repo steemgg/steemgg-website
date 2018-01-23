@@ -7,14 +7,23 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var config = require('config');
+var db = require('./db');
 
 var app = express();
+
+// Connect to MySQL on start
+db.connect(function(err) {
+  if (err) {
+    console.log('Unable to connect to MySQL.')
+    process.exit(1)
+  }
+})
 
 var sess = {
   secret: config.get('steemit.app.secret'),
   cookie: {},
   resave: false,
-  saveUninitialized: false 
+  saveUninitialized: false
 }
 
 if (app.get('env') === 'production') {

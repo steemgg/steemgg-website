@@ -1,6 +1,7 @@
 const config = require('config');
 const sc2 = require('../lib/sc2');
 const mysql = require('mysql');
+const redis = require('redis');
 
 var api = sc2.Initialize({
     app: config.get('steemit.sc.app'),
@@ -9,6 +10,7 @@ var api = sc2.Initialize({
     callbackURL: config.get('steemit.sc.cburl')
 });
 var user;
+var client = redis.createClient({host: config.get('steemit.redis.host'), port:config.get('steemit.redis.port')});
 
 function me(req, res, callback)  {
     api.setAccessToken(req.session.accessToken);
@@ -17,7 +19,7 @@ function me(req, res, callback)  {
             callback(err);
             return;
         }
-        cmysql(function cb(con){ con.query('select * from user where username = ?' , result.user,(err, dbRes) => {
+        cmysql(function cb(con){ con.query('select * from user where account = ?' , result.user,(err, dbRes) => {
                 if(err) {
                     con.end();
                     callback(err);
@@ -25,7 +27,7 @@ function me(req, res, callback)  {
                 }
                 user = dbRes[0];
                 if(typeof dbRes[0] === 'undefined') {
-                    user = {'username':result.user, 'userid':result.account.id, 'role':0, 'status':1, 'createtime':Math.round(+new Date()/1000)};
+                    user = {'account':result.user, 'userid':result.account.id, 'role':0, 'status':1, 'createtime':Math.round(+new Date()/1000)};
                     con.query('INSERT INTO user SET ?', user, (err, dbRes) => {
                         if(err) {
                             con.end();
@@ -36,6 +38,7 @@ function me(req, res, callback)  {
                 }
                 con.end();
                 req.session.user = user;
+                client.set("token:userid:"+user.userid, req.session.accessToken);
                 callback(true, user);
             });
         });
