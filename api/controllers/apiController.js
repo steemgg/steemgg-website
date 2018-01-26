@@ -81,14 +81,14 @@ exports.postGame = function(req, res, next) {
     api.setAccessToken(req.session.accessToken);
 
     cmysql(function cb(con){
-        con.query('select * from games where id=?', [req.params.id] , (err, dbRes) => {
+        con.query('select * from games where id=?', [game.id] , (err, dbRes) => {
             if(err) {
                 con.end();
                 return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
             }
             console.log(user)
             console.log(dbRes[0]['id'])
-            if(user.account != dbRes[0]['account'] || req.params.id != dbRes[0]['id']) {
+            if(user.account != dbRes[0]['account'] || game.id != dbRes[0]['id']) {
                 con.end();
                 return res.status(500).json({ resultCode: CODE.POST_ERROR.RESCODE, err: CODE.POST_ERROR.DESC });
             }
@@ -203,6 +203,8 @@ exports.addGame = function(req, res, next) {
     game.payout = 0;
     game.created = unix;
     game.lastModified = unix;
+    //game.gameUrl = JSON.stringify(game.gameUrl);
+    //game.coverImage = JSON.stringify(game.coverImage);
     cmysql(function cb(con){
         con.query('INSERT INTO games SET ?', game, (err, dbRes) => {
             if(err) {
@@ -271,7 +273,7 @@ exports.getGameDetail = function(req, res, next) {
                     return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
                 } else {
                     con.end();
-                    return res.status(200).json(dbRes);
+                    return res.status(200).json(dbRes[0]);
                 }
             });
         });
@@ -320,8 +322,11 @@ exports.listGame = function(req, res, next) {
     var offset = (typeof req.query.offset !== 'undefined') ?  parseInt(req.query.offset,10) : 0;
     var pageSize = (typeof req.query.limit !== 'undefined') ? parseInt(req.query.limit, 10) : 20;
     var category = (typeof req.query.category !== 'undefined') ? req.query.category : '';
+    var sort = (typeof req.query.sort !== 'undefined') ? req.query.sort : 'desc';
+    var column = (typeof req.query.column !== 'undefined') ? req.query.column : 'created';
+    var type = (typeof req.query.type !== 'undefined') ? req.query.column : 'index';
     var href = 'games?offset='+offset+'&limit='+pageSize+'&type='+req.query.type;
-    if (req.query.type === 'index') {
+    if (type === 'index') {
         cmysql(function cb(con){
             con.query('select count(1) as nums from games where status != 3', [] , (err, dbRes) => {
                 if(err) {
@@ -348,7 +353,7 @@ exports.listGame = function(req, res, next) {
                 }
             });
         });
-    } else if(req.query.type === 'me') {
+    } else if(type === 'me') {
         var userid = req.session.user.userid;
         cmysql(function cb(con){
             con.query('select count(1) as nums from games where userid=? and status !=3', [userid] , (err, dbRes) => {
@@ -376,7 +381,7 @@ exports.listGame = function(req, res, next) {
                 }
             });
         });
-    } else if(req.query.type === 'audit') {
+    } else if(type === 'audit') {
         if(req.session.user.role === 0) {
             return res.status(401).json({ resultCode: CODE.NO_AUDIT_ERROR.RESCODE, err: CODE.NO_AUDIT_ERROR.DESC });
         }

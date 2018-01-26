@@ -14,7 +14,7 @@ module.exports = function(app) {
   app.post('/v1/upload', [morkSessionMiddleware, userMiddleware], api.upload);
   app.get('/v1/game', [morkSessionMiddleware, userMiddleware], api.listGame);
   app.post('/v1/game', [morkSessionMiddleware, userMiddleware], api.addGame);
-  app.post('/v1/post/:id', [morkSessionMiddleware, userMiddleware], api.postGame);
+  app.post('/v1/post', [morkSessionMiddleware, userMiddleware], api.postGame);
   app.post('/v1/comment/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.commentGame);
   app.get('/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.getGameDetail);
   app.put('/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.updateGame);
