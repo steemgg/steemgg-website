@@ -12,13 +12,15 @@ module.exports = function(app) {
   var api  = require('../controllers/apiController');
 
   app.post('/v1/upload', [morkSessionMiddleware, userMiddleware], api.upload);
-  app.get('/v1/game', [morkSessionMiddleware, userMiddleware], api.listGame);
+  app.get('/v1/game', [morkSessionMiddleware], api.listGame);
   app.post('/v1/game', [morkSessionMiddleware, userMiddleware], api.addGame);
   app.post('/v1/post', [morkSessionMiddleware, userMiddleware], api.postGame);
-  app.post('/v1/comment/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.commentGame);
   app.get('/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.getGameDetail);
   app.put('/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.updateGame);
   app.delete('/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.deleteGame);
+  app.post('/v1/audit/:id', [morkSessionMiddleware, userMiddleware], api.auditGame);
+  app.post('/v1/comment/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.commentGame);
+  app.post('/v1/vote/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.voteGame);
   app.get('/v1/me', [morkMiddleware], api.me);
   app.get('/v1/logout', api.logout);
   app.get('/v1/test', api.test);
@@ -66,16 +68,7 @@ function morkSessionMiddleware (req, res, next) {
 
 function userMiddleware (req, res, next) {
     if (!req.session.user) {
-        //if (process.env.NODE_ENV === 'development' && typeof req.cookies['at'] !== 'undefined' && req.cookies['at'].length >10) {
-        //    req.session.accessToken = req.cookies['at'];
-        //    user.me(req, res, function(err, users){
-        //        if(users) {
-        //           next();
-        //        }
-        //    });
-        //} else {
-            return res.status(401).json({resCode:CODE.NO_LOGIN_ERROR.RESCODE, err:CODE.NO_LOGIN_ERROR.DESC});
-        //}
+        return res.status(401).json({resCode:CODE.NO_LOGIN_ERROR.RESCODE, err:CODE.NO_LOGIN_ERROR.DESC});
     } else {
         next();
     }

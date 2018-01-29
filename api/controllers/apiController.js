@@ -16,6 +16,7 @@ const formidable = require('formidable');
 const steemitHelpers = require('../vendor/steemitHelpers');
 const user = require('../models/user');
 const redis = require('redis');
+const querystring = require('querystring');
 
 const client = redis.createClient({host: config.get('steemit.redis.host'), port:config.get('steemit.redis.port')});
 
@@ -81,14 +82,14 @@ exports.postGame = function(req, res, next) {
     api.setAccessToken(req.session.accessToken);
 
     cmysql(function cb(con){
-        con.query('select * from games where id=?', [game.id] , (err, dbRes) => {
+        con.query('select * from games where id=?', [game.gameid] , (err, dbRes) => {
             if(err) {
                 con.end();
                 return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
             }
             console.log(user)
             console.log(dbRes[0]['id'])
-            if(user.account != dbRes[0]['account'] || game.id != dbRes[0]['id']) {
+            if(user.account != dbRes[0]['account'] || game.gameid != dbRes[0]['id']) {
                 con.end();
                 return res.status(500).json({ resultCode: CODE.POST_ERROR.RESCODE, err: CODE.POST_ERROR.DESC });
             }
@@ -170,7 +171,7 @@ exports.postGame = function(req, res, next) {
                     game.userid = req.session.user.userid;
                     game.account = req.session.user.account;
                     game.status = 0;
-                    game.gameid = req.params.id;
+                    game.gameid = game.gameid;
                     game.lastModified = unix;
                     game.vote = 0;
                     game.payout = 0;
@@ -203,8 +204,9 @@ exports.addGame = function(req, res, next) {
     game.payout = 0;
     game.created = unix;
     game.lastModified = unix;
-    //game.gameUrl = JSON.stringify(game.gameUrl);
-    //game.coverImage = JSON.stringify(game.coverImage);
+    //game.gameUrl = JSON.stringify(game.gameUrl || {});
+    //game.coverImage = JSON.stringify(game.coverImage || {});
+    console.log(game.gameUrl);
     cmysql(function cb(con){
         con.query('INSERT INTO games SET ?', game, (err, dbRes) => {
             if(err) {
@@ -272,8 +274,25 @@ exports.getGameDetail = function(req, res, next) {
                     con.end();
                     return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
                 } else {
-                    con.end();
-                    return res.status(200).json(dbRes[0]);
+                    if(dbRes.length>0){
+                        con.query('select * from steemits where gameid=?', [req.params.id] , (err, steemitRes) => {
+                            if(err) {
+                                con.end();
+                                return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+                            } else {
+                                console.log(dbRes);
+                                console.log(steemitRes);
+                                if(steemitRes.length>0){
+                                    dbRes[0]['activities'] = steemitRes;
+                                }
+                                con.end();
+                                return res.status(200).json(dbRes[0]);
+                            }
+                        });
+                    } else {
+                        con.end();
+                        return res.status(200).send();
+                    }
                 }
             });
         });
@@ -322,99 +341,111 @@ exports.listGame = function(req, res, next) {
     var offset = (typeof req.query.offset !== 'undefined') ?  parseInt(req.query.offset,10) : 0;
     var pageSize = (typeof req.query.limit !== 'undefined') ? parseInt(req.query.limit, 10) : 20;
     var category = (typeof req.query.category !== 'undefined') ? req.query.category : '';
-    var sort = (typeof req.query.sort !== 'undefined') ? req.query.sort : 'desc';
-    var column = (typeof req.query.column !== 'undefined') ? req.query.column : 'created';
-    var type = (typeof req.query.type !== 'undefined') ? req.query.column : 'index';
-    var href = 'games?offset='+offset+'&limit='+pageSize+'&type='+req.query.type;
-    if (type === 'index') {
-        cmysql(function cb(con){
-            con.query('select count(1) as nums from games where status != 3', [] , (err, dbRes) => {
-                if(err) {
-                    con.end();
-                    return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-                }
-                var count = dbRes[0]['nums'];
-                if(count>0) {
-                    con.query('select * from games where status != 3 order by created desc limit ?,?' , [offset, pageSize] , (err, dbRes) => {
-                        if(err) {
-                            con.end();
-                            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-                        }
-                        var next = 'games?offset='+(offset+pageSize)+'&limit='+pageSize+'&type='+req.query.type;
-                        if (count<(offset+pageSize)) {
-                            next = '';
-                        }
-                        con.end();
-                        return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:dbRes,totalCount:count });
-                    });
-                } else {
-                    con.end();
-                    return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:[],totalCount:count });
-                }
-            });
-        });
-    } else if(type === 'me') {
-        var userid = req.session.user.userid;
-        cmysql(function cb(con){
-            con.query('select count(1) as nums from games where userid=? and status !=3', [userid] , (err, dbRes) => {
-                if(err) {
-                    con.end();
-                    return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-                }
-                var count = dbRes[0]['nums'];
-                if(count>0) {
-                    con.query('select * from games where userid=? and status !=3 order by lastModified desc limit ?,?' , [userid, offset, pageSize] , (err, dbRes) => {
-                        if(err) {
-                            con.end();
-                            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-                        }
-                        var next = 'games?offset='+(offset+pageSize)+'&limit='+pageSize+'&type='+req.query.type;
-                        if (count<(offset+pageSize)) {
-                            next = '';
-                        }
-                        con.end();
-                        return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:dbRes,totalCount:count });
-                    });
-                } else {
-                    con.end();
-                    return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:[],totalCount:count });
-                }
-            });
-        });
-    } else if(type === 'audit') {
-        if(req.session.user.role === 0) {
+    var sort = (typeof req.query.sort !== 'undefined') ? req.query.sort : 'created_desc';
+    var sortArr = sort.split("_")
+    var type = (typeof req.query.type !== 'undefined') ? req.query.type : 'index';
+    var url = querystring.stringify({ offset: offset, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], type:type });
+    var nextUrl = querystring.stringify({ offset: offset+pageSize, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], type:type });
+    var userid = req.session.user.userid;
+    console.log(req.session.user);
+    var gameQuery = 'status = 1';
+    if (type === 'me'){
+        gameQuery = 'status != 3 and userid='+ userid;
+        if (typeof userid === 'undefined') {
+            return res.status(401).json({resCode:CODE.NO_LOGIN_ERROR.RESCODE, err:CODE.NO_LOGIN_ERROR.DESC});
+        }
+    } else if(type ==='audit') {
+        if (req.session.user.role === 0){
             return res.status(401).json({ resultCode: CODE.NO_AUDIT_ERROR.RESCODE, err: CODE.NO_AUDIT_ERROR.DESC });
         }
-        cmysql(function cb(con){
-            con.query('select count(1) as nums from games where status=0',[], (err, dbRes) => {
-                if(err) {
-                    con.end();
-                    return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-                }
-                var count = dbRes[0]['nums'];
-                if(count>0) {
-                    con.query('select * from games where status=0 order by lastModified desc limit ?,?' , [offset, pageSize] , (err, dbRes) => {
-                        if(err) {
-                            con.end();
-                            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-                        }
-                        var next = 'games?offset='+(offset+pageSize)+'&limit='+pageSize+'&type='+req.query.type;
-                        if (count<(offset+pageSize)) {
-                            next = '';
-                        }
-                        con.end();
-                        return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:dbRes,totalCount:count });
-                    });
-                } else {
-                    con.end();
-                    return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:[],totalCount:count });
-                }
-            });
-        });
-    } else {
-        return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err: CODE.ERROR.DESC });
+        gameQuery = 'status = 0';
     }
+    if (category !='') {
+        gameQuery = 'and category='+category;
+    }
+    var countSql = 'select count(1) as nums from games where ' + gameQuery;
+    var querySql = 'select * from games where ' + gameQuery + ' order by ? ? limit ?,?';
+    var query = [sortArr[0], sortArr[1], offset, pageSize];
+    console.log(url)
+    console.log(querySql)
+    console.log(countSql)
+    console.log(query)
+    var href = 'game?' + url;
+    cmysql(function cb(con){
+        con.query(countSql, [] , (err, dbRes) => {
+            if(err) {
+                con.end();
+                return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+            }
+            var count = dbRes[0]['nums'];
+            if(count>0) {
+                con.query(querySql , query , (err, dbRes) => {
+                    if(err) {
+                        con.end();
+                        return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+                    }
+                    var next = 'game?'+ nextUrl;
+                    if (count<(offset+pageSize)) {
+                        next = '';
+                    }
+                    con.end();
+                    return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:dbRes,totalCount:count });
+                });
+            } else {
+                con.end();
+                return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:[],totalCount:count });
+            }
+        });
+    });
 };
+
+exports.voteGame = function(req, res, next) {
+    var data = req.body;
+    var api = sc2.Initialize({
+        app: config.get('steemit.sc.app'),
+        callbackURL: config.get('steemit.sc.cburl'),
+        baseURL: config.get('steemit.sc.url'),
+        scope: config.get('steemit.sc.scope')
+    });
+    var voter = req.session.user.account;
+    var author = req.params.author;
+    var permlink = req.params.permlink;
+    if (process.env.NODE_ENV === 'development' && voter ==='apple') {
+        voter = 'steemitgame.test';
+    }
+    console.log(voter,author,permlink,data.weight);
+    if( typeof voter === 'undefined' || typeof author === 'undefined' || typeof author === 'undefined' || typeof data.weight ==='undefined' ){
+        return res.status(500).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
+    }
+    api.setAccessToken(req.session.accessToken);
+    api.vote(voter, author, permlink, parseInt(data.weight), function (err, result) {
+        console.log(err, result);
+        if(err) {
+            return res.status(500).json({ resultCode: CODE.VOTE_ERROR.RESCODE, err: err.name });
+        }
+        return res.status(200).send();
+    });
+}
+exports.auditGame = function(req, res, next) {
+    if (req.session.user.role === 0){
+        return res.status(401).json({ resultCode: CODE.NO_AUDIT_ERROR.RESCODE, err: CODE.NO_AUDIT_ERROR.DESC });
+    }
+    cmysql(function cb(con){
+        con.query('update games set status=1 where id= ?', [req.params.id], (err, dbRes) => {
+            if(err) {
+                con.end();
+                return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+            } else {
+                if (dbRes.changedRows == 1){
+                    return res.status(200).send();
+                } else {
+                    return res.status(500).json({ resultCode: CODE.UPDATE_ERROR.RESCODE, err: CODE.UPDATE_ERROR.DESC });
+                }
+                con.end();
+            }
+        });
+    });
+}
 
 exports.index = function(req, res, next) {
     var api = sc2.Initialize({
