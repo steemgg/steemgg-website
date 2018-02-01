@@ -8,6 +8,7 @@ var bodyParser = require('body-parser');
 var session = require('express-session');
 var config = require('config');
 var db = require('./db');
+var sc2Api = require('./sc2');
 
 var app = express();
 
@@ -17,7 +18,9 @@ db.connect(function(err) {
     console.log('Unable to connect to MySQL.')
     process.exit(1)
   }
-})
+});
+// init sc2
+sc2Api.init();
 
 var sess = {
   secret: config.get('steemit.app.secret'),
