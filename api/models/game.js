@@ -88,6 +88,17 @@ exports.addActivity = function(activity, cb) {
   })
 }
 
+exports.getRecentlyActivity = function(gameId, cb) {
+    db.get(db.READ, function(err, connection) {
+    if (err) return cb({code:"Missing database connection"})
+
+        connection.query('select * from activities where gameid=? order by lastModified desc limit 1', gameId, function (err, rows) {
+            if (err) return cb(err)
+            cb(null, rows)
+        })
+    })
+}
+
 exports.query = function(sql, params, cb) {
   db.get(db.WRITE, function(err, connection) {
     if (err) return cb({code:"Missing database connection"})
