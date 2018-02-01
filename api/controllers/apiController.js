@@ -276,15 +276,32 @@ exports.auditGame = function(req, res, next) {
     if (req.session.user.role === 0){
         return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
     }
-    game.auditGame([data.status,req.params.id],function(err, dbRes){
-        if(err) {
-            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
+    game.getRecentlyActivity(req.params.id, function(err, dbRes){
+        if(typeof dbRes[0] === 'undefined') {
+            return res.status(404).json({ resultCode: CODE.NOFOUND_ACTIVITY_ERROR.RESCODE, err: CODE.NOFOUND_ACTIVITY_ERROR.DESC });
         }
-        if (dbRes.changedRows == 1){
-            return res.status(200).send();
-        } else {
-            return res.status(500).json({ resultCode: CODE.UPDATE_GAME_ERROR.RESCODE, err: CODE.UPDATE_GAME_ERROR.DESC });
+        var author = req.session.user.account;
+        if (process.env.NODE_ENV === 'development' && author==='apple') {
+            author = 'steemitgame.test';
         }
+        if (process.env.NODE_ENV === 'development' && dbRes[0].account==='apple') {
+            dbRes[0].account = 'steemitgame.test';
+        }
+        steem.comment(req.session.accessToken, dbRes[0].account,dbRes[0].permlink, author, data.comment, function(err, result){
+            if(err) {
+                return res.status(500).json({ resultCode: CODE.COMMENT_ERROR.RESCODE, err: err.error_description });
+            }
+            game.auditGame([data.status,req.params.id],function(err, dbRes){
+                if(err) {
+                    return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
+                }
+                if (dbRes.changedRows == 1){
+                    return res.status(200).send();
+                } else {
+                    return res.status(500).json({ resultCode: CODE.UPDATE_GAME_ERROR.RESCODE, err: CODE.UPDATE_GAME_ERROR.DESC });
+                }
+            });
+        });
     });
 }
 
@@ -293,15 +310,32 @@ exports.reportGame = function(req, res, next) {
     if (req.session.user.role === 0){
         return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
     }
-    game.reportGame([req.params.id], function(err, dbRes){
-        if(err) {
-            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
+    game.getRecentlyActivity(req.params.id, function(err, dbRes){
+        if(typeof dbRes[0] === 'undefined') {
+            return res.status(404).json({ resultCode: CODE.NOFOUND_ACTIVITY_ERROR.RESCODE, err: CODE.NOFOUND_ACTIVITY_ERROR.DESC });
         }
-        if (dbRes.changedRows == 1){
-            return res.status(200).send();
-        } else {
-            return res.status(500).json({ resultCode: CODE.UPDATE_GAME_ERROR.RESCODE, err: CODE.UPDATE_GAME_ERROR.DESC });
+        var author = req.session.user.account;
+        if (process.env.NODE_ENV === 'development' && author === 'apple') {
+            author = 'steemitgame.test';
         }
+        if (process.env.NODE_ENV === 'development' && dbRes[0].account === 'apple') {
+            dbRes[0].account = 'steemitgame.test';
+        }
+        steem.comment(req.session.accessToken, dbRes[0].account,dbRes[0].permlink, author, data.comment, function(err, result){
+            if(err) {
+                return res.status(500).json({ resultCode: CODE.COMMENT_ERROR.RESCODE, err: err.error_description });
+            }
+            game.reportGame([data.report,req.params.id], function(err, dbRes){
+                if(err) {
+                    return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
+                }
+                if (dbRes.changedRows == 1){
+                    return res.status(200).send();
+                } else {
+                    return res.status(500).json({ resultCode: CODE.UPDATE_GAME_ERROR.RESCODE, err: CODE.UPDATE_GAME_ERROR.DESC });
+                }
+            });
+        });
     });
 }
 
