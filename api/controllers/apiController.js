@@ -1,20 +1,16 @@
 'use strict';
 
-
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
-const steem = require('steem');
-const mysql = require('mysql');
 const config = require('config');
-const sc2 = require('../lib/sc2');
-const request = require('request');
 const ipfsAPI = require('ipfs-api');
 const CODE = require('../lib/code');
 const decompress = require('decompress');
 const formidable = require('formidable');
-const steemitHelpers = require('../vendor/steemitHelpers');
 const user = require('../models/user');
+const steem = require('../models/steem');
+const game = require('../models/game');
 const redis = require('redis');
 const querystring = require('querystring');
 
@@ -62,277 +58,144 @@ exports.upload = function(req, res) {
 };
 
 exports.me = function(req, res) {
-    user.me(req, res, function(err, users){
-        if(!users) {
-               return res.status(401).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE });
-        } else {
-               return res.status(200).json(users);
+    steem.me(req.session.accessToken, function (err, result) {
+        if(err){
+            return res.status(401).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.error_description });
         }
+        user.getUserByAccount(result.user, function cb(err, dbRes){
+                if(err) {
+                    console.log(err)
+                    return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
+                }
+                var userInfo = dbRes[0];
+                if(typeof dbRes[0] === 'undefined') {
+                    userInfo = {'account':result.user, 'userid':result.account.id, 'role':0, 'status':1, 'createtime':Math.round(+new Date()/1000)};
+                    user.addUser(userInfo, function cb(err, dbRes){
+                        if(err) {
+                            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
+                        }
+                    });
+                }
+                req.session.user = userInfo;
+                client.set("token:userid:"+userInfo.userid, req.session.accessToken);
+                return res.status(200).json(userInfo);
+        });
+
     });
 };
+
 exports.postGame = function(req, res, next) {
-    var user = req.session.user;
-    var game = req.body;
-    var api = sc2.Initialize({
-        app: config.get('steemit.sc.app'),
-        callbackURL: config.get('steemit.sc.cburl'),
-        baseURL: config.get('steemit.sc.url'),
-        scope: config.get('steemit.sc.scope')
-    });
-    api.setAccessToken(req.session.accessToken);
-
-    cmysql(function cb(con){
-        con.query('select * from games where id=?', [game.gameid] , (err, dbRes) => {
+    var data = req.body;
+    var userInfo = req.session.user;
+    console.log(data);
+    game.getGameById(data.gameid, function(err, dbRes){
+        if(err) {
+            console.log(err)
+            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
+        }
+        if(typeof dbRes[0] === 'undefined') {
+            return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
+        }
+        if(userInfo.account != dbRes[0]['account'] || data.gameid != dbRes[0]['id']) {
+            return res.status(500).json({ resultCode: CODE.PARAMS_INCONSISTENT_ERROR.RESCODE, err: CODE.PARAMS_INCONSISTENT_ERROR.DESC });
+        }
+        var author = req.session.user.account;
+        if (process.env.NODE_ENV === 'development' && author==='apple') {
+            author = 'steemitgame.test';
+        }
+        steem.post(req.session.accessToken, author, data.activityTitle, data.activityDescription, data.reward, data.tags, function(err, result, permlink){
+            console.log(err, result, permlink);
             if(err) {
-                con.end();
-                return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+                return res.status(500).json({ resultCode: CODE.POST_ERROR.RESCODE, err: err.error_description });
             }
-            console.log(user)
-            console.log(dbRes[0]['id'])
-            if(user.account != dbRes[0]['account'] || game.gameid != dbRes[0]['id']) {
-                con.end();
-                return res.status(500).json({ resultCode: CODE.POST_ERROR.RESCODE, err: CODE.POST_ERROR.DESC });
-            }
-            var author = req.session.user.account;
-            if (process.env.NODE_ENV === 'development' && author==='apple') {
-                author = 'steemitgame.test';
-            }
-            console.log(author);
-            var parentAuthor = "";
-            var parentPermlink = "";
-
-            const extensions = [[0, {
-                beneficiaries: [
-                    {
-                        account: 'steemitgame.dev',
-                        weight: 2500
-                    }
-                ]
-            }]];
-
-            const operations = [];
-
-            const metaData = {
-                community: 'steemitgame',
-                tags: game.tags,
-                app: `steemitgame.app/test`
-            };
-
-            const getPermLink = steemitHelpers.createPermlink(game.activityTitle, author, '', '');
-            getPermLink.then(permlink => {
-                console.log("permlink:"+ permlink);
-                const commentOp = [
-                    'comment',
-                    {
-                        parent_author: "",
-                        parent_permlink: "steemitgame",
-                        author: author,
-                        permlink,
-                        title: game.activityTitle,
-                        body: game.activityDescription,
-                        json_metadata: JSON.stringify(metaData)
-                    },
-                ];
-                operations.push(commentOp);
-
-                const commentOptionsConfig = {
-                    author: author,
-                    permlink,
-                    allow_votes: true,
-                    allow_curation_rewards: true,
-                    extensions,
-                };
-
-                if (extensions) {
-                    commentOptionsConfig.extensions = extensions;
-
-                    if (game.reward === '100') {
-                        commentOptionsConfig.percent_steem_dollars = 0;
-                    } else {
-                        commentOptionsConfig.percent_steem_dollars = 10000;
-                    }
-
-                    commentOptionsConfig.max_accepted_payout = '1000000.000 SBD';
-
-                    operations.push(['comment_options', commentOptionsConfig]);
+            var unix = Math.round(+new Date()/1000);
+            var activity = {userid:req.session.user.userid, account:req.session.user.account,gameid: data.gameid,lastModified: unix, permlink:permlink };
+            game.addActivity(activity, function(err, dbRes){
+                if(err) {
+                    console.log(err);
+                    return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
                 }
-
-                console.log("OPERATIONS", operations)
-                api.broadcast(operations, function(err, result){
-                    console.log(err, result);
-                    if(err) {
-                        return res.status(500).json({ resultCode: CODE.POST_ERROR.RESCODE, err: err.name });
-                    }
-                    var unix = Math.round(+new Date()/1000);
-                    delete game.activityTitle;
-                    delete game.activityDescription;
-                    delete game.tags;
-                    delete game.reward;
-                    game.userid = req.session.user.userid;
-                    game.account = req.session.user.account;
-                    game.status = 0;
-                    game.gameid = game.gameid;
-                    game.lastModified = unix;
-                    game.vote = 0;
-                    game.payout = 0;
-                    game.permlink = permlink;
-                    cmysql(function cb(con){
-                        con.query('INSERT INTO steemits SET ?', game, (err, dbRes) => {
-                            if(err) {
-                                console.log(err);
-                                con.end();
-                                return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-                            }
-                            con.end();
-                            return res.status(200).json(game);
-                        });
-                    });
-                });
+                return res.status(200).json(activity);
             });
         });
     });
 }
 
 exports.addGame = function(req, res, next) {
-    var user = req.session.user;
-    var game = req.body;
+    var userInfo = req.session.user;
+    var data = req.body;
     var unix = Math.round(+new Date()/1000);
-    game.userid = req.session.user.userid;
-    game.account = req.session.user.account;
-    game.status = 0;
-    game.vote = 0;
-    game.payout = 0;
-    game.created = unix;
-    game.lastModified = unix;
-    //game.gameUrl = JSON.stringify(game.gameUrl || {});
-    //game.coverImage = JSON.stringify(game.coverImage || {});
-    console.log(game.gameUrl);
-    cmysql(function cb(con){
-        con.query('INSERT INTO games SET ?', game, (err, dbRes) => {
-            if(err) {
-                console.log(err);
-                con.end();
-                return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-            }
-            game.id = dbRes.insertId;
-            con.end();
-            return res.status(200).json(game);
-        });
+    var gameInfo = {userid:req.session.userInfo.userid,account:req.session.userInfo.account,created:unix,lastModified:unix,gameUrl:data.gameUrl,coverImage:data.coverImage,version:data.version}
+    game.addGame(gameInfo,function(err, dbRes){
+        if(err) {
+            console.log(err);
+            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
+        }
+        gameInfo.id = dbRes.insertId;
+        return res.status(200).json(gameInfo);
     });
-    return;
 };
 
 exports.commentGame = function(req, res, next) {
-    var user = req.session.user;
+    var userInfo = req.session.user;
     var post = req.body;
-    var api = sc2.Initialize({
-        app: config.get('steemit.sc.app'),
-        callbackURL: config.get('steemit.sc.cburl'),
-        baseURL: config.get('steemit.sc.url'),
-        scope: config.get('steemit.sc.scope')
-    });
-    api.setAccessToken(req.session.accessToken);
     var author = req.session.user.account;
     if (process.env.NODE_ENV === 'development' && author==='apple') {
         author = 'steemitgame.test';
     }
-    const operations = [];
-    const metaData = {
-        community: 'steemitgame',
-        tags: ['steemitgame'],
-        app: `steemitgame.app/test`
-    };
-    const commentOp = [
-        'comment',
-        {
-            parent_author: req.params.author,
-            parent_permlink: req.params.permlink,
-            author: author,
-            permlink: steemitHelpers.createCommentPermlink(req.params.author, req.params.permlink),
-            title: "",
-            body: post.content,
-            json_metadata: JSON.stringify(metaData)
-        },
-    ];
-    operations.push(commentOp);
-    api.comment(operations, function(err, result){
-        console.log(err, result);
-    });
-    console.log("OPERATIONS", operations)
-    api.broadcast(operations, function(err, result){
+    steem.comment(req.session.accessToken, req.params.author,req.params.permlink, author, post.content, function(err, result){
         if(err) {
-            return res.status(500).json({ resultCode: CODE.POST_ERROR.RESCODE, err: err.name });
+            return res.status(500).json({ resultCode: CODE.COMMENT_ERROR.RESCODE, err: err.error_description });
         }
         return res.status(200).send();
     });
 };
 
 exports.getGameDetail = function(req, res, next) {
-        cmysql(function cb(con){
-            con.query('select * from games where id=?', [req.params.id] , (err, dbRes) => {
-                if(err) {
-                    con.end();
-                    return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-                } else {
-                    if(dbRes.length>0){
-                        con.query('select * from steemits where gameid=?', [req.params.id] , (err, steemitRes) => {
-                            if(err) {
-                                con.end();
-                                return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-                            } else {
-                                console.log(dbRes);
-                                console.log(steemitRes);
-                                if(steemitRes.length>0){
-                                    dbRes[0]['activities'] = steemitRes;
-                                }
-                                con.end();
-                                return res.status(200).json(dbRes[0]);
-                            }
-                        });
-                    } else {
-                        con.end();
-                        return res.status(200).send();
-                    }
-                }
-            });
-        });
-};
-exports.updateGame = function(req, res, next) {
-    var unix = Math.round(+new Date()/1000);
-    var game = req.body;
-    cmysql(function cb(con){
-        con.query('update games set ? where id= ? and userid= ?', [{ title:game.title,coverImage:game.coverImage,description:game.description,category:game.category,gameUrl:game.gameUrl,lastModified:unix }, req.params.id, req.session.user.userid], (err, dbRes) => {
+    game.getGameById(req.params.id,function(err, dbRes){
+        if(err) {
+            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
+        }
+        if(typeof dbRes[0] === 'undefined') {
+            return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
+        }
+        game.getActivitiesById(req.params.id,function(err,steemitRes){
             if(err) {
-                con.end();
-                return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-            } else {
-                if (dbRes.changedRows == 1){
-                    return res.status(200).send();
-                } else {
-                    return res.status(500).json({ resultCode: CODE.UPDATE_ERROR.RESCODE, err: CODE.UPDATE_ERROR.DESC });
-                }
-                con.end();
+                return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
             }
+            if(steemitRes.length>0){
+                dbRes[0]['activities'] = steemitRes;
+            }
+            return res.status(200).json(dbRes[0]);
         });
     });
 };
-exports.deleteGame = function(req, res, next) {
+exports.updateGame = function(req, res, next) {
     var unix = Math.round(+new Date()/1000);
-    cmysql(function cb(con){
-        con.query('update games set status = 3 where id= ? and userid= ?', [req.params.id, req.session.user.userid], (err, dbRes) => {
-            if(err) {
-                con.end();
-                return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
+    var data = req.body;
+    game.updateGame([{ title:data.title,coverImage:data.coverImage,description:data.description,category:data.category,gameUrl:data.gameUrl,lastModified:unix }, req.params.id, req.session.user.userid],function(err, dbRes){
+        if(err) {
+            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
+        } else {
+            if (dbRes.changedRows == 1){
+                return res.status(200).send();
             } else {
-                console.log(dbRes);
-                if (dbRes.changedRows == 1){
-                    return res.status(200).send();
-                } else {
-                    return res.status(500).json({ resultCode: CODE.UPDATE_ERROR.RESCODE, err: CODE.UPDATE_ERROR.DESC } );
-                }
-                con.end();
+                return res.status(500).json({ resultCode: CODE.UPDATE_GAME_ERROR.RESCODE, err: CODE.UPDATE_GAME_ERROR.DESC });
             }
-        });
+        }
+    });
+};
+exports.deleteGame = function(req, res, next) {
+    game.deleteGame([req.params.id, req.session.user.userid], function(err, dbRes){
+        if(err) {
+            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
+        } else {
+            if (dbRes.changedRows == 1){
+                return res.status(200).send();
+            } else {
+                return res.status(500).json({ resultCode: CODE.DELETE_GAME_ERROR.RESCODE, err: CODE.DELETE_GAME_ERROR.DESC } );
+            }
+        }
     });
 };
 
@@ -347,16 +210,15 @@ exports.listGame = function(req, res, next) {
     var url = querystring.stringify({ offset: offset, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], type:type });
     var nextUrl = querystring.stringify({ offset: offset+pageSize, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], type:type });
     var userid = req.session.user.userid;
-    console.log(req.session.user);
     var gameQuery = 'status = 1';
     if (type === 'me'){
         gameQuery = 'status != 3 and userid='+ userid;
         if (typeof userid === 'undefined') {
-            return res.status(401).json({resCode:CODE.NO_LOGIN_ERROR.RESCODE, err:CODE.NO_LOGIN_ERROR.DESC});
+            return res.status(401).json({resCode:CODE.NEED_LOGIN_ERROR.RESCODE, err:CODE.NEED_LOGIN_ERROR.DESC});
         }
     } else if(type ==='audit') {
         if (req.session.user.role === 0){
-            return res.status(401).json({ resultCode: CODE.NO_AUDIT_ERROR.RESCODE, err: CODE.NO_AUDIT_ERROR.DESC });
+            return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
         }
         gameQuery = 'status = 0';
     }
@@ -365,48 +227,32 @@ exports.listGame = function(req, res, next) {
     }
     var countSql = 'select count(1) as nums from games where ' + gameQuery;
     var querySql = 'select * from games where ' + gameQuery + ' order by ? ? limit ?,?';
-    var query = [sortArr[0], sortArr[1], offset, pageSize];
-    console.log(url)
-    console.log(querySql)
-    console.log(countSql)
-    console.log(query)
+    var queryParams = [sortArr[0], sortArr[1], offset, pageSize];
     var href = 'game?' + url;
-    cmysql(function cb(con){
-        con.query(countSql, [] , (err, dbRes) => {
-            if(err) {
-                con.end();
-                return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-            }
-            var count = dbRes[0]['nums'];
-            if(count>0) {
-                con.query(querySql , query , (err, dbRes) => {
-                    if(err) {
-                        con.end();
-                        return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-                    }
-                    var next = 'game?'+ nextUrl;
-                    if (count<(offset+pageSize)) {
-                        next = '';
-                    }
-                    con.end();
-                    return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:dbRes,totalCount:count });
-                });
-            } else {
-                con.end();
-                return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:[],totalCount:count });
-            }
-        });
+    game.query(countSql, [], function(err, dbRes){
+        if(err) {
+            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
+        }
+        var count = dbRes[0]['nums'];
+        var next = '';
+        if(count>0) {
+            game.query(querySql, queryParams, function(err, dbRes){
+                if(err) {
+                    return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
+                }
+                if (count>=(offset+pageSize)) {
+                    next = 'game?'+ nextUrl;
+                }
+                return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:dbRes,totalCount:count });
+            });
+        } else {
+            return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:[],totalCount:count });
+        }
     });
 };
 
 exports.voteGame = function(req, res, next) {
     var data = req.body;
-    var api = sc2.Initialize({
-        app: config.get('steemit.sc.app'),
-        callbackURL: config.get('steemit.sc.cburl'),
-        baseURL: config.get('steemit.sc.url'),
-        scope: config.get('steemit.sc.scope')
-    });
     var voter = req.session.user.account;
     var author = req.params.author;
     var permlink = req.params.permlink;
@@ -417,84 +263,76 @@ exports.voteGame = function(req, res, next) {
     if( typeof voter === 'undefined' || typeof author === 'undefined' || typeof author === 'undefined' || typeof data.weight ==='undefined' ){
         return res.status(500).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
     }
-    api.setAccessToken(req.session.accessToken);
-    api.vote(voter, author, permlink, parseInt(data.weight), function (err, result) {
-        console.log(err, result);
+    steem.vote(req.session.accessToken, voter, author, permlink, parseInt(data.weight), function (err, result) {
         if(err) {
-            return res.status(500).json({ resultCode: CODE.VOTE_ERROR.RESCODE, err: err.name });
+            return res.status(500).json({ resultCode: CODE.VOTE_ERROR.RESCODE, err: err.error_description });
         }
         return res.status(200).send();
     });
 }
+
 exports.auditGame = function(req, res, next) {
+    var data = req.body;
     if (req.session.user.role === 0){
-        return res.status(401).json({ resultCode: CODE.NO_AUDIT_ERROR.RESCODE, err: CODE.NO_AUDIT_ERROR.DESC });
+        return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
     }
-    cmysql(function cb(con){
-        con.query('update games set status=1 where id= ?', [req.params.id], (err, dbRes) => {
-            if(err) {
-                con.end();
-                return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: CODE.DB_ERROR.DESC });
-            } else {
-                if (dbRes.changedRows == 1){
-                    return res.status(200).send();
-                } else {
-                    return res.status(500).json({ resultCode: CODE.UPDATE_ERROR.RESCODE, err: CODE.UPDATE_ERROR.DESC });
-                }
-                con.end();
-            }
-        });
+    game.auditGame([data.status,req.params.id],function(err, dbRes){
+        if(err) {
+            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
+        }
+        if (dbRes.changedRows == 1){
+            return res.status(200).send();
+        } else {
+            return res.status(500).json({ resultCode: CODE.UPDATE_GAME_ERROR.RESCODE, err: CODE.UPDATE_GAME_ERROR.DESC });
+        }
+    });
+}
+
+exports.reportGame = function(req, res, next) {
+    var data = req.body;
+    if (req.session.user.role === 0){
+        return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
+    }
+    game.reportGame([req.params.id], function(err, dbRes){
+        if(err) {
+            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
+        }
+        if (dbRes.changedRows == 1){
+            return res.status(200).send();
+        } else {
+            return res.status(500).json({ resultCode: CODE.UPDATE_GAME_ERROR.RESCODE, err: CODE.UPDATE_GAME_ERROR.DESC });
+        }
     });
 }
 
 exports.index = function(req, res, next) {
-    var api = sc2.Initialize({
-        app: config.get('steemit.sc.app'),
-        callbackURL: config.get('steemit.sc.cburl'),
-        baseURL: config.get('steemit.sc.url'),
-        scope: config.get('steemit.sc.scope')
-    });
-    var url = api.getLoginURL(1);
-  res.render('index', { title: '$$$ hello! Steem Game $$$', login: url });
+    steem.getLoginUrl(function(url){
+        res.render('index', { title: '$$$ hello! Steem Game $$$', login: url });
+    })
 };
 
 exports.logout = function(req, res, next) {
-    var api = sc2.Initialize({
-        app: config.get('steemit.sc.app'),
-        callbackURL: config.get('steemit.sc.cburl'),
-        baseURL: config.get('steemit.sc.url'),
-        scope: config.get('steemit.sc.scope')
-    });
-    api.revokeToken(function (err, res) {
+    steem.revokeToken(function(err, res){
         if(err){
-            console.log(err);
-            return;
+            console.log(err)
+            res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err: err.error_description });
         }
-        return;
+        res.clearCookie('at');
+        req.session.destroy(function(err) {
+            if(err){
+                res.status(500).json({ resultCode: CODE.CLEAR_SESSION_ERROR.RESCODE, err: CODE.CLEAR_SESSION_ERROR.DESC });
+            }
+            return
+        });
+        res.status(200).send();
     });
-    res.clearCookie('at');
-    req.session.destroy(function(err) {
-        if(err){
-            res.status(500).json({ resultCode: CODE.SESSION_ERROR.RESCODE, err: CODE.SESSION_ERROR.DESC });
-            return;
-        }
-        return;
-    });
-    res.status(200).send();
+    return
 };
 
 exports.test = function(req, res, next) {
     client.get("token:userid:477514", function (err, reply) {
         console.log(reply.toString()); // Will print `OK`
-        var api = sc2.Initialize({
-            app: config.get('steemit.sc.app'),
-            callbackURL: config.get('steemit.sc.cburl'),
-            baseURL: config.get('steemit.sc.url'),
-            scope: config.get('steemit.sc.scope')
-        });
-        api.setAccessToken(reply.toString());
-        api.reToken(function (err, res) {
-                console.log(res,err);
+        steem.reflashToken(reply.toString(), function(err, res){
             if(err){
                 console.log(err);
                 return;
@@ -511,22 +349,5 @@ function unzipFile(file, userid, cb) {
     }).then(files => {
         cb(files);
     });
-}
-
-function cmysql(cb) {
-    const con = mysql.createConnection({
-        host: config.get('steemit.db.host'),
-        user: config.get('steemit.db.dbUser'),
-        password: config.get('steemit.db.dbPass'),
-        database: config.get('steemit.db.dbName'),
-    });
-
-    con.connect((err) => {
-        if(err){
-            console.log('Error connecting to Db');
-            return;
-        }
-    });
-    cb(con);
 }
 

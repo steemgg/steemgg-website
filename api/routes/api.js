@@ -21,6 +21,7 @@ module.exports = function(app) {
   app.post('/v1/audit/:id', [morkSessionMiddleware, userMiddleware], api.auditGame);
   app.post('/v1/comment/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.commentGame);
   app.post('/v1/vote/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.voteGame);
+  app.post('/v1/report/:id', [morkSessionMiddleware, userMiddleware], api.reportGame);
   app.get('/v1/me', [morkMiddleware], api.me);
   app.get('/v1/logout', api.logout);
   app.get('/v1/test', api.test);
@@ -67,8 +68,9 @@ function morkSessionMiddleware (req, res, next) {
 }
 
 function userMiddleware (req, res, next) {
+    console.log(req.session.user)
     if (!req.session.user) {
-        return res.status(401).json({resCode:CODE.NO_LOGIN_ERROR.RESCODE, err:CODE.NO_LOGIN_ERROR.DESC});
+        return res.status(401).json({resCode:CODE.NEED_LOGIN_ERROR.RESCODE, err:CODE.NEED_LOGIN_ERROR.DESC});
     } else {
         next();
     }
