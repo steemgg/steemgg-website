@@ -21,6 +21,7 @@ const CODE = {
     UPDATE_GAME_ERROR: {RESCODE:500,DESC:'update game failed'},
     DELETE_GAME_ERROR: {RESCODE:501,DESC:'delete game failed'},
     NOFOUND_GAME_ERROR: {RESCODE:502,DESC:'game not found'},
+    NOFOUND_ACTIVITY_ERROR: {RESCODE:503,DESC:'activity not found'},
 
     //other
     TEST_DATA_ERROR: {RESCODE:700,DESC:'get test data failed'},
