@@ -1,111 +1,51 @@
 const db = require('../../db')
 
-exports.addGame = function(game, cb) {
-  db.get(db.WRITE, function(err, connection) {
-    if (err) return cb({code:"Missing database connection"})
-
-    connection.query('INSERT INTO games SET ?', game, function (err, rows) {
-      if (err) return cb(err)
-      cb(null, rows)
-    })
-  })
+exports.addGame = async function(game) {
+    let rows = await db.execute(db.WRITE, 'INSERT INTO games SET ?', game);
+    return rows;
 }
 
-exports.deleteGame = function(params, cb) {
-  db.get(db.WRITE, function(err, connection) {
-    if (err) return cb({code:"Missing database connection"})
-
-    connection.query('update games set status = 3 where id= ? and userid= ?', params, function (err, rows) {
-      if (err) return cb(err)
-      cb(null, rows)
-    })
-  })
+exports.deleteGame = async function(params) {
+    let rows = await db.execute(db.WRITE, 'update games set status = 3 where id= ? and userid= ?', params);
+    return rows;
 }
 
-exports.updateGame = function(params, cb) {
-  db.get(db.WRITE, function(err, connection) {
-    if (err) return cb({code:"Missing database connection"})
-
-    connection.query('update games set ? where id= ? and userid= ?', params, function (err, rows) {
-      if (err) return cb(err)
-      cb(null, rows)
-    })
-  })
+exports.updateGame = async function(params) {
+    let rows = await db.execute(db.WRITE, 'update games set ? where id= ? and userid= ?', params);
+    return rows;
 }
 
-exports.auditGame = function(params, cb) {
-  db.get(db.WRITE, function(err, connection) {
-    if (err) return cb({code:"Missing database connection"})
-
-    connection.query('update games set status=? where id= ?', params, function (err, rows) {
-      if (err) return cb(err)
-      cb(null, rows)
-    })
-  })
+exports.auditGame = async function(params) {
+    let rows = await db.execute(db.WRITE, 'update games set status=? where id= ?', params);
+    return rows;
 }
 
-exports.reportGame = function(params, cb) {
-  db.get(db.WRITE, function(err, connection) {
-    if (err) return cb({code:"Missing database connection"})
-
-    connection.query('update games set report=? where id= ?', params, function (err, rows) {
-      if (err) return cb(err)
-      cb(null, rows)
-    })
-  })
+exports.reportGame = async function(params) {
+    let rows = await db.execute(db.WRITE, 'update games set report=? where id= ?', params);
+    return rows;
 }
 
-exports.getGameById = function(gameId, cb) {
-    db.get(db.READ, function(err, connection) {
-    if (err) return cb({code:"Missing database connection"})
-
-        connection.query('select * from games where id=?', gameId, function (err, rows) {
-            if (err) return cb(err)
-            cb(null, rows)
-        })
-    })
+exports.getGameById = async function(gameId) {
+    let rows = await db.execute(db.READ, 'select * from games where id=?', gameId);
+    return rows;
 }
 
-exports.getActivitiesById = function(gameId, cb) { 
-    db.get(db.READ, function(err, connection) {
-    if (err) return cb({code:"Missing database connection"})
-
-        connection.query('select * from games where id=?', gameId, function (err, rows) {
-            if (err) return cb(err)
-            cb(null, rows)
-        })
-    })
+exports.getActivitiesById = async function(gameId) {
+    let rows = await db.execute(db.READ, 'select * from activities where gameid=?', gameId);
+    return rows;
 }
 
-exports.addActivity = function(activity, cb) {
-  db.get(db.WRITE, function(err, connection) {
-    if (err) return cb({code:"Missing database connection"})
-
-    connection.query('INSERT INTO activities SET ?', activity, function (err, rows) {
-      if (err) return cb(err)
-      cb(null, rows)
-    })
-  })
+exports.addActivity = async function(activity) {
+    let rows = await db.execute(db.WRITE, 'INSERT INTO activities SET ?', activity);
+    return rows;
 }
 
-exports.getRecentlyActivity = function(gameId, cb) {
-    db.get(db.READ, function(err, connection) {
-    if (err) return cb({code:"Missing database connection"})
-
-        connection.query('select * from activities where gameid=? order by lastModified desc limit 1', gameId, function (err, rows) {
-            if (err) return cb(err)
-            cb(null, rows)
-        })
-    })
+exports.getRecentlyActivity = async function(gameId) {
+    let rows = await db.execute(db.READ, 'select * from activities where gameid=? order by lastModified desc limit 1', gameId);
+    return rows;
 }
 
-exports.query = function(sql, params, cb) {
-  db.get(db.WRITE, function(err, connection) {
-    if (err) return cb({code:"Missing database connection"})
-
-    connection.query(sql, params, function (err, rows) {
-      if (err) return cb(err)
-      cb(null, rows)
-    })
-  })
+exports.query = async function(sql, params) {
+    let rows = await db.execute(db.WRITE, sql, params);
+    return rows;
 }
