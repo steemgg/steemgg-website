@@ -29,7 +29,7 @@ module.exports = function(app) {
 };
 
 function morkMiddleware (req, res, next) {
-    if (!req.session.accessToken && process.env.NODE_ENV === 'development' && typeof req.cookies['at'] !== 'undefined') {
+    if (process.env.NODE_ENV === 'development' && typeof req.cookies['at'] !== 'undefined') {
         fs.readFile( config.get('steemit.app.rooturl') + '/' + req.cookies['at'] +'.json', 'utf8', function (err, result) {
             if (err) {
                 console.log({resCode:CODE.TEST_DATA_ERROR.RESCODE, err:CODE.TEST_DATA_ERROR.DESC});
@@ -45,15 +45,17 @@ function morkMiddleware (req, res, next) {
 }
 
 function morkSessionMiddleware (req, res, next) {
-    if (!req.session.accessToken && process.env.NODE_ENV === 'development' && typeof req.cookies['at'] !== 'undefined') {
+    if (process.env.NODE_ENV === 'development' && typeof req.cookies['at'] !== 'undefined') {
         fs.readFile( config.get('steemit.app.rooturl') + '/' + req.cookies['at'] +'.json', 'utf8', function (err, result) {
             if (err) {
                 console.log({resCode:CODE.TEST_DATA_ERROR.RESCODE, err:CODE.TEST_DATA_ERROR.DESC});
                 next();
             } else {
-                client.get("token:userid:477514", function (err, at) {
+                let user = JSON.parse(result);
+                console.log(user);
+                client.get("token:userid:"+user.userid, function (err, at) {
                     req.session.accessToken = at.toString();
-                    req.session.user = JSON.parse(result);
+                    req.session.user = user;
                     next();
                 });
             }

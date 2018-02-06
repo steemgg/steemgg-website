@@ -214,14 +214,17 @@ exports.listGame = async function(req, res, next) {
     let type = (typeof req.query.type !== 'undefined') ? req.query.type : 'index';
     let url = querystring.stringify({ offset: offset, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], type:type });
     let nextUrl = querystring.stringify({ offset: offset+pageSize, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], type:type });
-    let userid = req.session.user.userid;
     let gameQuery = 'status = 1';
     if (type === 'me'){
-        gameQuery = 'status != 3 and userid='+ userid;
-        if (typeof userid === 'undefined') {
+        if (typeof req.session.user === 'undefined') {
             return res.status(401).json({resCode:CODE.NEED_LOGIN_ERROR.RESCODE, err:CODE.NEED_LOGIN_ERROR.DESC});
         }
+        let userid = req.session.user.userid;
+        gameQuery = 'status != 3 and userid='+ userid;
     } else if(type ==='audit') {
+        if (typeof req.session.user === 'undefined') {
+            return res.status(401).json({resCode:CODE.NEED_LOGIN_ERROR.RESCODE, err:CODE.NEED_LOGIN_ERROR.DESC});
+        }
         if (req.session.user.role === 0){
             return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
         }
@@ -356,7 +359,9 @@ exports.index = async function(req, res, next) {
 
 exports.logout = async function(req, res, next) {
     try{
-        await steem.revokeToken(req.session.accessToken);
+        if (process.env.NODE_ENV !== 'development'){
+            await steem.revokeToken(req.session.accessToken);
+        }
         res.clearCookie('at');
         req.session.destroy(function(err) {
             if(err){
