@@ -1,5 +1,7 @@
-const config = require('config');
-const db = require('../../db')
+'use strict';
+
+import config from 'config';
+import db from '../../db';
 
 exports.getUserByAccount = async function(account) {
     let rows = await db.execute(db.READ, 'select * from user where account = ?', account);

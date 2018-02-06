@@ -8,7 +8,7 @@ var bodyParser = require('body-parser');
 var session = require('express-session');
 var config = require('config');
 var db = require('./db');
-var sc2Api = require('./sc2');
+var sc2NewApi = require('./sc2new');
 
 var app = express();
 
@@ -20,7 +20,12 @@ db.connect(function(err) {
   }
 });
 // init sc2
-sc2Api.init();
+sc2NewApi.Initialize({
+    app: config.get('steemit.sc.app'),
+    callbackURL: config.get('steemit.sc.cburl'),
+    baseURL: config.get('steemit.sc.url'),
+    scope: config.get('steemit.sc.scope')
+});
 
 var sess = {
   secret: config.get('steemit.app.secret'),

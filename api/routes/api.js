@@ -1,16 +1,17 @@
 'use strict';
 
-const fs = require('fs');
-const config = require('config');
-const CODE = require('../lib/code');
-const user = require('../models/user');
-const redis = require('redis');
+import fs from 'fs';
+import config from 'config';
+import CODE from '../lib/code';
+import user from '../models/user';
+import redis from 'redis';
+import api from '../controllers/apiController';
+import callback from '../controllers/callbackController';
+
 
 const client = redis.createClient({host: config.get('steemit.redis.host'), port:config.get('steemit.redis.port')});
 
 module.exports = function(app) {
-  var api  = require('../controllers/apiController');
-
   app.post('/v1/upload', [morkSessionMiddleware, userMiddleware], api.upload);
   app.get('/v1/game', [morkSessionMiddleware], api.listGame);
   app.post('/v1/game', [morkSessionMiddleware, userMiddleware], api.addGame);
@@ -26,8 +27,6 @@ module.exports = function(app) {
   app.get('/v1/logout', api.logout);
   app.get('/v1/test', api.test);
   app.get('/', api.index);
-
-  var callback  = require('../controllers/callbackController');
   app.get('/callback', callback.auth);
 };
 

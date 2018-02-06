@@ -1,7 +1,11 @@
-const sc2Api = require('../../sc2');
-const steemitHelpers = require('../vendor/steemitHelpers');
+'use strict';
 
-exports.comment = function(accessToken, parentAuthor, parentPermlink, author, content, callback) {
+import sc2Api from '../../sc2';
+import config from 'config';
+import sc2 from '../../sc2new';
+import steemitHelpers from '../vendor/steemitHelpers';
+
+exports.comment = function(accessToken, parentAuthor, parentPermlink, author, content, permlink) {
     const operations = [];
     const metaData = {
         community: 'steemitgame',
@@ -14,21 +18,19 @@ exports.comment = function(accessToken, parentAuthor, parentPermlink, author, co
             parent_author: parentAuthor,
             parent_permlink: parentPermlink,
             author: author,
-            permlink: steemitHelpers.createCommentPermlink(parentAuthor, parentPermlink),
+            permlink: permlink,
             title: "",
             body: content,
             json_metadata: JSON.stringify(metaData)
         },
     ];
     operations.push(commentOp);
-    sc2Api.broadcast(accessToken, operations, function(err, result){
-        console.log(err)
-        callback(err, result);
-    });
+    let result = sc2.instance.broadcast(accessToken, operations);
+    return result;
 }
 
-exports.post = function(accessToken, author, title, content, reward, tags, callback){
-    const extensions = [[0, {
+exports.post = function(accessToken, author, title, content, reward, tags, permlink){
+    let extensions = [[0, {
         beneficiaries: [
             {
                 account: 'steemitgame.dev',
@@ -37,84 +39,75 @@ exports.post = function(accessToken, author, title, content, reward, tags, callb
         ]
     }]];
 
-    const operations = [];
+    let operations = [];
 
-    const metaData = {
+    let metaData = {
         community: 'steemitgame',
         tags: tags,
         app: `steemitgame.app/test`
     };
 
-    const getPermLink = steemitHelpers.createPermlink(title, author, '', '');
-    getPermLink.then(permlink => {
-        const commentOp = [
-            'comment',
-            {
-                parent_author: "",
-                parent_permlink: "steemitgame",
-                author: author,
-                permlink,
-                title: title,
-                body: content,
-                json_metadata: JSON.stringify(metaData)
-            },
-        ];
-        operations.push(commentOp);
-
-        const commentOptionsConfig = {
+    let commentOp = [
+        'comment',
+        {
+            parent_author: "",
+            parent_permlink: "steemitgame",
             author: author,
             permlink,
-            allow_votes: true,
-            allow_curation_rewards: true,
-            extensions,
-        };
+            title: title,
+            body: content,
+            json_metadata: JSON.stringify(metaData)
+        },
+    ];
+    operations.push(commentOp);
 
-        if (extensions) {
-            commentOptionsConfig.extensions = extensions;
+    let commentOptionsConfig = {
+        author: author,
+        permlink,
+        allow_votes: true,
+        allow_curation_rewards: true,
+        extensions,
+    };
 
-            if (reward === '100') {
-                commentOptionsConfig.percent_steem_dollars = 0;
-            } else {
-                commentOptionsConfig.percent_steem_dollars = 10000;
-            }
+    if (extensions) {
+        commentOptionsConfig.extensions = extensions;
 
-            commentOptionsConfig.max_accepted_payout = '1000000.000 SBD';
-
-            operations.push(['comment_options', commentOptionsConfig]);
+        if (reward === '100') {
+            commentOptionsConfig.percent_steem_dollars = 0;
+        } else {
+            commentOptionsConfig.percent_steem_dollars = 10000;
         }
 
-        sc2Api.broadcast(accessToken, operations, function(err, result){
-            callback(err, result, permlink);
-        });
-    });
+        commentOptionsConfig.max_accepted_payout = '1000000.000 SBD';
+
+        operations.push(['comment_options', commentOptionsConfig]);
+    }
+
+    let result = sc2.instance.broadcast(accessToken, operations);
+    return result;
 }
 
-exports.me = function(accessToken, callback) {
-    sc2Api.me(accessToken, function (err, result) {
-        callback(err, result);
-    });
+exports.me = async function(accessToken) {
+    let user = await sc2.instance.me(accessToken);
+    return user;
 }
 
-exports.getLoginUrl = function(callback) {
-    sc2Api.getLoginUrl(function (url) {
-        callback(url);
-    });
+exports.getLoginUrl = async function() {
+    let url = await sc2.instance.getLoginURL();
+    return url;
 }
 
-exports.revokeToken = function(callback) {
-    sc2Api.revokeToken(function (err, result) {
-        callback(err, result);
-    });
+exports.revokeToken = async function(accessToken) {
+    let result = await sc2.instance.revokeToken(accessToken);
+    return result;
 }
 
-exports.reflashToken = function(accessToken, callback) {
-    sc2Api.reflashToken(accessToken, function (err, result) {
-        callback(err, result);
-    });
+exports.reflashToken = async function(accessToken) {
+    let result = await sc2.instance.reflashToken(accessToken);
+    return result;
 }
 
-exports.vote = function(accessToken, voter, author, permlink, weight, callback) {
-    sc2Api.vote(accessToken, voter, author, permlink, weight, function (err, result) {
-        callback(err, result);
-    });
+exports.vote = async function(accessToken, voter, author, permlink, weight) {
+    let result = await sc2.instance.vote(accessToken, voter, author, permlink, weight);
+    return result;
 }

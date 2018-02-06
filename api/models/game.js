@@ -1,4 +1,4 @@
-const db = require('../../db')
+import db from '../../db'
 
 exports.addGame = async function(game) {
     let rows = await db.execute(db.WRITE, 'INSERT INTO games SET ?', game);

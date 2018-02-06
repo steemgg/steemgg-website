@@ -1,3 +1,5 @@
+'use strict';
+
 const CODE = {
     SUCCESS: {RESCODE:0,DESC:'success'},
     ERROR: {RESCODE:500,DESC:'error'},
