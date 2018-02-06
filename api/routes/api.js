@@ -1,5 +1,4 @@
 'use strict';
-
 import fs from 'fs';
 import config from 'config';
 import CODE from '../lib/code';
@@ -7,7 +6,6 @@ import user from '../models/user';
 import redis from 'redis';
 import api from '../controllers/apiController';
 import callback from '../controllers/callbackController';
-
 
 const client = redis.createClient({host: config.get('steemit.redis.host'), port:config.get('steemit.redis.port')});
 
