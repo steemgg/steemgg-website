@@ -396,58 +396,6 @@ exports.voteGame = async function(req, res, next) {
     });
 }
 
-exports.auditGame = async function(req, res, next) {
-    let data = req.body;
-    if (req.session.user.role === 0){
-        return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
-    }
-    try {
-        let dbRes = await game.getRecentlyActivity(req.params.id);
-        if(typeof dbRes[0] === 'undefined') {
-            return res.status(404).json({ resultCode: CODE.NOFOUND_ACTIVITY_ERROR.RESCODE, err: CODE.NOFOUND_ACTIVITY_ERROR.DESC });
-        }
-        let author = req.session.user.account;
-        steem.comment(req.session.accessToken, dbRes[0].account,dbRes[0].permlink, author, data.comment, async function(err, result){
-            if(err) {
-                return res.status(500).json({ resultCode: CODE.COMMENT_ERROR.RESCODE, err: err.error_description });
-            }
-            let dbRes = await game.auditGame([data.status,req.params.id]);
-            if (dbRes.changedRows == 1){
-                return res.status(200).json({comment:post.comment});
-            } else {
-                return res.status(500).json({ resultCode: CODE.UPDATE_GAME_ERROR.RESCODE, err: CODE.UPDATE_GAME_ERROR.DESC });
-            }
-        });
-    } catch(err){
-        console.log(err);
-        return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
-    }
-}
-
-exports.reportGame = async function(req, res, next) {
-    let data = req.body;
-    try {
-        let dbRes = await game.getRecentlyActivity(req.params.id);
-        if(typeof dbRes[0] === 'undefined') {
-            return res.status(404).json({ resultCode: CODE.NOFOUND_ACTIVITY_ERROR.RESCODE, err: CODE.NOFOUND_ACTIVITY_ERROR.DESC });
-        }
-        let author = req.session.user.account;
-        steem.comment(req.session.accessToken, dbRes[0].account,dbRes[0].permlink, author, data.comment, async function(err, result){
-            if(err) {
-                return res.status(500).json({ resultCode: CODE.COMMENT_ERROR.RESCODE, err: err.error_description });
-            }
-            let dbRes = await game.reportGame([data.report,req.params.id]);
-            if (dbRes.changedRows == 1){
-                return res.status(200).json({comment:data.comment});
-            } else {
-                return res.status(500).json({ resultCode: CODE.UPDATE_GAME_ERROR.RESCODE, err: CODE.UPDATE_GAME_ERROR.DESC });
-            }
-        });
-    } catch(err){
-        return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.code+' '+err.errno+' '+err.sqlMessage });
-    }
-}
-
 exports.test = async function(req, res, next) {
     client.get("token:userid:477514", async function (err, reply) {
         try{
