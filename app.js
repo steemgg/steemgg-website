@@ -7,8 +7,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var config = require('config');
-var db = require('./db');
-var sc2NewApi = require('./sc2new');
+var db = require('./api/lib/db');
+var sc2NewApi = require('./api/lib/sc2');
 
 var app = express();
 

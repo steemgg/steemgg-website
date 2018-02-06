@@ -1,8 +1,7 @@
 'use strict';
 
-import sc2Api from '../../sc2';
 import config from 'config';
-import sc2 from '../../sc2new';
+import sc2 from '../lib/sc2';
 import steemitHelpers from '../vendor/steemitHelpers';
 
 exports.comment = function(accessToken, parentAuthor, parentPermlink, author, content, permlink) {

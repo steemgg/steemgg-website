@@ -1,7 +1,7 @@
 'use strict';
 
 import config from 'config';
-import db from '../../db';
+import db from '../lib/db';
 
 exports.getUserByAccount = async function(account) {
     let rows = await db.execute(db.READ, 'select * from user where account = ?', account);

@@ -1,4 +1,4 @@
-import db from '../../db'
+import db from '../lib/db'
 
 exports.addGame = async function(game) {
     let rows = await db.execute(db.WRITE, 'INSERT INTO games SET ?', game);
