@@ -6,7 +6,30 @@
         <site-navigation></site-navigation>
       </el-aside>
       <el-main>
-        <game-list></game-list>
+        <div>
+          <span class="filter">
+            <el-select v-model="queryParameter.category" placeholder="Please select a category" @change="updateQueryParameter">
+              <el-option
+                v-for="item in categories"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </span>
+          <!--<span class="filter">-->
+            <!--<el-select v-model="queryParameter.sortBy" placeholder="Sort by" @change="updateQueryParameter">-->
+              <!--<el-option-->
+                <!--v-for="item in sortBy"-->
+                <!--:key="item.value"-->
+                <!--:label="item.label"-->
+                <!--:value="item.value">-->
+              <!--</el-option>-->
+            <!--</el-select>-->
+          <!--</span>-->
+        </div>
+        <hr/>
+        <game-list :queryParameter="queryParameter"></game-list>
       </el-main>
     </el-container>
     <el-footer> <common-footer></common-footer></el-footer>
@@ -23,9 +46,13 @@
   import CommonHeader from '../common/CommonHeader'
   import GameList from '../shared/GameList'
   import SiteNavigation from '../common/SideNavigation'
+  import ElOption from '../../../node_modules/element-ui/packages/select/src/option'
 
+  import { Select } from 'element-ui'
   export default {
     components: {
+      ElOption,
+      Select,
       GameList,
       GameSlider,
       ElContainer,
@@ -36,12 +63,39 @@
       CommonHeader,
       SiteNavigation
     },
-    name: 'GameEditForm',
+    name: 'GameBrowser',
+    props: ['query'],
     data () {
       return {
-        title: '',
-        description: ''
-
+        categories: [{
+          value: 'Pixel Art',
+          label: 'Pixel Art'
+        }, {
+          value: 'Action',
+          label: 'Action'
+        }, {
+          value: 'Music',
+          label: 'Music'
+        }, {
+          value: 'Shooting',
+          label: 'Shooting'
+        }],
+        sortBy: [{
+          value: 'rating',
+          label: 'Rating'
+        }, {
+          value: 'lastModified',
+          label: 'Last Modified'
+        }],
+        queryParameter: {
+          category: null,
+          sortBy: null
+        }
+      }
+    },
+    methods: {
+      updateQueryParameter () {
+        this.queryParameter = this.queryParameter.clone
       }
     }
   }

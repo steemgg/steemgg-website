@@ -13,21 +13,40 @@
     components: {
       appGameGrid: GameGrid
     },
-    props: [],
+    props: ['queryParameter', 'items'],
     name: 'GameList',
     data () {
       return {
-        items: null
       }
     },
     computed: {
     },
+    methods: {
+      updateList () {
+        if (this.queryParameter != null && (this.queryParameter.category || this.queryParameter.sortBy)) {
+          gameService.query(this.queryParameter).then(result => {
+            console.log(result)
+            this.items = result.items
+            console.log('get the game item query result with', this.items, this.queryParameter)
+          })
+        } else {
+          gameService.list().then(result => {
+            console.log(result)
+            this.items = result.items
+            console.log('get the game item list', this.items)
+          })
+        }
+      }
+    },
+    watch: {
+      'queryParameter': function (val, oldVal) {
+        this.updateList()
+      }
+    },
     mounted () {
-      gameService.list().then(result => {
-        console.log(result)
-        this.items = result.items
-        console.log('get the game item list', this.items)
-      })
+      if (this.items == null) {
+        this.updateList()
+      }
     }
   }
 </script>
