@@ -8,13 +8,13 @@
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
-            <a class="nav-link" href="#/">Home <span class="sr-only">(current)</span></a>
+            <router-link class="nav-link" :to="{name: 'home'}" tag="a">Home </router-link>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#/game/new">Upload Game</a>
+            <router-link class="nav-link" :to="{name: 'newGame'}" tag="a">Upload Game</router-link>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#/game/audit">Audit Games</a>
+            <router-link class="nav-link" :to="{name: 'auditGame'}" tag="a">Audit Games</router-link>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="https://v2.steemconnect.com/oauth2/authorize?client_id=steemitgame.app&redirect_uri=http%3A%2F%2Fdev.steemitgame.com%2Fcallback&scope=login,offline,vote,comment,comment_delete,comment_options,custom_json,claim_reward_balance">Log In</a>

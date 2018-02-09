@@ -1,94 +1,157 @@
 export default {
   'offset': 0,
-  'limit': 5,
-  'next': 'games?offset=2&limit=2&type=index',
-  'href': 'games?offset=0&limit=2&type=index',
+  'limit': 20,
+  'next': '',
+  'href': 'games?offset=0&limit=20&type=index',
   'items': [
     {
-      'id': 1,
-      'account': 'apple',
-      'userid': 88,
-      'title': 'steemitgame 1',
-      'coverImg': 'https://1.bp.blogspot.com/-5CEA0E0pdxk/Vv2SSf837QI/AAAAAAAAHKk/OEC9lFH-Ag0MNzhNvqCQON1eOqu0vpuwA/s1600/2d-game-sample.JPG',
-      'desc': 'this is a really looooooooooooooooooooooooong desc',
+      'id': 9,
+      'account': 'steemitgame.test',
+      'userid': 477514,
+      'title': 'erik game 3',
+      'coverImage': 'xxx',
+      'description': 'steemit desc',
       'category': 'cate1',
-      'activity': 'sdfsd',
-      'comment': 'xxxx',
-      'gameIndex': 'xxxx',
+      'version': '1.0.0',
+      'gameUrl': 'xxxx',
       'vote': 0,
       'payout': 0,
-      'createtime': 1513151706,
-      'updatetime': 1513151706,
+      'created': 1516944633,
+      'lastModified': 1516944633,
       'status': 0
     },
     {
-      'id': 2,
-      'account': 'apple',
-      'userid': 88,
-      'title': 'this is a really looooooooooooooooooooooooong name',
-      'coverImg': 'https://cdn.pastemagazine.com/www/articles/best%20nes%20games%20square.jpg',
-      'desc': 'steemit desc',
+      'id': 8,
+      'account': 'steemitgame.test',
+      'userid': 477514,
+      'title': 'erik game 2',
+      'coverImage': 'xxx',
+      'description': 'steemit desc',
       'category': 'cate1',
-      'activity': 'sdfsd',
-      'comment': 'xxxx',
-      'gameIndex': 'xxxx',
+      'version': '1.0.0',
+      'gameUrl': 'xxxx',
       'vote': 0,
       'payout': 0,
-      'createtime': 1513147809,
-      'updatetime': 1513147809,
+      'created': 1516944626,
+      'lastModified': 1516944626,
       'status': 0
     },
     {
-      'id': 3,
-      'account': 'apple',
-      'userid': 88,
-      'title': 'steemitgame 3',
-      'coverImg': 'https://www.hdwallpapers.in/walls/angry_birds_space_game-HD.jpg',
-      'desc': 'steemit desc',
+      'id': 7,
+      'account': 'steemitgame.test',
+      'userid': 477514,
+      'title': 'erik game 1',
+      'coverImage': 'xxx',
+      'description': 'steemit desc',
       'category': 'cate1',
-      'activity': 'sdfsd',
-      'comment': 'xxxx',
-      'gameIndex': 'xxxx',
+      'version': '1.0.0',
+      'gameUrl': 'xxxx',
       'vote': 0,
       'payout': 0,
-      'createtime': 1513147809,
-      'updatetime': 1513147809,
+      'created': 1516944617,
+      'lastModified': 1516944617,
       'status': 0
     },
     {
-      'id': 4,
-      'account': 'apple',
-      'userid': 88,
-      'title': 'steemitgame 4',
-      'coverImg': 'https://c.s-microsoft.com/en-in/CMSImages/Windows-10-Games-E3_Content-Placement-1083_Acorn_485x273.jpg?version=364abed8-d81d-c126-1c2a-b4442b8eef36',
-      'desc': 'steemit desc',
+      'id': 6,
+      'account': 'steemitgame.test',
+      'userid': 477514,
+      'title': 'steemitgame',
+      'coverImage': 'xxx',
+      'description': 'steemit desc',
       'category': 'cate1',
-      'activity': 'sdfsd',
-      'comment': 'xxxx',
-      'gameIndex': 'xxxx',
+      'version': '1.0.0',
+      'gameUrl': 'xxxx',
       'vote': 0,
       'payout': 0,
-      'createtime': 1513147809,
-      'updatetime': 1513147809,
+      'created': 1516944591,
+      'lastModified': 1516944591,
       'status': 0
     },
     {
       'id': 5,
       'account': 'apple',
       'userid': 88,
-      'title': 'Driver Game',
-      'coverImg': 'http://www.addictinggames.com/content-items/stuntdriver2hero.png',
-      'desc': 'steemit desc',
+      'title': 'steemitgame',
+      'coverImage': 'xxx',
+      'description': 'steemit desc',
       'category': 'cate1',
-      'activity': 'sdfsd',
-      'comment': 'xxxx',
-      'gameIndex': 'xxxx',
+      'version': '1.0.0',
+      'gameUrl': 'xxxx',
       'vote': 0,
       'payout': 0,
-      'createtime': 1513147809,
-      'updatetime': 1513147809,
+      'created': 1516601112,
+      'lastModified': 1516601112,
+      'status': 0
+    },
+    {
+      'id': 4,
+      'account': 'apple',
+      'userid': 88,
+      'title': 'steemitgame',
+      'coverImage': 'xxx',
+      'description': 'steemit desc',
+      'category': 'cate1',
+      'version': '1.0.0',
+      'gameUrl': 'xxxx',
+      'vote': 0,
+      'payout': 0,
+      'created': 1516588975,
+      'lastModified': 1516588975,
       'status': 0
     }
   ],
-  'totalCount': 12
+  'totalCount': 6
 }
+/*
+ {
+ 'userid': 477514,
+ 'account': 'steemitgame.test',
+ 'status': 0,
+ 'gameid': '6',
+ 'lastModified': 1516944820,
+ 'vote': 0,
+ 'payout': 0,
+ 'permlink': 'jdwc4-steemitgame'
+ }
+
+ {
+ 'id': 6,
+ 'account': 'steemitgame.test',
+ 'userid': 477514,
+ 'title': 'steemitgame',
+ 'coverImage': 'xxx',
+ 'description': 'steemit desc',
+ 'category': 'cate1',
+ 'version': '1.0.0',
+ 'gameUrl': 'xxxx',
+ 'vote': 0,
+ 'payout': 0,
+ 'created': 1516944591,
+ 'lastModified': 1516944591,
+ 'status': 0
+ }
+active_votes:
+ [{voter: "good-karma", weight: 39234, rshares: "90951153550", percent: 50,…},…]
+ 0
+ :
+ {voter: "good-karma", weight: 39234, rshares: "90951153550", percent: 50,…}
+ percent
+ :
+ 50
+ reputation
+ :
+ "323368090522759"
+ rshares
+ :
+ "90951153550"
+ time
+ :
+ "2018-01-28T14:14:39"
+ voter
+ :
+ "good-karma"
+ weight
+ :
+ 39234
+ */

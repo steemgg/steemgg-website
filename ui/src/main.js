@@ -14,10 +14,15 @@ import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
-import {FormItem, Checkbox,
+import {
+  FormItem,
+  Checkbox,
   CheckboxGroup,
   Form,
+  Row,
   Col,
+  Collapse,
+  CollapseItem,
   Switch,
   Button,
   Radio,
@@ -37,11 +42,19 @@ import {FormItem, Checkbox,
   Menu,
   MenuItem,
   MenuItemGroup,
-  Submenu
+  Submenu,
+  Slider,
+  Icon,
+  Loading,
+  Notification,
+  Message,
+  MessageBox
 } from 'element-ui'
 
-// import { Button, Select, Input, Upload, Alert } from 'element-ui'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
+import mavonEditor from 'mavon-editor'
+import 'mavon-editor/dist/css/index.css'
+import 'element-ui/lib/theme-chalk/display.css'
 
 Vue.use(FormItem)
 Vue.use(Form)
@@ -58,6 +71,9 @@ Vue.use(CheckboxGroup)
 Vue.use(Select)
 Vue.use(Option)
 Vue.use(Col)
+Vue.use(Collapse)
+Vue.use(CollapseItem)
+Vue.use(Row)
 Vue.use(Switch)
 Vue.use(Input)
 Vue.use(Upload)
@@ -68,10 +84,24 @@ Vue.use(Menu)
 Vue.use(MenuItem)
 Vue.use(MenuItemGroup)
 Vue.use(Submenu)
+Vue.use(Slider)
+Vue.use(Loading)
+Vue.use(Icon)
+// Vue.use(Notification)
+// Vue.use(Message)
+// Vue.use(MessageBox)
 Vue.use(VueAwesomeSwiper)
-
+Vue.use(mavonEditor)
 Vue.use(BootstrapVue)
 
+const MsgBox = MessageBox
+Vue.prototype.$msgbox = MsgBox
+Vue.prototype.$alert = MsgBox.alert
+Vue.prototype.$confirm = MsgBox.confirm
+Vue.prototype.$prompt = MsgBox.prompt
+
+Vue.prototype.$notify = Notification
+Vue.prototype.$message = Message
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
