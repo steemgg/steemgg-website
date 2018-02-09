@@ -75,6 +75,7 @@ export default class GameService {
   }
 
   getComments (category, author, permlink) {
+    console.log('GameService: get comments', category, author, permlink)
     return steemApi.getStateAsync(`/${category}/@${author}/${permlink}`).then(apiRes => {
       return this.handleComments(apiRes)
     })

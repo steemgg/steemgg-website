@@ -244,7 +244,7 @@
                 // pop up success message
                 this.game.id = game.id
                 this.gameActionInProgress = false
-                  this.$alert('Congratulations! Your game has been created', 'Game Created', {
+                this.$alert('Congratulations! Your game has been created', 'Game Created', {
                   confirmButtonText: '确定',
                   callback: action => {
                     // go to my game list view
@@ -391,7 +391,7 @@
             this.$refs.coverImageDropzone.dropzone.emit('addedfile', this.game.coverImage)
             this.$refs.coverImageDropzone.dropzone.options.thumbnail.call(this.$refs.coverImageDropzone, this.game.coverImage, 'http://gateway.ipfs.io/ipfs/' + game.coverImage.hash)
             this.$refs.coverImageDropzone.dropzone.emit('complete', this.game.coverImage)
-            this.$refs.coverImageDropzone.dropzone.files.push( this.game.coverImage )
+            this.$refs.coverImageDropzone.dropzone.files.push(this.game.coverImage)
             this.fileList = [this.game.gameUrl]
           }).catch(error => {
             console.log(error)

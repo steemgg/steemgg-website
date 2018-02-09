@@ -49,7 +49,7 @@
                       <el-button round>Comment</el-button>
                     </div>
                   </div>
-                  <div v-for="comment in metadata.comments">
+                  <div v-for="comment in this.comments">
                     <comment :comment="comment"></comment>
                   </div>
                 </div>
@@ -161,7 +161,7 @@
       refreshSteemitMetaData () {
         if (this.game) {
           this.latestPost = null
-          if (this.game & this.game.activities && this.game.activities.length > 0) {
+          if (this.game && this.game.activities && this.game.activities.length > 0) {
             this.latestPost = this.game.activities[this.game.activities.length - 1]
           }
           gameService.fetchSteemitMetadata(this.game).then(response => {
@@ -171,9 +171,9 @@
         }
       },
       refreshSteemitComments () {
-        if (this.game & this.game.activities && this.game.activities.length > 0) {
+        if (this.game && this.game.activities && this.game.activities.length > 0) {
           let activity = this.game.activities[this.game.activities.length - 1]
-          gameService.getComments('', activity.author, activity.permlink).then(response => {
+          gameService.getComments('', activity.account, activity.permlink).then(response => {
             this.comments = response
           })
         }

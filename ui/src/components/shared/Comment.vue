@@ -53,7 +53,7 @@
     components: {
       Avatar
     },
-    props: ['comment', 'author'],
+    props: ['comment'],
     name: 'Comment',
     data () {
       return {
@@ -66,10 +66,13 @@
     methods: {
       voteUp () {
         if (this.canVote()) {
-//          gameService.vote(this.author, this.comment.permlink)/**/
-          // assume it vote successfully
-          this.votesCount++
-          this.$message('vote!')
+          gameService.vote(this.comment.author, this.comment.permlink, 5000).then(response => {
+            this.votesCount++
+            this.$message.success('Vote Successfully.')
+          }).catch(error => {
+            this.$message.error('Vote Failed.')
+            console.log('Vote comment failed', error)
+          })
         }
       },
 
