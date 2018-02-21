@@ -11,14 +11,12 @@ import formidable from 'formidable';
 import user from '../models/user';
 import steem from '../models/steem';
 import game from '../models/game';
-import redis from 'redis';
 import querystring from 'querystring';
 import {createPermlink} from '../vendor/steemitHelpers';
 import {createCommentPermlink} from '../vendor/steemitHelpers';
 import {SDKError} from '../errors/SDKError';
 import {DBError} from '../errors/DBError';
 
-const client = redis.createClient({host: config.get('steemit.redis.host'), port:config.get('steemit.redis.port')});
 
 exports.upload = function(req, res) {
     var userid = req.session.user.userid;
@@ -64,13 +62,16 @@ exports.me = async function(req, res) {
     try {
         let result = await steem.me(req.session.accessToken);
         let dbRes = await user.getUserByAccount(result.user);
+        let unix = Math.round(+new Date()/1000);
         let userInfo = dbRes[0];
         if(typeof userInfo === 'undefined') {
-            userInfo = {'account':result.user, 'userid':result.account.id, 'role':0, 'status':1, 'createtime':Math.round(+new Date()/1000)};
+            userInfo = {'account':result.user, 'userid':result.account.id, 'role':0, 'status':1, 'created':unix};
             await user.addUser(userInfo);
         }
+        let iso = new Date(unix*1000).toISOString();
+        userInfo.created = iso;
         req.session.user = userInfo;
-        client.set("token:userid:"+userInfo.userid, req.session.accessToken);
+        await user.setUserToken("token:userid:"+userInfo.userid, req.session.accessToken);
         return res.status(200).json(userInfo);
     } catch(err) {
         if (err instanceof DBError) {
@@ -84,9 +85,9 @@ exports.me = async function(req, res) {
 };
 
 exports.postGame = async function(req, res, next) {
-    let data = req.body;
-    let userInfo = req.session.user;
     try{
+        let data = req.body;
+        let userInfo = req.session.user;
         let dbRes = await game.getGameById(data.gameid);
         if(typeof dbRes[0] === 'undefined') {
             return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
@@ -94,15 +95,20 @@ exports.postGame = async function(req, res, next) {
         if(userInfo.account != dbRes[0]['account'] || data.gameid != dbRes[0]['id']) {
             return res.status(500).json({ resultCode: CODE.PARAMS_INCONSISTENT_ERROR.RESCODE, err: CODE.PARAMS_INCONSISTENT_ERROR.DESC });
         }
+        if(await user.getInterval('post:interval:'+userInfo.userid)){
+            return res.status(500).json({ resultCode: CODE.POST_INTERVAL_ERROR.RESCODE, err: CODE.POST_INTERVAL_ERROR.DESC });
+        }
         let author = req.session.user.account;
         let permLink = await createPermlink(data.activityTitle, author, '', '');
         let result = await steem.post(req.session.accessToken, author, data.activityTitle, data.activityDescription, data.reward, data.tags,permLink);
         let unix = Math.round(+new Date()/1000);
         let activity = {userid:req.session.user.userid, account:req.session.user.account,gameid: data.gameid,lastModified: unix, permlink:permLink };
         await game.addActivity(activity);
+        let iso = new Date(unix*1000).toISOString();
+        await user.setInterval('post:interval:'+userInfo.userid, 300);
+        activity.lastModified = iso;
         return res.status(200).json(activity);
     } catch(err) {
-        console.log(err);
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else if (err instanceof SDKError) {
@@ -114,14 +120,16 @@ exports.postGame = async function(req, res, next) {
 }
 
 exports.addGame = async function(req, res, next) {
-    let userInfo = req.session.user;
-    let data = req.body;
-    let unix = Math.round(+new Date()/1000);
-    let gameInfo = {userid:userInfo.userid,account:userInfo.account,created:unix,lastModified:unix,gameUrl:data.gameUrl,coverImage:data.coverImage,version:data.version,title:data.title,category:data.category,description:data.description};
-
     try{
+        let userInfo = req.session.user;
+        let data = req.body;
+        let unix = Math.round(+new Date()/1000);
+        let gameInfo = {userid:userInfo.userid,account:userInfo.account,created:unix,lastModified:unix,gameUrl:data.gameUrl,coverImage:data.coverImage,version:data.version,title:data.title,category:data.category,description:data.description};
         let dbRes = await game.addGame(gameInfo);
+        let iso = new Date(unix*1000).toISOString();
         gameInfo.id = dbRes.insertId;
+        gameInfo.lastModified = iso;
+        gameInfo.created = iso;
         return res.status(200).json(gameInfo);
     } catch(err) {
         if (err instanceof DBError) {
@@ -133,12 +141,16 @@ exports.addGame = async function(req, res, next) {
 };
 
 exports.commentGame = async function(req, res, next) {
-    let userInfo = req.session.user;
-    let post = req.body;
-    let author = req.session.user.account;
-    let permlink = createCommentPermlink(req.params.author,req.params.permlink);
     try{
+        let userInfo = req.session.user;
+        if(await user.getInterval('comment:interval:'+userInfo.account)){
+            return res.status(500).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
+        }
+        let post = req.body;
+        let author = req.session.user.account;
+        let permlink = createCommentPermlink(req.params.author,req.params.permlink);
         await steem.comment(req.session.accessToken, req.params.author,req.params.permlink, author, post.content, permlink);
+        await user.setInterval('comment:interval:'+userInfo.account, 10);
         return res.status(200).json({content:post.content, author:req.params.author, permlink:req.params.permlink});
     } catch(err) {
         if (err instanceof SDKError) {
@@ -169,9 +181,9 @@ exports.getGameDetail = async function(req, res, next) {
     }
 };
 exports.updateGame = async function(req, res, next) {
-    let unix = Math.round(+new Date()/1000);
-    let data = req.body;
     try{
+        let unix = Math.round(+new Date()/1000);
+        let data = req.body;
         let dbRes = await game.updateGame([{ title:data.title,coverImage:data.coverImage,description:data.description,category:data.category,gameUrl:data.gameUrl,lastModified:unix }, req.params.id, req.session.user.userid]);
         if (dbRes.changedRows == 1){
             return res.status(200).send();
@@ -187,7 +199,6 @@ exports.updateGame = async function(req, res, next) {
     }
 };
 exports.deleteGame = async function(req, res, next) {
-
     try{
         let dbRes = await game.deleteGame([req.params.id, req.session.user.userid]);
         if (dbRes.changedRows == 1){
@@ -205,39 +216,42 @@ exports.deleteGame = async function(req, res, next) {
 };
 
 exports.listGame = async function(req, res, next) {
-    let data = req.body;
-    let offset = (typeof req.query.offset !== 'undefined') ?  parseInt(req.query.offset,10) : 0;
-    let pageSize = (typeof req.query.limit !== 'undefined') ? parseInt(req.query.limit, 10) : 20;
-    let category = (typeof req.query.category !== 'undefined') ? req.query.category : '';
-    let sort = (typeof req.query.sort !== 'undefined') ? req.query.sort : 'created_desc';
-    let sortArr = sort.split("_")
-    let type = (typeof req.query.type !== 'undefined') ? req.query.type : 'index';
-    let url = querystring.stringify({ offset: offset, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], type:type });
-    let nextUrl = querystring.stringify({ offset: offset+pageSize, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], type:type });
-    let gameQuery = 'status = 1';
-    if (type === 'me'){
-        if (typeof req.session.user === 'undefined') {
-            return res.status(401).json({resCode:CODE.NEED_LOGIN_ERROR.RESCODE, err:CODE.NEED_LOGIN_ERROR.DESC});
-        }
-        let userid = req.session.user.userid;
-        gameQuery = 'status != 3 and userid='+ userid;
-    } else if(type ==='audit') {
-        if (typeof req.session.user === 'undefined') {
-            return res.status(401).json({resCode:CODE.NEED_LOGIN_ERROR.RESCODE, err:CODE.NEED_LOGIN_ERROR.DESC});
-        }
-        if (req.session.user.role === 0){
-            return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
-        }
-        gameQuery = 'status = 0';
-    }
-    if (category !='') {
-        gameQuery = 'and category='+category;
-    }
-    let countSql = 'select count(1) as nums from games where ' + gameQuery;
-    let querySql = 'select * from games where ' + gameQuery + ' order by ? ? limit ?,?';
-    let queryParams = [sortArr[0], sortArr[1], offset, pageSize];
-    let href = 'game?' + url;
     try {
+        let data = req.body;
+        let offset = (typeof req.query.offset !== 'undefined') ?  parseInt(req.query.offset,10) : 0;
+        let pageSize = (typeof req.query.limit !== 'undefined') ? parseInt(req.query.limit, 10) : 20;
+        let category = (typeof req.query.category !== 'undefined') ? req.query.category : '';
+        let sort = (typeof req.query.sort !== 'undefined') ? req.query.sort : 'created_desc';
+        let sortArr = sort.split("_")
+        let type = (typeof req.query.type !== 'undefined') ? req.query.type : 'index';
+        let url = querystring.stringify({ offset: offset, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], type:type });
+        let nextUrl = querystring.stringify({ offset: offset+pageSize, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], type:type });
+        let gameQuery = 'status = 1';
+        if (type === 'me'){
+            if (typeof req.session.user === 'undefined') {
+                return res.status(401).json({resCode:CODE.NEED_LOGIN_ERROR.RESCODE, err:CODE.NEED_LOGIN_ERROR.DESC});
+            }
+            let userid = req.session.user.userid;
+            gameQuery = 'status != 3 and userid='+ userid;
+        } else if(type ==='audit') {
+            if (typeof req.session.user === 'undefined') {
+                return res.status(401).json({resCode:CODE.NEED_LOGIN_ERROR.RESCODE, err:CODE.NEED_LOGIN_ERROR.DESC});
+            }
+            if (req.session.user.role === 0){
+                return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
+            }
+            let report = (typeof req.query.report !== 'undefined') ?  parseInt(req.query.report,10) : 0;
+            let status = (typeof req.query.status !== 'undefined') ? parseInt(req.query.status, 10) : 0;
+            gameQuery = 'status = '+ status + ' and report = ' + report;
+        }
+        if (category !='') {
+            gameQuery = gameQuery + ' and category=\''+category+'\'';
+        }
+        let countSql = 'select count(1) as nums from games where ' + gameQuery;
+        let querySql = 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status from games where ' + gameQuery + ' order by ? ? limit ?,?';
+        console.log(querySql);
+        let queryParams = [sortArr[0], sortArr[1], offset, pageSize];
+        let href = 'game?' + url;
         let dbRes = await game.query(countSql, []);
         let count = dbRes[0]['nums'];
         if(count>0) {
@@ -260,16 +274,20 @@ exports.listGame = async function(req, res, next) {
 };
 
 exports.voteGame = async function(req, res, next) {
-    let data = req.body;
-    let voter = req.session.user.account;
-    let author = req.params.author;
-    let permlink = req.params.permlink;
-    if( typeof voter === 'undefined' || typeof author === 'undefined' || typeof author === 'undefined' || typeof data.weight ==='undefined' ){
-        return res.status(500).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
-    }
     try{
+        let data = req.body;
+        let voter = req.session.user.account;
+        if(await user.getInterval('vote:interval:'+voter)){
+            return res.status(500).json({ resultCode: CODE.VOTE_INTERVAL_ERROR.RESCODE, err: CODE.VOTE_INTERVAL_ERROR.DESC });
+        }
+        let author = req.params.author;
+        let permlink = req.params.permlink;
+        if( typeof voter === 'undefined' || typeof author === 'undefined' || typeof author === 'undefined' || typeof data.weight ==='undefined' ){
+            return res.status(500).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
+        }
         await steem.vote(req.session.accessToken, voter, author, permlink, parseInt(data.weight));
-        return res.status(200).json({author:authr,permlink:permlink,weight:parseInt(data.weight)});
+        await user.setInterval('vote:interval:'+voter, 10);
+        return res.status(200).json({author:author,permlink:permlink,weight:parseInt(data.weight)});
     } catch(err) {
         if (err instanceof SDKError) {
             return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
@@ -280,20 +298,24 @@ exports.voteGame = async function(req, res, next) {
 }
 
 exports.auditGame = async function(req, res, next) {
-    let data = req.body;
-    if (req.session.user.role === 0){
-        return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
-    }
     try {
+        let data = req.body;
+        if (req.session.user.role === 0){
+            return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
+        }
         let dbRes = await game.getRecentlyActivity(req.params.id);
         if(typeof dbRes[0] === 'undefined') {
             return res.status(404).json({ resultCode: CODE.NOFOUND_ACTIVITY_ERROR.RESCODE, err: CODE.NOFOUND_ACTIVITY_ERROR.DESC });
         }
         let author = req.session.user.account;
+        if(await user.getInterval('comment:interval:'+author)){
+            return res.status(500).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
+        }
         let permlink = createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
         let parentAuthor = dbRes[0].account;
         let parentPermlink = dbRes[0].permlink;
         await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, data.comment, permlink);
+        await user.setInterval('comment:interval:'+author, 10);
         dbRes = await game.auditGame([data.status,req.params.id]);
         if (dbRes.changedRows == 1){
             return res.status(200).json({comment:data.comment, parentAuthor:parentAuthor, parentPermlink:parentPermlink, author:author,permlink:permlink});
@@ -301,7 +323,6 @@ exports.auditGame = async function(req, res, next) {
             return res.status(500).json({ resultCode: CODE.UPDATE_GAME_ERROR.RESCODE, err: CODE.UPDATE_GAME_ERROR.DESC });
         }
     } catch(err){
-        console.log(err);
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else if (err instanceof SDKError) {
@@ -313,17 +334,21 @@ exports.auditGame = async function(req, res, next) {
 }
 
 exports.reportGame = async function(req, res, next) {
-    let data = req.body;
     try {
+        let data = req.body;
         let dbRes = await game.getRecentlyActivity(req.params.id);
         if(typeof dbRes[0] === 'undefined') {
             return res.status(404).json({ resultCode: CODE.NOFOUND_ACTIVITY_ERROR.RESCODE, err: CODE.NOFOUND_ACTIVITY_ERROR.DESC });
         }
         let author = req.session.user.account;
+        if(await user.getInterval('comment:interval:'+author)){
+            return res.status(500).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
+        }
         let permlink = createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
         let parentAuthor = dbRes[0].account;
         let parentPermlink = dbRes[0].permlink;
         await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, data.comment, permlink);
+        await user.setInterval('comment:interval:'+author, 10);
         dbRes = await game.reportGame([data.report,req.params.id]);
         if (dbRes.changedRows == 1){
             return res.status(200).json({comment:data.comment, parentAuthor:parentAuthor, parentPermlink:parentPermlink, author:author,permlink:permlink});
@@ -346,7 +371,6 @@ exports.index = async function(req, res, next) {
         let url = await steem.getLoginUrl();
         res.render('index', { title: '$$$ hello! Steem Game $$$', login: url });
     } catch(err){
-        console.log(err);
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else if (err instanceof SDKError) {
@@ -380,42 +404,15 @@ exports.logout = async function(req, res, next) {
     }
 };
 
-exports.voteGame = async function(req, res, next) {
-    let data = req.body;
-    let voter = req.session.user.account;
-    let author = req.params.author;
-    let permlink = req.params.permlink;
-    if (process.env.NODE_ENV === 'development' && voter ==='apple') {
-        voter = 'steemitgame.test';
-    }
-    //console.log(voter,author,permlink,data.weight);
-    if( typeof voter === 'undefined' || typeof author === 'undefined' || typeof author === 'undefined' || typeof data.weight ==='undefined' ){
-        return res.status(500).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
-    }
-    steem.vote(req.session.accessToken, voter, author, permlink, parseInt(data.weight), function (err, result) {
-        if(err) {
-            return res.status(500).json({ resultCode: CODE.VOTE_ERROR.RESCODE, err: err.error_description });
-        }
-        console.log(result);
-        return res.status(200).send();
-    });
-}
-
 exports.test = async function(req, res, next) {
-    client.get("token:userid:477514", async function (err, reply) {
-        try{
-            await steem.reflashToken(reply.toString());
-            res.status(200).send();
-        } catch(err){
-            if (err instanceof DBError) {
-                return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
-            } else if (err instanceof SDKError) {
-                return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
-            } else {
-                return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err });
-            }
-        }
-    });
+    try {
+        let dbRes = await user.getUserToken("token:userid:477514");
+        console.log(dbRes);
+        res.status(200).send();
+    } catch(err) {
+        console.log(err);
+        return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
+    }
 }
 
 function unzipFile(file, userid, cb) {

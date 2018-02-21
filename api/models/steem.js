@@ -1,17 +1,16 @@
 'use strict';
 
-import config from 'config';
 import sc2 from '../lib/sc2';
 import steemitHelpers from '../vendor/steemitHelpers';
 
 exports.comment = function(accessToken, parentAuthor, parentPermlink, author, content, permlink) {
-    const operations = [];
-    const metaData = {
+    let operations = [];
+    let metaData = {
         community: 'steemitgame',
         tags: ['steemitgame'],
         app: `steemitgame.app/test`
     };
-    const commentOp = [
+    let commentOp = [
         'comment',
         {
             parent_author: parentAuthor,

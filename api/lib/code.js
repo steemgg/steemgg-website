@@ -15,9 +15,9 @@ const CODE = {
     DB_ERROR: {RESCODE:300,DESC:'db error'},
 
     //post
-    POST_ERROR: {RESCODE:400,DESC:'post game failed'},
-    VOTE_ERROR: {RESCODE:401,DESC:'vote game failed'},
-    COMMENT_ERROR: {RESCODE:402,DESC:'comment game failed'},
+    POST_INTERVAL_ERROR: {RESCODE:400,DESC:'post interval close'},
+    COMMENT_INTERVAL_ERROR: {RESCODE:401,DESC:'comment interval close'},
+    VOTE_INTERVAL_ERROR: {RESCODE:402,DESC:'vote interval close'},
 
     //game
     UPDATE_GAME_ERROR: {RESCODE:500,DESC:'update game failed'},

@@ -8,6 +8,7 @@ var bodyParser = require('body-parser');
 var session = require('express-session');
 var config = require('config');
 var db = require('./api/lib/db');
+var redis = require('./api/lib/redis');
 var sc2NewApi = require('./api/lib/sc2');
 
 var app = express();
@@ -18,6 +19,12 @@ db.connect(function(err) {
     console.log('Unable to connect to MySQL.')
     process.exit(1)
   }
+});
+
+// init Redis
+redis.Initialize({
+    url: config.get('steemit.redis.host'),
+    port: config.get('steemit.redis.port')
 });
 // init sc2
 sc2NewApi.Initialize({

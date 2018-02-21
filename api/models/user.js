@@ -1,10 +1,10 @@
 'use strict';
 
-import config from 'config';
 import db from '../lib/db';
+import redis from '../lib/redis';
 
 exports.getUserByAccount = async function(account) {
-    let rows = await db.execute(db.READ, 'select * from user where account = ?', account);
+    let rows = await db.execute(db.READ, 'select id,account,userid,role,status,from_unixtime(createtime,\'%Y-%m%dT%TZ\') from user where account = ?', account);
     return rows;
 }
 
@@ -13,3 +13,23 @@ exports.addUser = async function(user) {
     return rows;
 }
 
+exports.getUserToken = async function(key) {
+    let result = await redis.instance.get(key);
+    return result;
+}
+
+exports.setUserToken = async function(key, value) {
+    let result = await redis.instance.set(key, value);
+    return result;
+}
+
+exports.setInterval = async function(key, seconds) {
+    await redis.instance.set(key, true);
+    return await redis.instance.expire(key, seconds);
+}
+
+exports.getInterval = async function(key) {
+    let result = await redis.instance.get(key);
+    console.log(key, result);
+    return result;
+}
