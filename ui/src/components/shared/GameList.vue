@@ -13,7 +13,7 @@
     components: {
       appGameGrid: GameGrid
     },
-    props: ['queryParameter', 'items'],
+    props: ['queryParameter', 'items', 'limit'],
     name: 'GameList',
     data () {
       return {
@@ -23,16 +23,16 @@
     },
     methods: {
       updateList () {
-        if (this.queryParameter != null && (this.queryParameter.category || this.queryParameter.sortBy)) {
+        if (this.queryParameter != null) {
           gameService.query(this.queryParameter).then(result => {
             console.log(result)
-            this.items = result.items
+            this.items = result.items.slice(this.limit)
             console.log('get the game item query result with', this.items, this.queryParameter)
           })
         } else {
           gameService.list().then(result => {
             console.log(result)
-            this.items = result.items
+            this.items = result.items.slice(this.limit)
             console.log('get the game item list', this.items)
           })
         }

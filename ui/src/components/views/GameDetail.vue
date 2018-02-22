@@ -80,10 +80,10 @@
   import GameList from '../shared/GameList'
   import Avatar from '../shared/Avatar'
   import Comment from '../shared/Comment'
-  import GameService from '../../service/game.service'
   import mockData from '../../mocks/gameListMock'
   import moment from 'moment'
   import marked from 'marked'
+  import GameService from '../../service/game.service'
   const gameService = new GameService()
 
   export default {
@@ -116,7 +116,7 @@
         }
       },
       postedTime () {
-        return moment(this.game.lastModified, 'x').fromNow()
+        return moment(this.game.lastModified).fromNow()
       },
       votes () {
         return this.metadata && this.metadata.activeVotes ? this.metadata.activeVotes.length : 0

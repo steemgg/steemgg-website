@@ -59,6 +59,36 @@ export default class GameService {
   query (params) {
     return axios.get('v1/game', {
       params: params
+    }).then(response => {
+      return this.handleResponse(response)
+    })
+  }
+
+  approve (gameId, comment) {
+    return axios.post(`v1/audit/${gameId}`, {
+      status: 1,
+      comment: comment
+    })
+  }
+
+  deny (gameId, comment) {
+    return axios.post(`v1/audit/${gameId}`, {
+      status: 0,
+      comment: comment
+    })
+  }
+
+  report (gameId, comment) {
+    return axios.post(`v1/audit/${gameId}`, {
+      report: 1,
+      comment: comment
+    })
+  }
+
+  undoReport (gameId, comment) {
+    return axios.post(`v1/audit/${gameId}`, {
+      report: 0,
+      comment: comment
     })
   }
 
@@ -82,11 +112,15 @@ export default class GameService {
   }
 
   vote (author, permlink, weight) {
-    return axios.post(`v1/vote/${author}/${permlink}`, {weight: weight})
+    return axios.post(`v1/vote/${author}/${permlink}`, {weight: weight}).then(response => {
+      return response.data
+    })
   }
 
   postComment (author, permlink, content) {
-    return axios.post(`v1/comment/${author}/${permlink}`, {content: content})
+    return axios.post(`v1/comment/${author}/${permlink}`, {content: content}).then(response => {
+      return response.data
+    })
   }
 
   /**

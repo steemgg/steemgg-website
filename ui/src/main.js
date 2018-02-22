@@ -22,6 +22,7 @@ import {
   Row,
   Col,
   Collapse,
+  Dialog,
   CollapseItem,
   Switch,
   Button,
@@ -87,6 +88,7 @@ Vue.use(Submenu)
 Vue.use(Slider)
 Vue.use(Loading)
 Vue.use(Icon)
+Vue.use(Dialog)
 // Vue.use(Notification)
 // Vue.use(Message)
 // Vue.use(MessageBox)
