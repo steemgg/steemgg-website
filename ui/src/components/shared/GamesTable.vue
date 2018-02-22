@@ -1,6 +1,8 @@
 <template>
   <div>
-    <el-table :data="items" style="width: 100%" max-height="550" :stripe=true>
+    <el-table :data="items" style="width: 100%" :stripe=true>
+      <el-table-column prop="id" label="ID" width="50">
+      </el-table-column>
       <el-table-column prop="title" label="Name" width="150">
       </el-table-column>
       <el-table-column prop="category" label="Category" width="120">
