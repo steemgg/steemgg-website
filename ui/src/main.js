@@ -45,6 +45,8 @@ import {
   MenuItemGroup,
   Submenu,
   Slider,
+  Tabs,
+  TabPane,
   Icon,
   Loading,
   Notification,
@@ -81,6 +83,8 @@ Vue.use(Upload)
 Vue.use(RadioGroup)
 Vue.use(Table)
 Vue.use(TableColumn)
+Vue.use(Tabs)
+Vue.use(TabPane)
 Vue.use(Menu)
 Vue.use(MenuItem)
 Vue.use(MenuItemGroup)
