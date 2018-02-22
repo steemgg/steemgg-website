@@ -38,7 +38,7 @@ export default new Router({
       component: GameBrowser
     },
     {
-      path: '/game/:id',
+      path: '/game/play/:id',
       name: 'viewGame',
       component: GameDetail,
       props: true
@@ -47,6 +47,11 @@ export default new Router({
       path: '/game/audit',
       name: 'auditGame',
       component: GameAudit
+    },
+    {
+      path: '/game/browse',
+      name: 'browseGame',
+      component: GameBrowser
     }
   ]
 })

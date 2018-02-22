@@ -29,7 +29,7 @@
     computed: {
     },
     mounted () {
-      gameService.list().then(result => {
+      gameService.query({type: 'audit', limit: 1000}).then(result => {
         console.log(result)
         this.items = result.items
         console.log('get the game item list', this.items)

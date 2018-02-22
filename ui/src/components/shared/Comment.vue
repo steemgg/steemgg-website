@@ -27,10 +27,10 @@
             </span>
           </div>
           <div class="replyArea" v-if="leaveReply">
-            <el-input placeholder="say something..." v-model="replyContent"></el-input>
+            <el-input ref="replyInput" autofocus placeholder="say something..." v-model="replyContent" :disabled="replying"></el-input>
             <div class="replyButtons">
-              <el-button round @click="leaveReply = false;">Cancel</el-button>
-              <el-button round @click="postReply">Reply</el-button>
+              <el-button round @click="leaveReply = false;" :disabled="replying">Cancel</el-button>
+              <el-button round @click="postReply" :disabled="replying">Reply</el-button>
             </div>
           </div>
           <div class="commentReplies">
@@ -60,7 +60,8 @@
         votesCount: 0,
         alreadyVotes: false,
         leaveReply: false,
-        replyContent: ''
+        replyContent: '',
+        replying: false
       }
     },
     methods: {
@@ -82,8 +83,25 @@
       postReply () {
         if (this.replyContent == null || this.replyContent.trim().length === 0) {
         } else {
-          alert(this.replyContent)
-          gameService.postComment(this.comment.author, this.comment.permlink, this.replyContent)
+          this.replying = true
+          gameService.postComment(this.comment.author, this.comment.permlink, this.replyContent).then(response => {
+              console.log('comment response', response)
+            this.comment.replies.push({
+              author: response.author,
+              total_payout_value: '0.000 SBD',
+              pending_payout_value: '0.000 SBD',
+              replies: [],
+              permlink: response.permlink,
+              body: this.replyContent
+            })
+            this.leaveReply = false
+            this.$message.success('Post reply successfully.')
+          }).catch(error => {
+            console.log('post comment error', error)
+            this.$message.error('Fail to post comment')
+          }).finally(() => {
+            this.replying = false
+          })
         }
       }
     },
@@ -111,6 +129,7 @@
       }
     },
     mounted () {
+      console.log('comment', this.comment)
       this.votesCount = this.comment.active_votes ? this.comment.active_votes.length : 0
     }
   }
