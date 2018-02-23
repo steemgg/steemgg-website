@@ -85,7 +85,7 @@
         } else {
           this.replying = true
           gameService.postComment(this.comment.author, this.comment.permlink, this.replyContent).then(response => {
-              console.log('comment response', response)
+            console.log('comment response', response)
             this.comment.replies.push({
               author: response.author,
               total_payout_value: '0.000 SBD',
