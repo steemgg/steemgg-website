@@ -10,8 +10,7 @@
             <el-col :xs="24" :sm="24" :md="24" :lg="18" :xl="18">
               <div class="gamePlayer">
                 <!--<img :src="game.coverImg" class="game-cover-image"/>-->
-                <!--<iframe msallowfullscreen="true" allowfullscreen="true" id="game_drop" frameborder="0" :src="game.gameIndex" scrolling="no" allowtransparency="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>    </div>-->
-                game area
+                <iframe msallowfullscreen="true" allowfullscreen="true" id="game_drop" height="400px" style="height:400px; width: 100%" frameborder="0" scrolling="no" allowtransparency="true" webkitallowfullscreen="true" mozallowfullscreen="true" :src="gameUrl" ></iframe>
               </div>
               <div class="gameInfo">
                 <div class="gameTitle">
@@ -99,6 +98,7 @@
         isAuditMode: false,
         similarGames: mockData.items,
         game: {},
+        gameUrl: '',
         gameComment: '',
         comments: [],
         metadata: {},
@@ -124,7 +124,6 @@
 
     },
     methods: {
-
       canVote () {
         let canVote = true
         if (this.latestPost != null && this.metadata.activeVotes != null) {
@@ -183,6 +182,7 @@
       if (this.id) {
         gameService.getById(this.id).then(response => {
           this.game = response
+          this.gameUrl = 'https://ipfs.io/ipfs/' + this.game.gameUrl.hash
           console.log('mounted successfully', this.game)
           this.refreshSteemitMetaData()
           this.refreshSteemitComments()
@@ -200,8 +200,6 @@
   .gamePlayer {
     background-color: #00B6FF;
     height: 400px;
-    padding: 20px;
-
   }
 
   .gameInfo {

@@ -248,7 +248,9 @@ export default class GameService {
       try {
         gameJson.gameUrl = JSON.parse(gameJson.gameUrl)
       } catch (error) {
-        gameJson.gameUrl = {}
+        gameJson.gameUrl = {
+          hash: gameJson.gameUrl
+        }
       }
     }
     if (gameJson.activities == null) {
