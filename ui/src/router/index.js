@@ -5,6 +5,7 @@ import GameEditForm from '@/components/views/GameEditForm'
 import HomePage from '@/components/views/HomePage'
 import GameAudit from '../components/views/GameAudit.vue'
 import GameBrowser from '../components/views/GameBrowser.vue'
+import GameDetail from '../components/views/GameDetail.vue'
 
 Vue.use(Router)
 
@@ -26,14 +27,31 @@ export default new Router({
       component: GameEditForm
     },
     {
-      path: 'game',
-      name: 'gameBrowser',
+      path: '/game/edit/:id',
+      name: 'editGame',
+      component: GameEditForm,
+      props: true
+    },
+    {
+      path: '/game',
+      name: 'browseGame',
       component: GameBrowser
     },
     {
+      path: '/game/play/:id',
+      name: 'viewGame',
+      component: GameDetail,
+      props: true
+    },
+    {
       path: '/game/audit',
-      name: 'gameAudit',
+      name: 'auditGame',
       component: GameAudit
+    },
+    {
+      path: '/game/browse',
+      name: 'browseGame',
+      component: GameBrowser
     }
   ]
 })

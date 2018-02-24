@@ -6,7 +6,32 @@
         <site-navigation></site-navigation>
       </el-aside>
       <el-main>
-        <game-list></game-list>
+        <div>
+          <span class="filter">
+            <el-select v-model="queryParameter.category" clearable filterable placeholder="Please select a category" @change="updateQueryParameter">
+              <el-option
+                v-for="item in categories"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </span>
+          <span class="filter">
+            <el-select v-model="queryParameter.sort" filterable placeholder="Sort by" @change="updateQueryParameter">
+              <el-option
+                v-for="item in sortBy"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </span>
+        </div>
+        <div class="allGames">
+          <game-list :queryParameter="gameListQuery"></game-list>
+        </div>
+        <hr/>
       </el-main>
     </el-container>
     <el-footer> <common-footer></common-footer></el-footer>
@@ -23,9 +48,14 @@
   import CommonHeader from '../common/CommonHeader'
   import GameList from '../shared/GameList'
   import SiteNavigation from '../common/SideNavigation'
+  import ElOption from '../../../node_modules/element-ui/packages/select/src/option'
+  import { GAME_CATEGORY } from '../../service/const'
 
+  import { Select } from 'element-ui'
   export default {
     components: {
+      ElOption,
+      Select,
       GameList,
       GameSlider,
       ElContainer,
@@ -36,12 +66,57 @@
       CommonHeader,
       SiteNavigation
     },
-    name: 'GameEditForm',
+    name: 'GameBrowser',
+    props: {
+      'type': {
+        default: 'index',
+        type: String
+      },
+      'category': {
+        default: null,
+        type: String
+      },
+      'sort': {
+        default: 'created_desc',
+        type: String
+      }
+    },
     data () {
       return {
-        title: '',
-        description: ''
-
+        categories: GAME_CATEGORY,
+        sortBy: [
+          {
+            label: 'Latest',
+            value: 'created_desc'
+          },
+          {
+            label: 'Top Voted',
+            value: 'voted_desc'
+          },
+          {
+            label: 'Top Payout',
+            value: 'payout_desc'
+          }
+        ],
+        queryParameter: {
+          category: this.category,
+          sort: this.sort,
+          type: this.type
+        }
+      }
+    },
+    computed: {
+      gameListQuery () {
+        let query = Object.assign({}, this.queryParameter)
+        if (query.category == null) {
+          delete query.category
+        }
+        return query
+      }
+    },
+    methods: {
+      updateQueryParameter () {
+        this.queryParameter = Object.assign({}, this.queryParameter)
       }
     }
   }

@@ -2,7 +2,7 @@
   <div class="game-grid-container">
     <div class="game-grid-image" >
       <div class="game-info-view view-ninth">
-        <img :src="game.coverImg" class="game-cover-image"/>
+        <img :src="thumbnail" class="game-cover-image"/>
         <div class="mask mask-1"></div>
         <div class="mask mask-2"></div>
         <div class="content">
@@ -20,10 +20,10 @@
           <!--<a href="#" class="info">Play</a>-->
         <!--</div>-->
         <span class="like">
-          <i class="fa fa-heart" aria-hidden="true"></i>
-          55
+          <i class="fa fa-usd" aria-hidden="true"></i>
+          {{game.payout}}
         </span>
-        <a href="#" class="play">→</a>
+        <router-link :to="{ name: 'viewGame', params: { id: game.id }}" tag="a" class="play">→</router-link>
       </div>
     </div>
   </div>
@@ -36,9 +36,13 @@
     props: ['game'],
     name: 'GameGrid',
     data () {
-      return {}
+      return {
+      }
     },
     computed: {
+      thumbnail () {
+        return 'http://ipfs.io/ipfs/' + this.game.coverImage.hash
+      }
     },
     mounted () {
       console.log('this is current swiper instance object', this.swiper)
@@ -85,10 +89,10 @@
     position: absolute;
     bottom: 10px;
     right: 60px;
-    color: white;
+    color: black;
   }
   .game-info-view .like i {
-    color: red;
+    color: black;
   }
   .game-info-view h2 {
     text-transform: uppercase;
