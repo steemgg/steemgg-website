@@ -4,7 +4,7 @@ import db from '../lib/db';
 import redis from '../lib/redis';
 
 exports.getUserByAccount = async function(account) {
-    let rows = await db.execute(db.READ, 'select id,account,userid,role,status,from_unixtime(createtime,\'%Y-%m%dT%TZ\') from user where account = ?', account);
+    let rows = await db.execute(db.READ, 'select id,account,userid,role,status,from_unixtime(created,\'%Y-%m%dT%TZ\') from user where account = ?', account);
     return rows;
 }
 

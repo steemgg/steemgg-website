@@ -2,6 +2,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import url from 'url';
 import util from 'util';
 import config from 'config';
 import ipfsAPI from 'ipfs-api';
@@ -27,7 +28,7 @@ exports.upload = function(req, res) {
     form.uploadDir = uploadDir
     form.parse(req, function(err, fields, files) {
         if (err || !files['file']){
-            console.log(err);
+            console.error(err);
             return res.status(500).json({ resCode:CODE.FILE_UPLOAD_ERROR.RESCODE, err: CODE.FILE_UPLOAD_ERROR.DESC });
         }
         var ipfs = ipfsAPI({host: config.get('steemit.ipfs.ip'), port: config.get('steemit.ipfs.port'), protocol: 'http'});
@@ -35,6 +36,7 @@ exports.upload = function(req, res) {
             unzipFile(files['file'].path, userid, function cb(unzips){
                 ipfs.util.addFromFs(config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[0].path, { recursive: true }, (err, result) => {
                     if (err) {
+                        console.error(err);
                         return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC });
                     }
                     res.status(200).json(result.slice(-1));
@@ -43,6 +45,7 @@ exports.upload = function(req, res) {
         } else {
             ipfs.util.addFromFs(files['file'].path, { recursive: true }, (err, result) => {
                 if (err) {
+                    console.error(err);
                     return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC + err });
                 }
                 res.status(200).json(result);
@@ -60,6 +63,9 @@ exports.upload = function(req, res) {
 
 exports.me = async function(req, res) {
     try {
+        if (typeof req.session.accessToken === 'undefined') {
+            return res.status(401).json({resCode:CODE.NEED_LOGIN_ERROR.RESCODE, err:CODE.NEED_LOGIN_ERROR.DESC});
+        }
         let result = await steem.me(req.session.accessToken);
         let dbRes = await user.getUserByAccount(result.user);
         let unix = Math.round(+new Date()/1000);
@@ -74,12 +80,13 @@ exports.me = async function(req, res) {
         await user.setUserToken("token:userid:"+userInfo.userid, req.session.accessToken);
         return res.status(200).json(userInfo);
     } catch(err) {
+        console.error(err);
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else if (err instanceof SDKError) {
             return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
         } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err });
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
         }
     }
 };
@@ -109,12 +116,13 @@ exports.postGame = async function(req, res, next) {
         activity.lastModified = iso;
         return res.status(200).json(activity);
     } catch(err) {
+        console.error(err);
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else if (err instanceof SDKError) {
             return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
         } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err });
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
         }
     }
 }
@@ -132,10 +140,11 @@ exports.addGame = async function(req, res, next) {
         gameInfo.created = iso;
         return res.status(200).json(gameInfo);
     } catch(err) {
+        console.error(err);
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err });
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
         }
     }
 };
@@ -153,10 +162,11 @@ exports.commentGame = async function(req, res, next) {
         await user.setInterval('comment:interval:'+userInfo.account, 10);
         return res.status(200).json({content:post.content, author:req.params.author, permlink:req.params.permlink});
     } catch(err) {
+        console.error(err);
         if (err instanceof SDKError) {
             return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
         } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err });
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
         }
     }
 };
@@ -173,10 +183,11 @@ exports.getGameDetail = async function(req, res, next) {
         }
         return res.status(200).json(dbRes[0]);
     } catch(err) {
+        console.error(err);
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err });
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
         }
     }
 };
@@ -191,10 +202,11 @@ exports.updateGame = async function(req, res, next) {
             return res.status(500).json({ resultCode: CODE.UPDATE_GAME_ERROR.RESCODE, err: CODE.UPDATE_GAME_ERROR.DESC });
         }
     } catch(err) {
+        console.error(err);
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err });
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
         }
     }
 };
@@ -207,10 +219,11 @@ exports.deleteGame = async function(req, res, next) {
             return res.status(500).json({ resultCode: CODE.DELETE_GAME_ERROR.RESCODE, err: CODE.DELETE_GAME_ERROR.DESC } );
         }
     } catch(err){
+        console.error(err);
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err });
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
         }
     }
 };
@@ -221,54 +234,49 @@ exports.listGame = async function(req, res, next) {
         let offset = (typeof req.query.offset !== 'undefined') ?  parseInt(req.query.offset,10) : 0;
         let pageSize = (typeof req.query.limit !== 'undefined') ? parseInt(req.query.limit, 10) : 20;
         let category = (typeof req.query.category !== 'undefined') ? req.query.category : '';
+        let creator = (typeof req.query.creator !== 'undefined') ? req.query.creator : '';
+        let report = (typeof req.query.report !== 'undefined') ?  parseInt(req.query.report,10) : 0;
+        let status = (typeof req.query.status !== 'undefined') ? parseInt(req.query.status, 10) : 0;
         let sort = (typeof req.query.sort !== 'undefined') ? req.query.sort : 'created_desc';
         let sortArr = sort.split("_")
-        let type = (typeof req.query.type !== 'undefined') ? req.query.type : 'index';
-        let url = querystring.stringify({ offset: offset, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], type:type });
-        let nextUrl = querystring.stringify({ offset: offset+pageSize, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], type:type });
+        let currUrl = querystring.stringify({ offset: offset, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], creator:creator, status:status, report:report });
+        let nextUrl = querystring.stringify({ offset: offset+pageSize, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], creator:creator, status:status, report:report });
         let gameQuery = 'status = 1';
-        if (type === 'me'){
-            if (typeof req.session.user === 'undefined') {
-                return res.status(401).json({resCode:CODE.NEED_LOGIN_ERROR.RESCODE, err:CODE.NEED_LOGIN_ERROR.DESC});
+        if (typeof req.session.user !== 'undefined') {
+            let user = req.session.user;
+            if (user.role == 1 || user.role == 2 || creator === user.account){
+                gameQuery = 'status = '+ status + ' and report = ' + report;
             }
-            let userid = req.session.user.userid;
-            gameQuery = 'status != 3 and userid='+ userid;
-        } else if(type ==='audit') {
-            if (typeof req.session.user === 'undefined') {
-                return res.status(401).json({resCode:CODE.NEED_LOGIN_ERROR.RESCODE, err:CODE.NEED_LOGIN_ERROR.DESC});
-            }
-            if (req.session.user.role === 0){
-                return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
-            }
-            let report = (typeof req.query.report !== 'undefined') ?  parseInt(req.query.report,10) : 0;
-            let status = (typeof req.query.status !== 'undefined') ? parseInt(req.query.status, 10) : 0;
-            gameQuery = 'status = '+ status + ' and report = ' + report;
+        }
+        if (creator != '') {
+            gameQuery = gameQuery + ' and account=\''+creator+'\'';
         }
         if (category !='') {
             gameQuery = gameQuery + ' and category=\''+category+'\'';
         }
         let countSql = 'select count(1) as nums from games where ' + gameQuery;
         let querySql = 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status from games where ' + gameQuery + ' order by ? ? limit ?,?';
-        console.log(querySql);
+        let path = url.parse(req.url).pathname;
         let queryParams = [sortArr[0], sortArr[1], offset, pageSize];
-        let href = 'game?' + url;
+        let href = path +'?' + currUrl;
         let dbRes = await game.query(countSql, []);
         let count = dbRes[0]['nums'];
         if(count>0) {
             let dbRes = await game.query(querySql, queryParams);
             let next = '';
             if (count>=(offset+pageSize)) {
-                next = 'game?'+ nextUrl;
+                next = path+ '?'+ nextUrl;
             }
             return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:dbRes,totalCount:count });
         } else {
             return res.status(200).json({ offset:offset,limit:pageSize,next:next,href:href,items:[],totalCount:count });
         }
     } catch(err){
+        console.error(err);
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err });
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
         }
     }
 };
@@ -289,10 +297,11 @@ exports.voteGame = async function(req, res, next) {
         await user.setInterval('vote:interval:'+voter, 10);
         return res.status(200).json({author:author,permlink:permlink,weight:parseInt(data.weight)});
     } catch(err) {
+        console.error(err);
         if (err instanceof SDKError) {
             return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
         } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err });
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
         }
     }
 }
@@ -323,12 +332,13 @@ exports.auditGame = async function(req, res, next) {
             return res.status(500).json({ resultCode: CODE.UPDATE_GAME_ERROR.RESCODE, err: CODE.UPDATE_GAME_ERROR.DESC });
         }
     } catch(err){
+        console.error(err);
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else if (err instanceof SDKError) {
             return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
         } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err });
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
         }
     }
 }
@@ -356,27 +366,29 @@ exports.reportGame = async function(req, res, next) {
             return res.status(500).json({resultCode: CODE.UPDATE_GAME_ERROR.RESCODE, err: CODE.UPDATE_GAME_ERROR.DESC});
         }
     } catch(err){
+        console.error(err);
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else if (err instanceof SDKError) {
             return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
         } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err });
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
         }
     }
 }
 
 exports.index = async function(req, res, next) {
     try{
-        let url = await steem.getLoginUrl();
-        res.render('index', { title: '$$$ hello! Steem Game $$$', login: url });
+        let indexUrl = await steem.getLoginUrl();
+        res.render('index', { title: '$$$ hello! Steem Game $$$', login: indexUrl });
     } catch(err){
+        console.error(err);
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else if (err instanceof SDKError) {
             return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
         } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err });
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
         }
     }
 };
@@ -394,12 +406,13 @@ exports.logout = async function(req, res, next) {
         });
         res.status(200).send();
     } catch(err){
+        console.error(err);
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else if (err instanceof SDKError) {
             return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
         } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err });
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
         }
     }
 };
@@ -410,7 +423,7 @@ exports.test = async function(req, res, next) {
         console.log(dbRes);
         res.status(200).send();
     } catch(err) {
-        console.log(err);
+        console.error(err);
         return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
     }
 }
