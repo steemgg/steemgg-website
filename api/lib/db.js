@@ -36,7 +36,7 @@ exports.connect = function(done) {
 exports.READ = 'read'
 exports.WRITE = 'write'
 
-function getConn(type) {
+exports.getConn = function(type) { 
     return new Promise(( resolve, reject ) => {
         let pool = state.pool
         if (!pool) {
@@ -65,7 +65,7 @@ function getConn(type) {
 
 exports.execute = async function(type, sql, params) {
     return new Promise( async ( resolve, reject ) => {
-        let conn = await getConn(type);
+        let conn = await this.getConn(type);
         conn.query(sql, params, function (err, rows){
             conn.release(function(err){
                 if ( err ) {
