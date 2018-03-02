@@ -21,7 +21,6 @@
   .avatar {
     vertical-align: top;
     display: inline-block;
-    margin-right: 25px;
     height: 36px;
     width: 36px;
     cursor: pointer;

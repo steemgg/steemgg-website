@@ -71,14 +71,20 @@
             this.votesCount++
             this.$message.success('Vote Successfully.')
           }).catch(error => {
-            this.$message.error('Vote Failed.')
-            console.log('Vote comment failed', error)
+            if (error.response.data.resultCode === 402) {
+              this.$message.error('You just voted, please wait for a while.')
+            } else {
+              this.$message.error('Vote Failed.')
+            }
+            console.log('Vote comment failed', error.response)
           })
+        } else {
+          this.$message.warning('Please log in first to vote.')
         }
       },
-
       canVote () {
-        return true
+        // user has login
+        return this.$store.user.account !== ''
       },
       postReply () {
         if (this.replyContent == null || this.replyContent.trim().length === 0) {

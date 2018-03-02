@@ -48,9 +48,11 @@
   </div>
 </template>
 <script>
-  import ElSubmenu from '../../../node_modules/element-ui/packages/menu/src/submenu'
+//  import ElSubmenu from '../../../node_modules/element-ui/packages/menu/src/submenu'
   export default {
-    components: {ElSubmenu},
+    components: {
+//      ElSubmenu
+    },
     name: 'GameGrid',
     data () {
       return {

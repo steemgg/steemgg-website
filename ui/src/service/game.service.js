@@ -19,7 +19,7 @@ export default class GameService {
   }
 
   list () {
-    return axios.get('v1/game?type=audit').then(response => {
+    return axios.get('v1/game').then(response => {
       return this.handleResponse(response)
     })
   }
@@ -36,16 +36,6 @@ export default class GameService {
     return axios.get('/v1/game/' + id).then(response => {
       return this.convertJsonToGame(response.data)
     })
-    // return new Promise((resolve, reject) => {
-    //   let games = GameList.items.filter((game) => {
-    //     return '' + game.id === id
-    //   })
-    //   if (games.length > 0) {
-    //     resolve(games[0])
-    //   } else {
-    //     reject(new Error('cannot find the game'))
-    //   }
-    // })
   }
 
   getMyGames (userId) {
@@ -137,10 +127,11 @@ export default class GameService {
       tags: []
     }
     for (let i = 0; i < game.activities.length; i++) {
+      // debugger
       let activity = game.activities[i]
       if (activity.status !== 0) {
         // already closed, get award directly from backend data
-        result.totalPayout += activity.award
+        result.totalPayout += activity.payout
       } else {
         // promises.push(steamApi.getContentAsync(/*activity.account*/'steemitgame.test', activity.permlink).then(response => {
         promises.push(this.getContentData('steemitgame.test', activity.permlink).then(response => {
@@ -269,5 +260,9 @@ export default class GameService {
     }
     delete clonnedGame.activities
     return clonnedGame
+  }
+
+  fetchUser () {
+    axios.get('/v1/me')
   }
 }

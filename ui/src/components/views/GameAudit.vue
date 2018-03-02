@@ -36,8 +36,13 @@
     },
     computed: {
     },
+    methods: {
+      handleClick () {
+
+      }
+    },
     mounted () {
-      gameService.query({type: 'audit', status: 0, limit: 1000}).then(result => {
+      gameService.query({status: 0, limit: 1000}).then(result => {
         console.log(result)
         this.auditItems = result.items
         console.log('get the game item list', this.auditItems)

@@ -19,7 +19,7 @@
           <li class="nav-item">
             <router-link class="nav-link" :to="{name: 'browseGame'}" tag="a">Browse Game</router-link>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" v-if="$store.getters.user.account == ''">
             <a class="nav-link" href="https://v2.steemconnect.com/oauth2/authorize?client_id=steemitgame.app&redirect_uri=http%3A%2F%2Fdev.steemitgame.com%2Fcallback&scope=login,offline,vote,comment,comment_delete,comment_options,custom_json,claim_reward_balance">Log In</a>
           </li>
         </ul>
@@ -27,13 +27,16 @@
           <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
         </form>
+        <user-info></user-info>
       </div>
     </nav>
   </div>
 </template>
 
 <script>
+  import UserInfo from './UserInfo'
   export default {
+    components: {UserInfo},
     name: 'CommonHeader',
     data () {
       return {

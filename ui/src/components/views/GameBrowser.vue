@@ -39,29 +39,29 @@
 </template>
 
 <script>
-  import ElHeader from '../../../node_modules/element-ui/packages/header/src/main'
-  import ElFooter from '../../../node_modules/element-ui/packages/footer/src/main'
-  import ElContainer from '../../../node_modules/element-ui/packages/container/src/main'
-  import ElMain from '../../../node_modules/element-ui/packages/main'
+//  import ElHeader from '../../../node_modules/element-ui/packages/header/src/main'
+//  import ElFooter from '../../../node_modules/element-ui/packages/footer/src/main'
+//  import ElContainer from '../../../node_modules/element-ui/packages/container/src/main'
+//  import ElMain from '../../../node_modules/element-ui/packages/main'
+//  import ElOption from '../../../node_modules/element-ui/packages/select/src/option'
   import GameSlider from '../common/GameSlider'
   import CommonFooter from '../common/CommonFooter'
   import CommonHeader from '../common/CommonHeader'
   import GameList from '../shared/GameList'
   import SiteNavigation from '../common/SideNavigation'
-  import ElOption from '../../../node_modules/element-ui/packages/select/src/option'
   import { GAME_CATEGORY } from '../../service/const'
 
   import { Select } from 'element-ui'
   export default {
     components: {
-      ElOption,
+//      ElOption,
+//      ElContainer,
+//      ElFooter,
+//      ElHeader,
+//      ElMain,
       Select,
       GameList,
       GameSlider,
-      ElContainer,
-      ElFooter,
-      ElHeader,
-      ElMain,
       CommonFooter,
       CommonHeader,
       SiteNavigation

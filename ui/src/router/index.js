@@ -48,6 +48,11 @@ export default new Router({
       name: 'auditGame',
       component: GameAudit
     },
+    // {
+    //   path: '/user/callback',
+    //   name: 'userCallback',
+    //   component: UserCallback
+    // },
     {
       path: '/game/browse',
       name: 'browseGame',

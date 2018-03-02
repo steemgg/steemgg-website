@@ -5,7 +5,23 @@ Vue.use(Vuex)
 
 export const store = new Vuex.Store({
   state: {
-    authenticated: false,
-    role: 0
+    user: {
+      'id': 15,
+      'account': 'steemitgame.test',
+      'userid': 477514,
+      'role': 2,
+      'status': 1,
+      'created': '2018-02-02T14:50:56Z'
+    }
+  },
+  getters: {
+    user: state => {
+      return state.user
+    }
+  },
+  mutations: {
+    setUser (state, user) {
+      state.user = user
+    }
   }
 })

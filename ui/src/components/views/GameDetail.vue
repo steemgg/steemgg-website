@@ -126,9 +126,9 @@
     methods: {
       canVote () {
         let canVote = true
-        if (this.latestPost != null && this.metadata.activeVotes != null) {
+        if (this.latestPost != null && this.metadata.activeVotes != null && this.$store.user) {
           for (let i = 0; i < this.metadata.activeVotes.length; i++) {
-            if (this.metadata.activeVotes[i].voter === 'steemitgame.test') {
+            if (this.metadata.activeVotes[i].voter === this.$store.user.account) {
               canVote = false
               break
             }
@@ -176,18 +176,26 @@
             this.comments = response
           })
         }
+      },
+      fetchGame () {
+        if (this.id) {
+          gameService.getById(this.id).then(response => {
+            this.game = response
+            this.gameUrl = 'https://ipfs.io/ipfs/' + this.game.gameUrl.hash
+            console.log('mounted successfully', this.game)
+            this.refreshSteemitMetaData()
+            this.refreshSteemitComments()
+          })
+        }
+      }
+    },
+    watch: {
+      'id': function (val, oldVal) {
+        this.fetchGame()
       }
     },
     mounted () {
-      if (this.id) {
-        gameService.getById(this.id).then(response => {
-          this.game = response
-          this.gameUrl = 'https://ipfs.io/ipfs/' + this.game.gameUrl.hash
-          console.log('mounted successfully', this.game)
-          this.refreshSteemitMetaData()
-          this.refreshSteemitComments()
-        })
-      }
+      this.fetchGame()
     }
   }
 </script>

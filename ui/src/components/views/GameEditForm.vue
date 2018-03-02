@@ -285,7 +285,7 @@
         })
       },
       getLastModifiedString (lastModified) {
-        return moment(lastModified, 'x').fromNow()
+        return moment(lastModified).fromNow()
       },
       submitActivity (isNew) {
         if (this.game.id) {
@@ -297,7 +297,6 @@
           if (isNew) {
             this.postingInProgress = true
             gameService.createActivity(this.game.id, post).then(response => {
-              debugger
               this.resetActivity()
               this.postingInProgress = false
               this.game.activities.push(response)

@@ -13,10 +13,11 @@
     components: {
       appGameGrid: GameGrid
     },
-    props: ['queryParameter', 'items', 'limit'],
+    props: ['queryParameter', 'limit'],
     name: 'GameList',
     data () {
       return {
+        items: null
       }
     },
     computed: {

@@ -41,7 +41,7 @@
 </template>
 
 <script>
-  import { Table, TableColumn } from 'element-ui'
+//  import { Table, TableColumn } from 'element-ui'
   import moment from 'moment'
   import GameService from '../../service/game.service'
   const gameService = new GameService()
@@ -49,8 +49,8 @@
   export default {
 
     components: {
-      appTable: Table,
-      appTableColumn: TableColumn
+//      appTable: Table,
+//      appTableColumn: TableColumn
     },
     props: ['items'],
     name: 'GamesTable',

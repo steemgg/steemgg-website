@@ -15,10 +15,10 @@
 </template>
 
 <script>
-  import ElHeader from '../../../node_modules/element-ui/packages/header/src/main'
-  import ElFooter from '../../../node_modules/element-ui/packages/footer/src/main'
-  import ElContainer from '../../../node_modules/element-ui/packages/container/src/main'
-  import ElMain from '../../../node_modules/element-ui/packages/main'
+//  import ElHeader from '../../../node_modules/element-ui/packages/header/src/main'
+//  import ElFooter from '../../../node_modules/element-ui/packages/footer/src/main'
+//  import ElContainer from '../../../node_modules/element-ui/packages/container/src/main'
+//  import ElMain from '../../../node_modules/element-ui/packages/main'
   import GameSlider from '../common/GameSlider'
   import CommonFooter from '../common/CommonFooter'
   import CommonHeader from '../common/CommonHeader'
@@ -29,10 +29,10 @@
     components: {
       GameList,
       GameSlider,
-      ElContainer,
-      ElFooter,
-      ElHeader,
-      ElMain,
+//      ElContainer,
+//      ElFooter,
+//      ElHeader,
+//      ElMain,
       CommonFooter,
       CommonHeader,
       SiteNavigation
