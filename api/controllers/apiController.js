@@ -160,7 +160,7 @@ exports.commentGame = async function(req, res, next) {
         let permlink = createCommentPermlink(req.params.author,req.params.permlink);
         await steem.comment(req.session.accessToken, req.params.author,req.params.permlink, author, post.content, permlink);
         await user.setInterval('comment:interval:'+userInfo.account, 10);
-        return res.status(200).json({content:post.content, author:req.params.author, permlink:req.params.permlink});
+        return res.status(200).json({content:post.content, author:author, permlink:permlink});
     } catch(err) {
         console.error(err);
         if (err instanceof SDKError) {

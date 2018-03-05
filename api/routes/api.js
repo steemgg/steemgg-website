@@ -24,7 +24,7 @@ module.exports = function(app) {
   app.get('/v1/me', [morkMiddleware], api.me);
   app.get('/v1/logout', api.logout);
   app.get('/v1/test', api.test);
-  app.get('/', api.index);
+  app.get('/testLogin', api.index);
   app.get('/callback', callback.auth);
 };
 

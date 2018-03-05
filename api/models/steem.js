@@ -91,7 +91,7 @@ exports.me = async function(accessToken) {
 }
 
 exports.getLoginUrl = async function() {
-    let url = await sc2.instance.getLoginURL();
+    let url = await sc2.instance.getLoginURL('hello');
     return url;
 }
 
