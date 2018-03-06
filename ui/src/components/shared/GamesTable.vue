@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-table :data="items" style="width: 100%" :stripe=true>
+    <el-table :data="items" style="width: 100%" :stripe=true v-loading="loading">
       <el-table-column prop="id" label="ID" width="50">
       </el-table-column>
       <el-table-column prop="title" label="Name" width="150">
@@ -62,7 +62,8 @@
         form: {
           comment: ''
         },
-        labelWidth: '80px'
+        labelWidth: '80px',
+        loading: false
       }
     },
     methods: {
@@ -82,25 +83,31 @@
       },
       approve () {
         this.dialogFormVisible = false
-        this.form.comment = ''
         console.log(`approve details of ${this.activeIndex} with comment`)
+        this.loading = true
         gameService.approve(this.items[this.activeIndex].id, this.form.comment).then(() => {
           this.$message.success('Game is approved.')
           this.items.splice(this.activeIndex, 1)
         }).catch(error => {
           console.log(error)
           this.$message.error('Approve action failed.')
+        }).finally(() => {
+          this.form.comment = ''
+          this.loading = false
         })
       },
       deny () {
         this.dialogFormVisible = false
-        this.form.comment = ''
         console.log(`approve details of ${this.activeIndex}`)
+        this.loading = true
         gameService.deny(this.items[this.activeIndex].id, this.form.comment).then(() => {
           this.$message.success('Game is denied.')
         }).catch(error => {
           console.log(error)
           this.$message.error('Deny action failed.')
+        }).finally(() => {
+          this.form.comment = ''
+          this.loading = false
         })
       },
       transformTime (time) {

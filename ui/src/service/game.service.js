@@ -129,7 +129,7 @@ export default class GameService {
     for (let i = 0; i < game.activities.length; i++) {
       // debugger
       let activity = game.activities[i]
-      if (activity.status !== 0) {
+      if (activity.status === 0) {
         // already closed, get award directly from backend data
         result.totalPayout += activity.payout
       } else {

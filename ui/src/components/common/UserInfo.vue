@@ -1,34 +1,51 @@
 <template>
-  <div class="userInfoContainer">
-    <avatar :accountName="accountName"></avatar> <span>{{accountName}}</span>
+  <div class="userInfoContainer" v-loading="loading">
+    <span v-if="$store.state.loggedIn">
+      <avatar :accountName="accountName"></avatar> <span class="user-name">{{accountName}}</span>
+      <el-button class="logout"  @click="logout">Log out</el-button>
+    </span>
+    <a class="nav-link" v-if="!$store.state.loggedIn" href="https://v2.steemconnect.com/oauth2/authorize?client_id=steemitgame.app&redirect_uri=http%3A%2F%2Fdev.steemitgame.com%2Fcallback&scope=login,offline,vote,comment,comment_delete,comment_options,custom_json,claim_reward_balance">Log In</a>
   </div>
 </template>
 <script>
   import axios from 'axios'
   import Avatar from '../shared/Avatar'
+  import ElButton from '../../../node_modules/element-ui/packages/button/src/button'
   export default {
     components: {
+      ElButton,
       Avatar
     },
     name: 'UserInfo',
     data () {
       return {
+        loggedIn: false,
+        loading: false
+      }
+    },
+    methods: {
+      logout () {
+        this.loading = true
+        axios.get('v1/logout').then(response => {
+          this.$message.success('log out successfully')
+          this.$store.commit('deleteUser')
+        }).finally(() => {
+          this.loading = false
+        })
       }
     },
     mounted () {
-      axios.get('v1/me').then(user => {
+      this.loading = true
+      axios.get('v1/me').then(response => {
         console.log('user logged in')
-        this.$store.user = user
+        this.$store.commit('setUser', response.data)
+        this.loggedIn = true
       }).catch(error => {
-        console.log(error)
-        this.$store.user = {
-          'id': '',
-          'account': '',
-          'userid': '',
-          'role': 0,
-          'status': 1,
-          'created': null
-        }
+        this.loggedIn = false
+        console.log(error.response)
+        this.$store.commit('deleteUser')
+      }).finally(() => {
+        this.loading = false
       })
     },
     computed: {
@@ -44,6 +61,13 @@
     color: white;
     .avatar {
       margin-right: 15px;
+    }
+    .user-name {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .logout {
+      margin-left: 20px;
     }
   }
 

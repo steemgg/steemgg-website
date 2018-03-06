@@ -39,12 +39,12 @@
                         :on-exceed="onFileExceedMax"
                         :on-error="onFileUploadFail"
                         list-type="text">
-                        <el-button size="small" type="primary">Click to upload</el-button>
+                        <el-button size="small" type="primary" :disabled="!$store.state.loggedIn">Click to upload</el-button>
                         <div slot="tip" class="el-upload__tip">Only accept zip file, max file size 10MB</div>
                       </el-upload>
                     </div>
                   </el-form-item>
-                    <el-button type='primary' @click="submitForm('game')">{{ actionText }}</el-button>
+                    <el-button type='primary' @click="submitForm('game')" :disabled="!$store.state.loggedIn">{{ actionText }}</el-button>
                     <el-button @click="cancelForm()">Cancel</el-button>
                 </el-form>
               </div>
@@ -89,7 +89,7 @@
                   </el-form-item>
                   <el-form-item>
                     <!--<el-button type='primary' v-if="activity.permLink != null" @click="submitActivity(false)">Update</el-button>-->
-                    <el-button type='primary' :disabled="game.id == null && postingInProgress" @click="submitActivity(true)">New Post</el-button>
+                    <el-button type='primary' :disabled="game.id == null || postingInProgress" @click="submitActivity(true)">New Post</el-button>
                     <!--<el-button @click="cancelForm()">Cancel</el-button>-->
                   </el-form-item>
                 </el-form>
@@ -408,8 +408,10 @@
       }
     },
     mounted () {
-      console.log('mounted')
-      console.log(GAME_CATEGORY)
+      console.log(this.$store.state.loggedIn)
+      if (!this.$store.state.loggedIn) {
+        this.$message.warning('Please log in first to create game.')
+      }
       this.initData()
     }
   }
