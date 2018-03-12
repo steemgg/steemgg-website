@@ -34,7 +34,7 @@ async function getReward(){
                 let payout = result.total_payout_value.split(' ');
                 let sbd = payout[0];
                 sql.push('update games set vote=vote+'+result.net_votes+', payout=payout+'+sbd+' where id= '+dbRes[k]['gameid']);
-                sql.push('update activities set status=1 and vote=vote+'+result.net_votes+', payout=payout+'+sbd+'  where id= '+ dbRes[k]['id']);
+                sql.push('update activities set status=1,vote=vote+'+result.net_votes+', payout=payout+'+sbd+'  where id= '+ dbRes[k]['id']);
             }
             async.each(sql, function(item, callback) {
                 conn.query(item, function(err, results) {
