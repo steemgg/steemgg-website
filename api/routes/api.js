@@ -3,11 +3,9 @@ import fs from 'fs';
 import config from 'config';
 import CODE from '../lib/code';
 import user from '../models/user';
-import redis from 'redis';
+import redis from '../lib/redis';
 import api from '../controllers/apiController';
 import callback from '../controllers/callbackController';
-
-const client = redis.createClient({host: config.get('steemit.redis.host'), port:config.get('steemit.redis.port')});
 
 module.exports = function(app) {
   app.post('/v1/upload', [morkSessionMiddleware, userMiddleware], api.upload);
@@ -21,7 +19,7 @@ module.exports = function(app) {
   app.post('/v1/comment/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.commentGame);
   app.post('/v1/vote/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.voteGame);
   app.post('/v1/report/:id', [morkSessionMiddleware, userMiddleware], api.reportGame);
-  app.get('/v1/me', [morkMiddleware], api.me);
+  app.get('/v1/me', api.me);
   app.get('/v1/logout', api.logout);
   app.get('/v1/test', api.test);
   app.get('/testLogin', api.index);
@@ -46,18 +44,21 @@ function morkMiddleware (req, res, next) {
 
 function morkSessionMiddleware (req, res, next) {
     if (process.env.NODE_ENV === 'development' && typeof req.cookies['at'] !== 'undefined') {
-        fs.readFile( config.get('steemit.app.rooturl') + '/' + req.cookies['at'] +'.json', 'utf8', function (err, result) {
+        fs.readFile( config.get('steemit.app.rooturl') + '/' + req.cookies['at'] +'.json', 'utf8', async function (err, result) {
             if (err) {
                 console.log({resCode:CODE.TEST_DATA_ERROR.RESCODE, err:CODE.TEST_DATA_ERROR.DESC});
                 next();
             } else {
                 let user = JSON.parse(result);
-                console.log(user);
-                client.get("token:userid:"+user.userid, function (err, at) {
-                    req.session.accessToken = at.toString();
+                try{
+                    let result = await redis.instance.get("token:userid:"+user.userid);
                     req.session.user = user;
+                    req.session.accessToken = result.toString();
                     next();
-                });
+                } catch(err) {
+                    console.error(err);
+                    next();
+                }
             }
         });
     } else {
