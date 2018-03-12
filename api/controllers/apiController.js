@@ -325,12 +325,10 @@ exports.auditGame = async function(req, res, next) {
         let parentPermlink = dbRes[0].permlink;
         await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, data.comment, permlink);
         await user.setInterval('comment:interval:'+author, 10);
-        dbRes = await game.auditGame([data.status,req.params.id]);
-        if (dbRes.changedRows == 1){
-            return res.status(200).json({comment:data.comment, parentAuthor:parentAuthor, parentPermlink:parentPermlink, author:author,permlink:permlink});
-        } else {
-            return res.status(500).json({ resultCode: CODE.UPDATE_GAME_ERROR.RESCODE, err: CODE.UPDATE_GAME_ERROR.DESC });
-        }
+        let unix = Math.round(+new Date()/1000);
+        let audit = { userid:req.session.user.userid, account:req.session.user.account,gameid: req.params.id,lastModified: unix, permlink:permlink,comment:data.comment, type:1 };
+        dbRes = await game.auditGame(audit, data.status);
+        return res.status(200).json({comment:data.comment, parentAuthor:parentAuthor, parentPermlink:parentPermlink, author:author,permlink:permlink});
     } catch(err){
         console.error(err);
         if (err instanceof DBError) {

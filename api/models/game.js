@@ -17,8 +17,9 @@ exports.updateGame = async function(params) {
     return rows;
 }
 
-exports.auditGame = async function(params) {
-    let rows = await db.execute(db.WRITE, 'update games set status=? where id= ?', params);
+exports.auditGame = async function(params, status) {
+    let rows = await db.execute(db.WRITE, 'INSERT INTO comments SET ?', params);
+    rows = await db.execute(db.WRITE, 'update games set status=? where id= ?', [status,params.gameid]);
     return rows;
 }
 
