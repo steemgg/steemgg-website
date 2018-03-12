@@ -73,9 +73,9 @@ exports.me = async function(req, res) {
         if(typeof userInfo === 'undefined') {
             userInfo = {'account':result.user, 'userid':result.account.id, 'role':0, 'status':1, 'created':unix};
             await user.addUser(userInfo);
+            let iso = new Date(userInfo['created']*1000).toISOString();
+            userInfo.created = iso;
         }
-        let iso = new Date(unix*1000).toISOString();
-        userInfo.created = iso;
         req.session.user = userInfo;
         await user.setUserToken("token:userid:"+userInfo.userid, req.session.accessToken);
         return res.status(200).json(userInfo);
