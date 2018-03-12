@@ -23,7 +23,13 @@ exports.auditGame = async function(params) {
 }
 
 exports.reportGame = async function(params) {
-    let rows = await db.execute(db.WRITE, 'update games set report=? where id= ?', params);
+    let rows = await db.execute(db.WRITE, 'INSERT INTO comments SET ?', params);
+    rows = await db.execute(db.WRITE, 'update games set report=1 where id= ?', params.gameid);
+    return rows;
+}
+
+exports.canReportGame = async function(params) {
+    let rows = await db.execute(db.READ, 'select * from comments where userid=? and gameid=? and status=0 and type=0', params);
     return rows;
 }
 

@@ -346,25 +346,27 @@ exports.auditGame = async function(req, res, next) {
 exports.reportGame = async function(req, res, next) {
     try {
         let data = req.body;
-        let dbRes = await game.getRecentlyActivity(req.params.id);
-        if(typeof dbRes[0] === 'undefined') {
-            return res.status(404).json({ resultCode: CODE.NOFOUND_ACTIVITY_ERROR.RESCODE, err: CODE.NOFOUND_ACTIVITY_ERROR.DESC });
-        }
         let author = req.session.user.account;
         if(await user.getInterval('comment:interval:'+author)){
             return res.status(500).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
+        }
+        let dbRes = await game.canReportGame([req.session.user.userid, req.params.id]);
+        if(typeof dbRes[0] !== 'undefined') {
+            return res.status(500).json({ resultCode: CODE.HAS_REPORT_ERROR.RESCODE, err: CODE.HAS_REPORT_ERROR.DESC });
+        }
+        dbRes = await game.getRecentlyActivity(req.params.id);
+        if(typeof dbRes[0] === 'undefined') {
+            return res.status(404).json({ resultCode: CODE.NOFOUND_ACTIVITY_ERROR.RESCODE, err: CODE.NOFOUND_ACTIVITY_ERROR.DESC });
         }
         let permlink = createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
         let parentAuthor = dbRes[0].account;
         let parentPermlink = dbRes[0].permlink;
         await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, data.comment, permlink);
         await user.setInterval('comment:interval:'+author, 10);
-        dbRes = await game.reportGame([data.report,req.params.id]);
-        if (dbRes.changedRows == 1){
-            return res.status(200).json({comment:data.comment, parentAuthor:parentAuthor, parentPermlink:parentPermlink, author:author,permlink:permlink});
-        } else {
-            return res.status(500).json({resultCode: CODE.UPDATE_GAME_ERROR.RESCODE, err: CODE.UPDATE_GAME_ERROR.DESC});
-        }
+        let unix = Math.round(+new Date()/1000);
+        let report = { userid:req.session.user.userid, account:req.session.user.account,gameid: req.params.id,lastModified: unix, permlink:permlink,comment:data.comment };
+        dbRes = await game.reportGame(report);
+        return res.status(200).json({comment:data.comment, parentAuthor:parentAuthor, parentPermlink:parentPermlink, author:author,permlink:permlink});
     } catch(err){
         console.error(err);
         if (err instanceof DBError) {
