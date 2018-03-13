@@ -19,6 +19,7 @@ exports.updateGame = async function(params) {
 
 exports.auditGame = async function(params, status) {
     let rows = await db.execute(db.WRITE, 'INSERT INTO comments SET ?', params);
+    rows = await db.execute(db.WRITE, 'update comments set status = 1 and type = 0 where gameid= ?', params.gameid);
     rows = await db.execute(db.WRITE, 'update games set status=? where id= ?', [status,params.gameid]);
     return rows;
 }
@@ -30,7 +31,17 @@ exports.reportGame = async function(params) {
 }
 
 exports.canReportGame = async function(params) {
-    let rows = await db.execute(db.READ, 'select * from comments where userid=? and gameid=? and status=0 and type=0', params);
+    let rows = await db.execute(db.READ, 'select id from comments where userid=? and gameid=? and status=0 and type=0', params);
+    return rows;
+}
+
+exports.reportComments = async function(params) {
+    let rows = await db.execute(db.READ, 'select id,gameid,account,permlink,userid,comment,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified  from comments where gameid=? and status=0 and type=0', params);
+    return rows;
+}
+
+exports.auditComments = async function(params) {
+    let rows = await db.execute(db.READ, 'select id,gameid,account,permlink,userid,comment,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified     from comments where gameid=? and status=0 and type=1', params);
     return rows;
 }
 
@@ -56,7 +67,6 @@ exports.getRecentlyActivity = async function(gameId) {
 
 exports.getPayoutActivities = async function() {
     let time = Math.floor(new Date() / 1000) - 86400*7;
-    console.log(time)
     let rows = await db.execute(db.READ, 'select id,gameid,account,userid,permlink,vote,payout,status,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModifie from activities where lastModified<? and status=0',time);
     return rows;
 }

@@ -181,6 +181,14 @@ exports.getGameDetail = async function(req, res, next) {
         if(steemitRes.length>0){
             dbRes[0]['activities'] = steemitRes;
         }
+        let reportComments = await game.reportComments(req.params.id);
+        if(reportComments.length>0){
+            dbRes[0]['reportComments'] = reportComments;
+        }
+        let auditComments = await game.auditComments(req.params.id);
+        if(auditComments.length>0){
+            dbRes[0]['auditComments'] = auditComments;
+        }
         return res.status(200).json(dbRes[0]);
     } catch(err) {
         console.error(err);
@@ -244,7 +252,7 @@ exports.listGame = async function(req, res, next) {
         let gameQuery = 'status = 1';
         if (typeof req.session.user !== 'undefined') {
             let user = req.session.user;
-            if (user.role == 1 || user.role == 2 || creator === user.account){
+            if (user.role == 1 || user.role == 2 || creator === user.account) {
                 gameQuery = 'status = '+ status + ' and report = ' + report;
             }
         }
