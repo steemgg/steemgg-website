@@ -22,43 +22,49 @@ import {DBError} from '../errors/DBError';
 exports.upload = function(req, res) {
     var userid = req.session.user.userid;
     var uploadDir = config.get('steemit.app.uploadurl');
-    var form = new formidable.IncomingForm()
-    form.multiples = true
-    form.keepExtensions = true
-    form.uploadDir = uploadDir
-    form.parse(req, function(err, fields, files) {
-        if (err || !files['file']){
-            console.error(err);
-            return res.status(500).json({ resCode:CODE.FILE_UPLOAD_ERROR.RESCODE, err: CODE.FILE_UPLOAD_ERROR.DESC });
+    var form = new formidable.IncomingForm(),uploadStatus;
+    form.multiples = true;
+    form.keepExtensions = true;
+    form.uploadDir = uploadDir;
+
+    uploadStatus = true;
+    form.on('fileBegin', function (name, file) {
+        let fileType = file.type.split('/').pop();
+        if(fileType == 'jpg' || fileType == 'png' || fileType == 'jpeg' || fileType == 'gif' ){
+            file.path = path.join(uploadDir, '/image/', `${new Date().getTime()}.${fileType}`)
+        } else if (fileType == 'zip') {
+            file.path = path.join(uploadDir, '/zip/', `${new Date().getTime()}.zip`)
+        } else {
+            uploadStatus = false;
         }
-        var ipfs = ipfsAPI({host: config.get('steemit.ipfs.ip'), port: config.get('steemit.ipfs.port'), protocol: 'http'});
-        if(files['file'].type == 'application/zip') {
-            unzipFile(files['file'].path, userid, function cb(unzips){
-                ipfs.util.addFromFs(config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[0].path, { recursive: true }, (err, result) => {
+    }).on('file', function(field, file) {
+        if (uploadStatus) {
+            let ipfs = ipfsAPI({host: config.get('steemit.ipfs.ip'), port: config.get('steemit.ipfs.port'), protocol: 'http'});
+            if(file.type == 'application/zip') {
+                unzipFile(file.path, userid, function cb(unzips){
+                    ipfs.util.addFromFs(config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[0].path, { recursive: true }, (err, result) => {
+                        if (err) {
+                            console.error(err);
+                            return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC });
+                        }
+                        data = result.slice(-1);
+                        return res.status(200).json(result.slice(-1));
+                    })
+                });
+            } else {
+                ipfs.util.addFromFs(file.path, { recursive: true }, (err, result) => {
                     if (err) {
                         console.error(err);
-                        return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC });
+                        return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC + err });
                     }
-                    res.status(200).json(result.slice(-1));
+                    return res.status(200).json(result);
                 })
-            });
+            }
         } else {
-            ipfs.util.addFromFs(files['file'].path, { recursive: true }, (err, result) => {
-                if (err) {
-                    console.error(err);
-                    return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC + err });
-                }
-                res.status(200).json(result);
-            })
+            return res.status(500).json({ resCode:CODE.FILE_TYPE_ERROR.RESCODE, err: CODE.FILE_TYPE_ERROR.DESC });
         }
-    })
-    form.on('fileBegin', function (name, file) {
-        const fileExt = path.extname(file.name);
-        file.path = path.join(uploadDir, '/image/', `${new Date().getTime()}${fileExt}`)
-        if(file.type == 'application/zip') {
-            file.path = path.join(uploadDir, '/zip/', `${new Date().getTime()}.zip`)
-        }
-    })
+    });
+    form.parse(req);
 };
 
 exports.me = async function(req, res) {

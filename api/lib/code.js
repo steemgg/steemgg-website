@@ -31,7 +31,8 @@ const CODE = {
     FILE_UPLOAD_ERROR: {RESCODE:701,DESC:'file upload failed'},
     IPFS_ERROR: {RESCODE:702,DESC:'ipfs upload failed'},
     PARAMS_ERROR: {RESCODE:703,DESC:'params error'},
-    PARAMS_INCONSISTENT_ERROR: {RESCODE:704,DESC:'inconsistent params'}
+    PARAMS_INCONSISTENT_ERROR: {RESCODE:704,DESC:'inconsistent params'},
+    FILE_TYPE_ERROR: {RESCODE:705,DESC:'incorrect file type'}
 }
 
 module.exports = CODE;
