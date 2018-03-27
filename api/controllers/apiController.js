@@ -251,9 +251,10 @@ exports.listGame = async function(req, res, next) {
         let creator = (typeof req.query.creator !== 'undefined') ? req.query.creator : '';
         let report = (typeof req.query.report !== 'undefined') ?  parseInt(req.query.report,10) : 0;
         let status = (typeof req.query.status !== 'undefined') ? parseInt(req.query.status, 10) : 0;
+        let recommend = (typeof req.query.recommend !== 'undefined') ? parseInt(req.query.recommend, 10) : '';
         let sort = (typeof req.query.sort !== 'undefined') ? req.query.sort : 'created_desc';
         let sortArr = sort.split("_")
-        let currUrl = querystring.stringify({ offset: offset, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], creator:creator, status:status, report:report });
+        let currUrl = querystring.stringify({ offset: offset, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], creator:creator, status:status, report:report, recommend:recommend });
         let nextUrl = querystring.stringify({ offset: offset+pageSize, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], creator:creator, status:status, report:report });
         let gameQuery = 'status = 1';
         if (typeof req.session.user !== 'undefined') {
@@ -268,8 +269,11 @@ exports.listGame = async function(req, res, next) {
         if (category !='') {
             gameQuery = gameQuery + ' and category=\''+category+'\'';
         }
+        if (recommend !='') {
+            gameQuery = gameQuery + ' and recommend='+recommend;
+        }
         let countSql = 'select count(1) as nums from games where ' + gameQuery;
-        let querySql = 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status from games where ' + gameQuery + ' order by ? ? limit ?,?';
+        let querySql = 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend from games where ' + gameQuery + ' order by ? ? limit ?,?';
         let path = url.parse(req.url).pathname;
         let queryParams = [sortArr[0], sortArr[1], offset, pageSize];
         let href = path +'?' + currUrl;
