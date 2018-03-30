@@ -47,7 +47,7 @@ exports.upload = function(req, res) {
                             console.error(err);
                             return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC });
                         }
-                        data = result.slice(-1);
+                        let data = result.slice(-1);
                         return res.status(200).json(result.slice(-1));
                     })
                 });
