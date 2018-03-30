@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="game-list-container">
     <app-game-grid v-for="game in items" :game="game" :key="game.id"></app-game-grid>
   </div>
 </template>
@@ -13,10 +13,11 @@
     components: {
       appGameGrid: GameGrid
     },
-    props: ['queryParameter', 'items', 'limit'],
+    props: ['queryParameter', 'limit'],
     name: 'GameList',
     data () {
       return {
+        items: null
       }
     },
     computed: {
@@ -30,7 +31,7 @@
             console.log('get the game item query result with', this.items, this.queryParameter)
           })
         } else {
-          gameService.list().then(result => {
+          gameService.query({status: 1}).then(result => {
             console.log(result)
             this.items = result.items.slice(this.limit)
             console.log('get the game item list', this.items)
@@ -50,3 +51,9 @@
     }
   }
 </script>
+<style>
+  .game-list-container {
+    display: flex;
+    flex-wrap: wrap;
+  }
+</style>

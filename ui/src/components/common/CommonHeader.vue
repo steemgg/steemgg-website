@@ -7,33 +7,36 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
+          <li class="nav-item">
             <router-link class="nav-link" :to="{name: 'home'}" tag="a">Home </router-link>
           </li>
           <li class="nav-item">
             <router-link class="nav-link" :to="{name: 'newGame'}" tag="a">Upload Game</router-link>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" v-if="$store.getters.user.role >= 2">
             <router-link class="nav-link" :to="{name: 'auditGame'}" tag="a">Audit Games</router-link>
           </li>
           <li class="nav-item">
             <router-link class="nav-link" :to="{name: 'browseGame'}" tag="a">Browse Game</router-link>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="https://v2.steemconnect.com/oauth2/authorize?client_id=steemitgame.app&redirect_uri=http%3A%2F%2Fdev.steemitgame.com%2Fcallback&scope=login,offline,vote,comment,comment_delete,comment_options,custom_json,claim_reward_balance">Log In</a>
+            <router-link class="nav-link" v-if="$store.state.loggedIn" :to="{name: 'userProfile'}" tag="a">Profile</router-link>
           </li>
         </ul>
-        <form class="form-inline mt-2 mt-md-0">
-          <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-        </form>
+        <!--<form class="form-inline mt-2 mt-md-0">-->
+          <!--<input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">-->
+          <!--<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>-->
+        <!--</form>-->
+        <user-info></user-info>
       </div>
     </nav>
   </div>
 </template>
 
 <script>
+  import UserInfo from './UserInfo'
   export default {
+    components: {UserInfo},
     name: 'CommonHeader',
     data () {
       return {
@@ -46,4 +49,10 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
+  .log-out-link {
+    color: white;
+  }
+  .nav-link {
+    font-size: 16px;
+  }
 </style>

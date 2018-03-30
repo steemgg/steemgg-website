@@ -8,7 +8,7 @@
       <swiper-slide><img class="slider-image" src="../../assets/images/3.jpg"/></swiper-slide>
       <div class="swiper-pagination" slot="pagination"></div>
     </swiper>
-    <div class="baner-info">
+    <div class="slider-text">
       <h3>
         GET <span>PAID</span> BY PLAYING <span>GAMES</span>
       </h3>
@@ -61,11 +61,38 @@
     height: 500px;
     position: relative;
   }
-  .baner-info {
+  .slider-text {
     position: absolute;
     top: 30%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 100;
+  }
+
+  .slider-text{
+    padding-top: 11em;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .slider-text h3 {
+    text-align: center;
+    font-size: 3.5em;
+    color: #fff;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+  }
+  .slider-text h3 span {
+    color:#02a388;
+  }
+  .slider-text h4{
+    text-align: center;
+    font-size: 1em;
+    color: #fff;
+    margin: 2em 0 2.5em 0;
+    font-family: 'Lato', sans-serif;
+    text-transform: uppercase;
+    font-weight: 300;
+    letter-spacing: 5px;
   }
 </style>
