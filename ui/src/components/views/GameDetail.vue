@@ -33,7 +33,7 @@
                   <span v-for="tag in metadata.tags" class="gameTag">{{tag}}</span>
                 </div>
                 <div class="authorInfo">
-                  <avatar :accountName="game.account"></avatar>
+                  <avatar :account="game.account"></avatar>
                   <div class="accountName"><a :href="'https://steemit.com/@' + game.account" target="_blank">{{game.account}}</a></div>
                 </div>
                 <div class="description" v-html="compiledDescription">

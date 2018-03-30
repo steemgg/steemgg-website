@@ -10,8 +10,4 @@ export default class SteemService {
       return accountInfo
     })
   }
-
-  vote (catetory, author, permlink) {
-
-  }
 }

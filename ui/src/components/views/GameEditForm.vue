@@ -244,20 +244,18 @@
                 // pop up success message
                 this.game.id = game.id
                 this.gameActionInProgress = false
-                this.$alert('Congratulations! Your game has been created', 'Game Created', {
-                  confirmButtonText: '确定',
-                  callback: action => {
-                    // go to my game list view
-                  }
+                this.$notify({
+                  title: 'Game Created',
+                  message: 'Congratulations! Your game has been created. You can create a new Post to steemit now.',
+                  type: 'success',
+                  offset: 100
                 })
               }).catch(error => {
                 console.log(error)
                 this.gameActionInProgress = false
-                this.$alert('Oops! Something went wrong. Your game cannot be created right now.', 'Game Creation Fail', {
-                  confirmButtonText: 'Got it',
-                  callback: action => {
-                    // go to my game list view
-                  }
+                this.$notify.error({
+                  title: 'Oops!',
+                  message: ' Something went wrong. Your game cannot be created right now. Please try again later or contact us.'
                 })
                 this.errorMessage = error.data
               })
@@ -266,14 +264,17 @@
               gameService.update(this.game).then(() => {
                 console.log('game updated successfully.')
                 this.gameActionInProgress = false
-                this.$message.success('Game updated successfully')
+                this.$notify({
+                  title: 'Game Updated',
+                  message: 'Your game has been updated. You can create a new Post to steemit now.',
+                  type: 'success',
+                  offset: 100
+                })
               }).catch(error => {
                 this.gameActionInProgress = false
-                this.$alert('Oops! Something went wrong. Your game cannot be updated right now.', 'Game Creation Fail', {
-                  confirmButtonText: 'Got it',
-                  callback: action => {
-                    // go to my game list view
-                  }
+                this.$notify.error({
+                  title: 'Oops!',
+                  message: ' Something went wrong. Your game cannot be updated right now. Please try again later or contact us.'
                 })
                 this.errorMessage = error.data
               })
@@ -386,12 +387,20 @@
       initData () {
         if (this.id != null) {
           gameService.getById(this.id).then(game => {
-            this.game = game
-            this.$refs.coverImageDropzone.dropzone.emit('addedfile', this.game.coverImage)
-            this.$refs.coverImageDropzone.dropzone.options.thumbnail.call(this.$refs.coverImageDropzone, this.game.coverImage, 'http://gateway.ipfs.io/ipfs/' + game.coverImage.hash)
-            this.$refs.coverImageDropzone.dropzone.emit('complete', this.game.coverImage)
-            this.$refs.coverImageDropzone.dropzone.files.push(this.game.coverImage)
-            this.fileList = [this.game.gameUrl]
+            // only the game creator or admin can edit game
+            if (this.$store.getters.isAdmin || game.account === this.$store.getters.user.account) {
+              this.game = game
+              this.$refs.coverImageDropzone.dropzone.emit('addedfile', this.game.coverImage)
+              this.$refs.coverImageDropzone.dropzone.options.thumbnail.call(this.$refs.coverImageDropzone, this.game.coverImage, 'http://gateway.ipfs.io/ipfs/' + game.coverImage.hash)
+              this.$refs.coverImageDropzone.dropzone.emit('complete', this.game.coverImage)
+              this.$refs.coverImageDropzone.dropzone.files.push(this.game.coverImage)
+              this.fileList = [this.game.gameUrl]
+            } else {
+              this.$message.error('You are not allowed to edit this game.')
+              this.$router.push({
+                name: 'home'
+              })
+            }
           }).catch(error => {
             console.log(error)
           })

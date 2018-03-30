@@ -18,6 +18,12 @@ export const store = new Vuex.Store({
   getters: {
     user: state => {
       return state.user
+    },
+    isAdmin: state => {
+      return state.user.role === 3
+    },
+    isAuditor: state => {
+      return state.user.role >= 2
     }
   },
   mutations: {

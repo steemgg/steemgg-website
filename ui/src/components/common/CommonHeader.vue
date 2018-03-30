@@ -19,6 +19,9 @@
           <li class="nav-item">
             <router-link class="nav-link" :to="{name: 'browseGame'}" tag="a">Browse Game</router-link>
           </li>
+          <li class="nav-item">
+            <router-link class="nav-link" v-if="$store.state.loggedIn" :to="{name: 'userProfile'}" tag="a">Profile</router-link>
+          </li>
         </ul>
         <!--<form class="form-inline mt-2 mt-md-0">-->
           <!--<input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">-->

@@ -3,8 +3,8 @@
     <common-header></common-header>
     <div class="listContainer">
       <el-tabs v-model="activeTab" type="border-card" @tab-click="handleClick" v-loading="loading">
-        <el-tab-pane label="Audit" name="audit"><app-game-table :items="auditItems" class="audit-table"></app-game-table></el-tab-pane>
-        <el-tab-pane label="Report" name="report"><app-game-table :items="reportItems" class="audit-table"></app-game-table></el-tab-pane>
+        <el-tab-pane label="Audit" name="audit"><app-game-table :items="auditItems" :type="audit" class="audit-table"></app-game-table></el-tab-pane>
+        <el-tab-pane label="Report" name="report"><app-game-table :items="reportItems" :type="report" class="audit-table"></app-game-table></el-tab-pane>
         <el-tab-pane label="Find" name="find">Find perticular game</el-tab-pane>
       </el-tabs>
     </div>

@@ -145,7 +145,9 @@
   }
   .filters {
     display: flex;
-    flex-direction:row-reverse;
+    border-bottom: 5px solid darkseagreen;
+    padding-bottom: 10px;
+    /*flex-direction:row-reverse;*/
     padding-right: 20px;
     .filter {
       margin: 0 10px;

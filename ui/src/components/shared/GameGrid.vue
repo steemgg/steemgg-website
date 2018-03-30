@@ -23,7 +23,8 @@
           <i class="fa fa-usd" aria-hidden="true"></i>
           {{game.payout}}
         </span>
-        <router-link :to="{ name: 'viewGame', params: { id: game.id }}" tag="a" class="play">→</router-link>
+        <router-link v-if="mode != 'edit'" :to="{ name: 'viewGame', params: { id: game.id }}" tag="a" class="play">→</router-link>
+        <router-link v-if="mode == 'edit'" :to="{ name: 'editGame', params: { id: game.id }}" tag="a" class="play">→</router-link>
       </div>
     </div>
   </div>
@@ -33,7 +34,7 @@
   export default {
     components: {
     },
-    props: ['game'],
+    props: ['game', 'mode'],
     name: 'GameGrid',
     data () {
       return {
@@ -64,9 +65,9 @@
     overflow: hidden;
     position: relative;
     text-align: center;
-    -webkit-box-shadow: 1px 1px 2px #e6e6e6;
-    -moz-box-shadow: 1px 1px 2px #e6e6e6;
-    box-shadow: 1px 1px 2px #e6e6e6;
+    -webkit-box-shadow: 2px 2px 4px #e6e6e6;
+    -moz-box-shadow: 2px 2px 4px #e6e6e6;
+    box-shadow: 2px 2px 4px #e6e6e6;
     cursor: default;
     word-break: break-all;
     /*background: #fff url(../images/bgimg.jpg) no-repeat center center;*/

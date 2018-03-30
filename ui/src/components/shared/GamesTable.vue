@@ -21,8 +21,9 @@
       <el-table-column label="Operations" width="180">
         <template slot-scope="scope">
           <el-button @click="viewDetails(scope.$index)" type="text" size="small">Detail</el-button>
-          <el-button @click="openDialog(scope.$index, 'approve')" type="text" size="small">Approve</el-button>
-          <el-button @click="openDialog(scope.$index, 'deny')" type="text" size="small">Deny</el-button>
+          <el-button @click="openDialog(scope.$index, 'Approve')" type="text" size="small" ng-if="type == 'audit' ">Approve</el-button>
+          <el-button @click="openDialog(scope.$index, 'Deny')" type="text" size="small" ng-if="type == 'report'">Deny</el-button>
+          <el-button @click="openDialog(scope.$index, 'Clear')" type="text" size="small" ng-if="type == 'report'">Clear Report</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -52,7 +53,7 @@
 //      appTable: Table,
 //      appTableColumn: TableColumn
     },
-    props: ['items'],
+    props: ['items', 'type'],
     name: 'GamesTable',
     data () {
       return {
@@ -79,7 +80,7 @@
       openDialog (index, type) {
         this.dialogFormVisible = true
         this.activeIndex = index
-        this.actionTitle = (type === 'approve' ? 'Approve' : 'Deny')
+        this.actionTitle = type
       },
       approve () {
         this.dialogFormVisible = false
@@ -98,13 +99,27 @@
       },
       deny () {
         this.dialogFormVisible = false
-        console.log(`approve details of ${this.activeIndex}`)
+        console.log(`deny details of ${this.activeIndex}`)
         this.loading = true
         gameService.deny(this.items[this.activeIndex].id, this.form.comment).then(() => {
           this.$message.success('Game is denied.')
         }).catch(error => {
           console.log(error)
           this.$message.error('Deny action failed.')
+        }).finally(() => {
+          this.form.comment = ''
+          this.loading = false
+        })
+      },
+      clear () {
+        this.dialogFormVisible = false
+        console.log(`approve details of ${this.activeIndex}`)
+        this.loading = true
+        gameService.undoReport(this.items[this.activeIndex].id, this.form.comment).then(() => {
+          this.$message.success('Game report status is cleared.')
+        }).catch(error => {
+          console.log(error)
+          this.$message.error('undo report action failed.')
         }).finally(() => {
           this.form.comment = ''
           this.loading = false

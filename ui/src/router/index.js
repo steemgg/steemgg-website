@@ -5,6 +5,7 @@ import HomePage from '@/components/views/HomePage'
 import GameAudit from '../components/views/GameAudit.vue'
 import GameBrowser from '../components/views/GameBrowser.vue'
 import GameDetail from '../components/views/GameDetail.vue'
+import UserSummary from '../components/views/UserSummary.vue'
 import { store } from '../store/store'
 
 Vue.use(Router)
@@ -39,6 +40,18 @@ export default new Router({
       name: 'viewGame',
       component: GameDetail,
       props: true
+    },
+    {
+      path: '/userProfile',
+      name: 'userProfile',
+      component: UserSummary
+      // beforeEnter: (to, from, next) => {
+      //   if (store.state.loggedIn === false) {
+      //     next(false)
+      //   } else {
+      //     next()
+      //   }
+      // }
     },
     {
       path: '/game/audit',
