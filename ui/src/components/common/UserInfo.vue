@@ -9,7 +9,7 @@
   </div>
 </template>
 <script>
-//  import axios from 'axios'
+  import axios from 'axios'
   import Avatar from '../shared/Avatar'
   import ElButton from '../../../node_modules/element-ui/packages/button/src/button'
   export default {
@@ -21,37 +21,51 @@
     data () {
       return {
         loggedIn: false,
-        loading: false
+        loading: false,
+        testMode: false
       }
     },
     methods: {
       logout () {
-        this.$store.commit('deleteUser')
-        this.loggedIn = false
-//        this.loading = true
-//        axios.get('v1/logout').then(response => {
-//          this.$message.success('log out successfully')
-//          this.$store.commit('deleteUser')
-//        }).finally(() => {
-//          this.loading = false
-//        })
+        if (this.testMode) {
+          this.$store.commit('deleteUser')
+          this.loggedIn = false
+        } else {
+          this.loading = true
+          axios.get('v1/logout').then(response => {
+            this.$message.success('log out successfully')
+            this.$store.commit('deleteUser')
+          }).finally(() => {
+            this.loading = false
+          })
+        }
       }
     },
     mounted () {
-      this.$store.commit('setUser', {'id': 15, 'account': 'stg.admin', 'userid': 729275, 'role': 2, 'status': 1, 'created': '2018-0202T08:41:28Z'})
-      this.loggedIn = true
-//      this.loading = true
-//      axios.get('v1/me').then(response => {
-//        console.log('user logged in')
-//        this.$store.commit('setUser', response.data)
-//        this.loggedIn = true
-//        this.loading = false
-//      }).catch(error => {
-//        this.loggedIn = false
-//        console.log(error.response)
-//        this.$store.commit('deleteUser')
-//        this.loading = false
-//      })
+      if (this.testMode) {
+        this.$store.commit('setUser', {
+          'id': 15,
+          'account': 'stg.admin',
+          'userid': 729275,
+          'role': 2,
+          'status': 1,
+          'created': '2018-0202T08:41:28Z'
+        })
+        this.loggedIn = true
+      } else {
+        this.loading = true
+        axios.get('v1/me').then(response => {
+          console.log('user logged in')
+          this.$store.commit('setUser', response.data)
+          this.loggedIn = true
+          this.loading = false
+        }).catch(error => {
+          this.loggedIn = false
+          console.log(error.response)
+          this.$store.commit('deleteUser')
+          this.loading = false
+        })
+      }
     },
     computed: {
       accountName () {

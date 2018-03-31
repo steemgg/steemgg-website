@@ -215,7 +215,7 @@
         }
       },
       refreshSteemitMetaData () {
-        debugger
+//        debugger
         if (this.game) {
           this.latestPost = null
           if (this.game && this.game.activities && this.game.activities.length > 0) {

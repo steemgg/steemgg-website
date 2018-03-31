@@ -102,7 +102,7 @@ export default class GameService {
   }
 
   vote (author, permlink, weight) {
-    debugger
+    // debugger
     return axios.post(`v1/vote/${author}/${permlink}`, {weight: weight}).then(response => {
       return response.data
     })
@@ -128,7 +128,6 @@ export default class GameService {
       tags: []
     }
     for (let i = 0; i < game.activities.length; i++) {
-      debugger
       let activity = game.activities[i]
       // if (activity.status === 0) {
       //   // already closed, get award directly from backend data
