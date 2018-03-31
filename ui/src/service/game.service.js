@@ -102,6 +102,7 @@ export default class GameService {
   }
 
   vote (author, permlink, weight) {
+    debugger
     return axios.post(`v1/vote/${author}/${permlink}`, {weight: weight}).then(response => {
       return response.data
     })
@@ -127,24 +128,24 @@ export default class GameService {
       tags: []
     }
     for (let i = 0; i < game.activities.length; i++) {
-      // debugger
+      debugger
       let activity = game.activities[i]
-      if (activity.status === 0) {
-        // already closed, get award directly from backend data
-        result.totalPayout += activity.payout
-      } else {
+      // if (activity.status === 0) {
+      //   // already closed, get award directly from backend data
+      //   result.totalPayout += activity.payout
+      // } else {
         // promises.push(steamApi.getContentAsync(/*activity.account*/'steemitgame.test', activity.permlink).then(response => {
-        promises.push(this.getContentData('steemitgame.test', activity.permlink).then(response => {
-          console.log('get data for content: ' + activity.permlink, response)
-          result.totalPayout += response.totalPayout
-          if (response.tags.length > 0) {
-            result.tags = result.tags.concat(response.tags)
-          }
-          if (response.activeVotes.length > 0) {
-            result.activeVotes = result.activeVotes.concat(response.tags)
-          }
-        }))
-      }
+      promises.push(this.getContentData('steemitgame.test', activity.permlink).then(response => {
+        console.log('get data for content: ' + activity.permlink, response)
+        result.totalPayout += response.totalPayout
+        if (response.tags.length > 0) {
+          result.tags = result.tags.concat(response.tags)
+        }
+        if (response.activeVotes.length > 0) {
+          result.activeVotes = result.activeVotes.concat(response.activeVotes)
+        }
+      }))
+      // }
     }
 
     return Promise.all(promises).then(() => {

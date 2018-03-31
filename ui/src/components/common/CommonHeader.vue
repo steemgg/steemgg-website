@@ -1,26 +1,20 @@
 <template>
-  <div>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-      <a class="navbar-brand" href="#">SteemitGame</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+  <div class="commentHeader">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+      <a class="" href="#">SteemitGame</a>
+      <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">-->
+        <!--<span class="navbar-toggler-icon"></span>-->
+      <!--</button>-->
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
             <router-link class="nav-link" :to="{name: 'home'}" tag="a">Home </router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" :to="{name: 'newGame'}" tag="a">Upload Game</router-link>
+            <router-link class="nav-link" :to="{name: 'newGame'}" tag="a"><i class="fa fa-cloud-upload fa-2x"></i></router-link>
           </li>
           <li class="nav-item" v-if="$store.getters.user.role >= 2">
-            <router-link class="nav-link" :to="{name: 'auditGame'}" tag="a">Audit Games</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" :to="{name: 'browseGame'}" tag="a">Browse Game</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" v-if="$store.state.loggedIn" :to="{name: 'userProfile'}" tag="a">Profile</router-link>
+            <router-link class="nav-link" :to="{name: 'auditGame'}" tag="a"><i class="fa fa-eye fa-2x" title="Audit Game"></i></router-link>
           </li>
         </ul>
         <!--<form class="form-inline mt-2 mt-md-0">-->
@@ -49,10 +43,21 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
-  .log-out-link {
-    color: white;
-  }
-  .nav-link {
-    font-size: 16px;
+  .commentHeader {
+    .log-out-link {
+      color: white;
+    }
+    .nav-link {
+      font-size: 16px;
+      li {
+        a {
+          padding-bottom: 0px;
+        }
+      }
+    }
+    .navbar {
+      height: 50px;
+      margin-bottom: 0px;
+    }
   }
 </style>

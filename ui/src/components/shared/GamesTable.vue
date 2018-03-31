@@ -17,13 +17,18 @@
           {{transformTime(scope.row.lastModified)}}
         </template>
       </el-table-column>
+      <el-table-column label="Audit History" width="150">
+        <template slot-scope="scope">
+          <comment-popover :comments="scope.row.auditComments"></comment-popover>
+        </template>
+      </el-table-column>
       <!--<el-table-column fixed="right" label="Operations" width="180">-->
       <el-table-column label="Operations" width="180">
         <template slot-scope="scope">
+          <el-button v-if="scope.row.status == 0" @click="openDialog(scope.$index, 'Approve')" type="text" size="small" ng-if="type == 'audit' ">Approve</el-button>
+          <el-button v-if="scope.row.status == 1" @click="openDialog(scope.$index, 'Deny')" type="text" size="small" ng-if="type == 'report'">Deny</el-button>
+          <el-button v-if="scope.row.report == 1" @click="openDialog(scope.$index, 'Clear')" type="text" size="small" ng-if="type == 'report'">Clear Report</el-button>
           <el-button @click="viewDetails(scope.$index)" type="text" size="small">Detail</el-button>
-          <el-button @click="openDialog(scope.$index, 'Approve')" type="text" size="small" ng-if="type == 'audit' ">Approve</el-button>
-          <el-button @click="openDialog(scope.$index, 'Deny')" type="text" size="small" ng-if="type == 'report'">Deny</el-button>
-          <el-button @click="openDialog(scope.$index, 'Clear')" type="text" size="small" ng-if="type == 'report'">Clear Report</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -34,8 +39,8 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="approve()">Confirm</el-button>
+        <el-button @click="confirmDialogCancel">Cancel</el-button>
+        <el-button type="primary" @click="confirmDialogAction" :disabled="commentIsEmpty">Confirm</el-button>
       </div>
     </el-dialog>
   </div>
@@ -45,13 +50,13 @@
 //  import { Table, TableColumn } from 'element-ui'
   import moment from 'moment'
   import GameService from '../../service/game.service'
+  import CommentPopover from './CommentPopover.vue'
   const gameService = new GameService()
 
   export default {
 
     components: {
-//      appTable: Table,
-//      appTableColumn: TableColumn
+      CommentPopover
     },
     props: ['items', 'type'],
     name: 'GamesTable',
@@ -82,6 +87,24 @@
         this.activeIndex = index
         this.actionTitle = type
       },
+      confirmDialogCancel () {
+        this.dialogFormVisible = false
+        this.form.comment = ''
+      },
+      confirmDialogAction () {
+        if (this.form.comment.trim().length === 0) {
+          this.$alert('Comment cannot be empty!')
+        } else {
+          if (this.actionTitle === 'Approve') {
+            this.approve()
+          } else if (this.actionTitle === 'Deny') {
+            this.deny()
+          } else if (this.actionTitle === 'Clear') {
+            this.clear()
+          }
+          this.form.comment = ''
+        }
+      },
       approve () {
         this.dialogFormVisible = false
         console.log(`approve details of ${this.activeIndex} with comment`)
@@ -103,6 +126,7 @@
         this.loading = true
         gameService.deny(this.items[this.activeIndex].id, this.form.comment).then(() => {
           this.$message.success('Game is denied.')
+          this.items.splice(this.activeIndex, 1)
         }).catch(error => {
           console.log(error)
           this.$message.error('Deny action failed.')
@@ -113,10 +137,11 @@
       },
       clear () {
         this.dialogFormVisible = false
-        console.log(`approve details of ${this.activeIndex}`)
+        console.log(`clearn report  of ${this.activeIndex}`)
         this.loading = true
         gameService.undoReport(this.items[this.activeIndex].id, this.form.comment).then(() => {
           this.$message.success('Game report status is cleared.')
+          this.items.splice(this.activeIndex, 1)
         }).catch(error => {
           console.log(error)
           this.$message.error('undo report action failed.')
@@ -126,13 +151,14 @@
         })
       },
       transformTime (time) {
-        let result = moment(time, 'x').calendar()
-//        let result = moment(time, 'x').format('MMMM Do YYYY, h:mm:ss a')
-        console.log(result)
+        let result = moment(time).format('DD/MM/YYYY, h:mm')
         return result
       }
     },
     computed: {
+      commentIsEmpty () {
+        return this.form.comment == null || this.form.comment.trim().length === 0
+      }
     },
     mounted () {
     }

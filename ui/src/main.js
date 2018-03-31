@@ -45,6 +45,7 @@ import {
   Menu,
   MenuItem,
   MenuItemGroup,
+  Popover,
   Submenu,
   Slider,
   Tabs,
@@ -53,7 +54,8 @@ import {
   Loading,
   Notification,
   Message,
-  MessageBox
+  MessageBox,
+  Tooltip
 } from 'element-ui'
 
 import infiniteScroll from 'vue-infinite-scroll'
@@ -91,11 +93,13 @@ Vue.use(TabPane)
 Vue.use(Menu)
 Vue.use(MenuItem)
 Vue.use(MenuItemGroup)
+Vue.use(Popover)
 Vue.use(Submenu)
 Vue.use(Slider)
 Vue.use(Loading)
 Vue.use(Icon)
 Vue.use(Dialog)
+Vue.use(Tooltip)
 // Vue.use(Notification)
 // Vue.use(Message)
 // Vue.use(MessageBox)

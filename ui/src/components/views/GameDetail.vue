@@ -17,13 +17,18 @@
                   {{game.title}}
                 </div>
                 <div class="gameMetadata">
-                  <span class="modifiedTime">{{postedTime}}</span>
+                  <span class="modifiedTime">Added on {{postedTime}}</span>
                   <span class="totalPayout">${{metadata.totalPayout}}</span>
                   <span class="activeVotes">
-                    <i class="fa fa-thumbs-o-up" aria-hidden="true" @click="vote"></i> {{votes}}
+                    <el-tooltip class="item" effect="dark" content="Vote" placement="top">
+                      <i class="fa fa-thumbs-o-up" aria-hidden="true" @click="voteUp"></i>
+                    </el-tooltip>
+                     {{votes}}
                   </span>
-                  <span class="report">
-                    <i class="fa fa-flag-checkered" aria-hidden="true"></i>
+                  <span class="report" @click="openDialog">
+                    <el-tooltip class="item" effect="dark" content="Report" placement="top">
+                      <i class="fa fa-flag-checkered" aria-hidden="true"></i>
+                    </el-tooltip>
                   </span>
                   <span class="type">
                     Type: {{game.category}}
@@ -65,6 +70,17 @@
               </div>
             </el-col>
           </el-row>
+          <el-dialog title="Report comment" :visible.sync="dialogFormVisible">
+            <el-form :model="form">
+              <el-form-item label="Report comment">
+                <el-input :rows="3" v-model="form.comment" auto-complete="off" type="textarea"></el-input>
+              </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+              <el-button @click="dialogFormVisible = false">Cancel</el-button>
+              <el-button type="primary" @click="report">Confirm</el-button>
+            </div>
+          </el-dialog>
         </el-main>
       </el-container>
       <el-footer>
@@ -104,7 +120,11 @@
         userInfo: {},
         latestPost: null,
         posting: false,
-        loadingComment: false
+        loadingComment: false,
+        dialogFormVisible: false,
+        form: {
+          comment: ''
+        }
       }
     },
     props: ['id'],
@@ -125,9 +145,20 @@
 
     },
     methods: {
+      openDialog () {
+        this.dialogFormVisible = true
+      },
+      report () {
+        gameService.report(this.game.id, this.form.comment).then(response => {
+          this.$message('report successfully')
+        }).catch(error => {
+          console.log('Fail to report', error.response)
+          this.$alert('Fail to report!.')
+        })
+      },
       canVote () {
         let canVote = true
-        if (this.latestPost != null && this.metadata.activeVotes != null && this.$store.user) {
+        if (this.latestPost != null && this.metadata.activeVotes != null && this.$store.state.loggedIn) {
           for (let i = 0; i < this.metadata.activeVotes.length; i++) {
             if (this.metadata.activeVotes[i].voter === this.$store.user.account) {
               canVote = false
@@ -139,12 +170,9 @@
         }
         return canVote
       },
-      vote (weight) {
-        if (weight == null) {
-          weight = 5000
-        }
+      voteUp () {
         if (this.canVote()) {
-          gameService.vote(this.latestPost.account, this.latestPost.permlink, weight).then(response => {
+          gameService.vote(this.latestPost.account, this.latestPost.permlink, 5000).then(response => {
             this.$message('vote successfully')
             this.refreshSteemitMetaData()
           }).catch(error => {
@@ -187,6 +215,7 @@
         }
       },
       refreshSteemitMetaData () {
+        debugger
         if (this.game) {
           this.latestPost = null
           if (this.game && this.game.activities && this.game.activities.length > 0) {
@@ -195,6 +224,8 @@
           gameService.fetchSteemitMetadata(this.game).then(response => {
             console.log('get steem data', response)
             this.metadata = response
+          }).catch(error => {
+            console.log('fail to get steem data', error.response)
           })
         }
       },
@@ -268,7 +299,12 @@
 
   .gameInfo {
     padding: 10px;
+    font-size: 1.5em;
 
+    .gameTitle {
+      display: flex;
+      font-weight: bold;
+    }
     .comments {
       margin-top: 20px;
       .commentAction {
@@ -292,9 +328,11 @@
   .gameTags {
     margin: 20px 0;
     display: flex;
+    flex-wrap:wrap;
     .gameTag {
       display: inline;
       margin-right: 12px;
+      margin-top:12px;
       /*line-height: 32px;*/
       padding: 4px 6px;
       background: rgba(94,109,130,.1);
@@ -308,11 +346,15 @@
   .gameMetadata {
     height: 30px;
     line-height: 30px;
-    span {
+    span{
       padding-left: 20px;
     }
 
-    .activeVotes {
+    span:first-child {
+      padding-left: 0px;
+    }
+
+    .activeVotes, .report {
       float: right;
       i {
         cursor: pointer;
@@ -321,6 +363,7 @@
 
     .modifiedTime {
       float: left;
+      font-weight:bold;
     }
 
     .totalPayout {

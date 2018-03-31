@@ -3,9 +3,9 @@
     <common-header></common-header>
     <div class="listContainer">
       <el-tabs v-model="activeTab" type="border-card" @tab-click="handleClick" v-loading="loading">
-        <el-tab-pane label="Audit" name="audit"><app-game-table :items="auditItems" :type="audit" class="audit-table"></app-game-table></el-tab-pane>
-        <el-tab-pane label="Report" name="report"><app-game-table :items="reportItems" :type="report" class="audit-table"></app-game-table></el-tab-pane>
-        <el-tab-pane label="Find" name="find">Find perticular game</el-tab-pane>
+        <el-tab-pane label="Pending Game" name="audit"><app-game-table :items="auditItems" type="audit" class="audit-table"></app-game-table></el-tab-pane>
+        <el-tab-pane label="Reported Game" name="report"><app-game-table :items="reportItems" type="report" class="audit-table"></app-game-table></el-tab-pane>
+        <el-tab-pane label="Live Game" name="live"><app-game-table :items="liveItems" type="live" class="audit-table"></app-game-table></el-tab-pane>
       </el-tabs>
     </div>
     <common-footer></common-footer>
@@ -31,6 +31,7 @@
       return {
         auditItems: null,
         reportItems: null,
+        liveItems: null,
         activeTab: 'audit',
         loading: false
       }
@@ -44,7 +45,7 @@
     },
     mounted () {
       this.loading = true
-      gameService.query({status: 0, limit: 1000}).then(result => {
+      gameService.query({status: 0, report: 0, limit: 1000}).then(result => {
         console.log(result)
         this.auditItems = result.items
         console.log('get the game item list', this.auditItems)
@@ -53,6 +54,12 @@
         console.log(error.response)
       }).finally(() => {
         this.loading = false
+      })
+
+      gameService.query({status: 1, limit: 1000}).then(result => {
+        console.log(result)
+        this.liveItems = result.items
+        console.log('get the game item list', this.reportItems)
       })
 
       gameService.query({report: 1, limit: 1000}).then(result => {

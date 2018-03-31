@@ -19,7 +19,9 @@
           </div>
           <div class="metadata">
             <span class="votes">
-              <i class="fa fa-thumbs-o-up" aria-hidden="true" :disabled="!canVote()" @click="voteUp()"></i> {{votesCount}}
+              <el-tooltip class="item" effect="dark" content="Vote" placement="top">
+                <i class="fa fa-thumbs-o-up" aria-hidden="true" :disabled="!canVote()" @click="voteUp()"></i> {{votesCount}}
+              </el-tooltip>
             </span>
             <span class="award">${{payout}}</span>
             <span class="reply">
@@ -61,30 +63,34 @@
         alreadyVotes: false,
         leaveReply: false,
         replyContent: '',
-        replying: false
+        replying: false,
+        voting: false
       }
     },
     methods: {
       voteUp () {
-        if (this.canVote()) {
-          gameService.vote(this.comment.author, this.comment.permlink, 5000).then(response => {
-            this.votesCount++
-            this.$message.success('Vote Successfully.')
-          }).catch(error => {
-            if (error.response.data.resultCode === 402) {
-              this.$message.error('You just voted, please wait for a while.')
-            } else {
-              this.$message.error('Vote Failed.')
-            }
-            console.log('Vote comment failed', error.response)
-          })
+        if (this.$store.state.loggedIn) {
+          if (this.voting === false) {
+            this.voting = true
+            gameService.vote(this.comment.author, this.comment.permlink, 5000).then(response => {
+              this.votesCount++
+              this.$message.success('Vote Successfully.')
+            }).catch(error => {
+              if (error.response.data.resultCode === 402) {
+                this.$message.error('You just voted, please wait for a while.')
+              } else {
+                this.$message.error('Vote Failed.')
+              }
+              console.log('Vote comment failed', error.response)
+            })
+          }
         } else {
           this.$message.warning('Please log in first to vote.')
         }
       },
       canVote () {
         // user has login
-        return this.$store.state.loggedIn
+        return this.$store.state.loggedIn && this.voting === false
       },
       postReply () {
         if (this.replyContent == null || this.replyContent.trim().length === 0) {
@@ -174,6 +180,9 @@
       }
       .reply {
         margin-left: 10px;
+      }
+      .votes:hover {
+        cursor: pointer;
       }
     }
 

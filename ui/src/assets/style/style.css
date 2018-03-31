@@ -2,3 +2,11 @@
   font-weight: bold;
   color: white;
 }
+
+#app .el-header {
+  height: auto;
+}
+
+#app .el-main {
+  padding: 0 20px;
+}

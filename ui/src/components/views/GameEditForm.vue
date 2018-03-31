@@ -388,6 +388,7 @@
         if (this.id != null) {
           gameService.getById(this.id).then(game => {
             // only the game creator or admin can edit game
+            debugger
             if (this.$store.getters.isAdmin || game.account === this.$store.getters.user.account) {
               this.game = game
               this.$refs.coverImageDropzone.dropzone.emit('addedfile', this.game.coverImage)
