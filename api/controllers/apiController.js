@@ -253,8 +253,9 @@ exports.listGame = async function(req, res, next) {
         let status = (typeof req.query.status !== 'undefined') ? parseInt(req.query.status, 10) : 1;
         let recommend = (typeof req.query.recommend !== 'undefined') ? parseInt(req.query.recommend, 10) : '';
         let sort = (typeof req.query.sort !== 'undefined') ? req.query.sort : 'created_desc';
+        let includeAuditComment = (typeof req.query.includeAuditComment !== 'undefined') ? req.query.includeAuditComment : false;
         let sortArr = sort.split("_")
-        let currUrl = querystring.stringify({ offset: offset, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], creator:creator, status:status, report:report, recommend:recommend });
+        let currUrl = querystring.stringify({ offset: offset, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], creator:creator, status:status, report:report, recommend:recommend,includeAuditComment:includeAuditComment });
         let nextUrl = querystring.stringify({ offset: offset+pageSize, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], creator:creator, status:status, report:report });
         let gameQuery = 'status = 1';
         if (typeof req.session.user !== 'undefined') {
@@ -281,6 +282,18 @@ exports.listGame = async function(req, res, next) {
         let count = dbRes[0]['nums'];
         if(count>0) {
             let dbRes = await game.query(querySql, queryParams);
+            if(includeAuditComment){
+                for(let k in dbRes){
+                    let reportComments = await game.reportComments(dbRes[k]['id']);
+                    if(reportComments.length>0){
+                        dbRes[k]['reportComments'] = reportComments;
+                    }
+                    let auditComments = await game.auditComments(dbRes[k]['id']);
+                    if(auditComments.length>0){
+                        dbRes[k]['auditComments'] = auditComments;
+                    }
+                }
+            }
             let next = '';
             if (count>=(offset+pageSize)) {
                 next = path+ '?'+ nextUrl;
@@ -337,6 +350,9 @@ exports.auditGame = async function(req, res, next) {
         let author = req.session.user.account;
         if(await user.getInterval('comment:interval:'+author)){
             return res.status(500).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
+        }
+        if(typeof data.status === 'undefined' ) {
+            return res.status(500).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
         }
         let permlink = createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
         let parentAuthor = dbRes[0].account;
