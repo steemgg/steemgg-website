@@ -253,9 +253,9 @@ exports.listGame = async function(req, res, next) {
         let status = (typeof req.query.status !== 'undefined') ? parseInt(req.query.status, 10) : 1;
         let recommend = (typeof req.query.recommend !== 'undefined') ? parseInt(req.query.recommend, 10) : '';
         let sort = (typeof req.query.sort !== 'undefined') ? req.query.sort : 'created_desc';
-        let includeAuditComment = (typeof req.query.includeAuditComment !== 'undefined') ? req.query.includeAuditComment : false;
+        let includeComment = (typeof req.query.includeComment !== 'undefined') ? req.query.includeComment : false;
         let sortArr = sort.split("_")
-        let currUrl = querystring.stringify({ offset: offset, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], creator:creator, status:status, report:report, recommend:recommend,includeAuditComment:includeAuditComment });
+        let currUrl = querystring.stringify({ offset: offset, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], creator:creator, status:status, report:report, recommend:recommend,includeComment:includeComment });
         let nextUrl = querystring.stringify({ offset: offset+pageSize, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], creator:creator, status:status, report:report });
         let gameQuery = 'status = 1';
         if (typeof req.session.user !== 'undefined') {
@@ -282,7 +282,7 @@ exports.listGame = async function(req, res, next) {
         let count = dbRes[0]['nums'];
         if(count>0) {
             let dbRes = await game.query(querySql, queryParams);
-            if(includeAuditComment){
+            if(includeComment){
                 for(let k in dbRes){
                     let reportComments = await game.reportComments(dbRes[k]['id']);
                     if(reportComments.length>0){
