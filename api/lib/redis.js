@@ -16,6 +16,7 @@ function Redis(host, port) {
     this.options.get = promisify(this.options.client.get).bind(this.options.client);
     this.options.set = promisify(this.options.client.set).bind(this.options.client);
     this.options.hmset = promisify(this.options.client.hmset).bind(this.options.client);
+    this.options.del = promisify(this.options.client.del).bind(this.options.client);
     this.options.hdel = promisify(this.options.client.hdel).bind(this.options.client);
     this.options.hgetall = promisify(this.options.client.hgetall).bind(this.options.client);
     this.options.expire = promisify(this.options.client.expire).bind(this.options.client);
@@ -37,8 +38,12 @@ Redis.prototype.hgetall = async function(key) {
     return  await this.options.hgetall(key);
 }
 
-Redis.prototype.hdel = async function(key) {
-    return  await this.options.hdel(key);
+Redis.prototype.hdel = async function(key, k) {
+    return  await this.options.hdel(key, k);
+}
+
+Redis.prototype.del = async function(key) {
+    return  await this.options.del(key);
 }
 
 Redis.prototype.hmset = async function(key, value) {
