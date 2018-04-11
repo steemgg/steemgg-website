@@ -47,7 +47,7 @@ exports.upload = function(req, res) {
                             console.error(err);
                             return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC });
                         }
-                        data = result.slice(-1);
+                        let data = result.slice(-1);
                         return res.status(200).json(result.slice(-1));
                     })
                 });
@@ -245,42 +245,46 @@ exports.deleteGame = async function(req, res, next) {
 exports.listGame = async function(req, res, next) {
     try {
         let data = req.body;
-        let offset = (typeof req.query.offset !== 'undefined') ?  parseInt(req.query.offset,10) : 0;
-        let pageSize = (typeof req.query.limit !== 'undefined') ? parseInt(req.query.limit, 10) : 20;
-        let category = (typeof req.query.category !== 'undefined') ? req.query.category : '';
-        let creator = (typeof req.query.creator !== 'undefined') ? req.query.creator : '';
-        let report = (typeof req.query.report !== 'undefined') ?  parseInt(req.query.report,10) : 0;
-        let status = (typeof req.query.status !== 'undefined') ? parseInt(req.query.status, 10) : 0;
-        let recommend = (typeof req.query.recommend !== 'undefined') ? parseInt(req.query.recommend, 10) : '';
-        let sort = (typeof req.query.sort !== 'undefined') ? req.query.sort : 'created_desc';
+        let keys = {};
+        let offset = keys['offset'] = (typeof req.query.offset !== 'undefined') ?  parseInt(req.query.offset,10) : 0;
+        let pageSize = keys['pageSize'] = (typeof req.query.limit !== 'undefined') ? parseInt(req.query.limit, 10) : 20;
+        let category = keys['category'] = (typeof req.query.category !== 'undefined') ? req.query.category : '';
+        let creator = keys['account'] = (typeof req.query.creator !== 'undefined') ? req.query.creator : '';
+        let report = keys['report'] = (typeof req.query.report !== 'undefined') ?  parseInt(req.query.report,10) : 0;
+        let status = keys['status'] = (typeof req.query.status !== 'undefined') ? parseInt(req.query.status, 10) : 1;
+        let recommend = keys['recommend'] = (typeof req.query.recommend !== 'undefined') ? parseInt(req.query.recommend, 10) : '';
+        let sort = keys['sort'] = (typeof req.query.sort !== 'undefined') ? req.query.sort : 'created_desc';
+        let includeComment = (typeof req.query.includeComment !== 'undefined') ? req.query.includeComment : false;
         let sortArr = sort.split("_")
-        let currUrl = querystring.stringify({ offset: offset, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], creator:creator, status:status, report:report, recommend:recommend });
+        let currUrl = querystring.stringify({ offset: offset, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], creator:creator, status:status, report:report, recommend:recommend,includeComment:includeComment });
         let nextUrl = querystring.stringify({ offset: offset+pageSize, pageSize: pageSize, category: category, sort:sortArr[1], column:sortArr[0], creator:creator, status:status, report:report });
-        let gameQuery = 'status = 1';
+        let gameQuery = '';
+        keys['status'] = 1;
         if (typeof req.session.user !== 'undefined') {
             let user = req.session.user;
             if (user.role == 1 || user.role == 2 || creator === user.account) {
-                gameQuery = 'status = '+ status + ' and report = ' + report;
+                keys['status'] = status;
             }
         }
-        if (creator != '') {
-            gameQuery = gameQuery + ' and account=\''+creator+'\'';
-        }
-        if (category !='') {
-            gameQuery = gameQuery + ' and category=\''+category+'\'';
-        }
-        if (recommend !='') {
-            gameQuery = gameQuery + ' and recommend='+recommend;
-        }
-        let countSql = 'select count(1) as nums from games where ' + gameQuery;
-        let querySql = 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend from games where ' + gameQuery + ' order by ? ? limit ?,?';
+
         let path = url.parse(req.url).pathname;
-        let queryParams = [sortArr[0], sortArr[1], offset, pageSize];
         let href = path +'?' + currUrl;
-        let dbRes = await game.query(countSql, []);
+        let dbRes = await game.countOfGames(keys);
         let count = dbRes[0]['nums'];
         if(count>0) {
-            let dbRes = await game.query(querySql, queryParams);
+            let dbRes = await game.gameList(keys);
+            if(includeComment){
+                for(let k in dbRes){
+                    let reportComments = await game.reportComments(dbRes[k]['id']);
+                    if(reportComments.length>0){
+                        dbRes[k]['reportComments'] = reportComments;
+                    }
+                    let auditComments = await game.auditComments(dbRes[k]['id']);
+                    if(auditComments.length>0){
+                        dbRes[k]['auditComments'] = auditComments;
+                    }
+                }
+            }
             let next = '';
             if (count>=(offset+pageSize)) {
                 next = path+ '?'+ nextUrl;
@@ -337,6 +341,9 @@ exports.auditGame = async function(req, res, next) {
         let author = req.session.user.account;
         if(await user.getInterval('comment:interval:'+author)){
             return res.status(500).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
+        }
+        if(typeof data.status === 'undefined' ) {
+            return res.status(500).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
         }
         let permlink = createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
         let parentAuthor = dbRes[0].account;
@@ -439,7 +446,7 @@ exports.test = async function(req, res, next) {
     try {
         let dbRes = await user.getUserToken("token:userid:477514");
         console.log(dbRes);
-        res.status(200).send();
+        return res.status(200).json(dbRes[0]);
     } catch(err) {
         console.error(err);
         return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });

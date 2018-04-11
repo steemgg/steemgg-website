@@ -1,19 +1,23 @@
 'use strict';
 
 import db from '../lib/db'
+import redis from '../lib/redis';
 
 exports.addGame = async function(game) {
     let rows = await db.execute(db.WRITE, 'INSERT INTO games SET ?', game);
+    clearCache();
     return rows;
 }
 
 exports.deleteGame = async function(params) {
     let rows = await db.execute(db.WRITE, 'update games set status = 3 where id= ? and userid= ?', params);
+    clearCache();
     return rows;
 }
 
 exports.updateGame = async function(params) {
     let rows = await db.execute(db.WRITE, 'update games set ? where id= ? and userid= ?', params);
+    clearCache();
     return rows;
 }
 
@@ -21,12 +25,14 @@ exports.auditGame = async function(params, status) {
     let rows = await db.execute(db.WRITE, 'INSERT INTO comments SET ?', params);
     rows = await db.execute(db.WRITE, 'update comments set status = 1 and type = 0 where gameid= ?', params.gameid);
     rows = await db.execute(db.WRITE, 'update games set status=? where id= ?', [status,params.gameid]);
+    clearCache();
     return rows;
 }
 
 exports.reportGame = async function(params) {
     let rows = await db.execute(db.WRITE, 'INSERT INTO comments SET ?', params);
     rows = await db.execute(db.WRITE, 'update games set report=1 where id= ?', params.gameid);
+    clearCache();
     return rows;
 }
 
@@ -71,7 +77,68 @@ exports.getPayoutActivities = async function() {
     return rows;
 }
 
-exports.query = async function(sql, params) {
-    let rows = await db.execute(db.READ, sql, params);
+exports.countOfGames = async function(params) {
+    let gameQuery = '';
+    let allKey = 'game:count';
+    let key = 'game:count:s:'+params['status']+':r:'+params['report']+':remm:'+params['recommend']+':a:'+params['account']+':c:'+params['category'];
+    let rows = await redis.instance.get(key);
+    if(rows) {
+        return JSON.parse(rows);
+    }
+    for (let k in params ) {
+        if(params[k] !== '' && k !='sort' && k !='offset' && k !='pageSize') {
+            gameQuery =  gameQuery + ' and ' + k + '=\'' +params[k] +'\'';
+        }
+    }
+    let sql = 'select count(1) as nums from games where 1=1 ' + gameQuery;
+    rows = await db.execute(db.READ, sql, []);
+    let count = rows[0]['nums'];
+    if(count>0) {
+        let data = {};
+        data[key] = 1;
+        await redis.instance.hmset(allKey, data);
+        await redis.instance.set(key, JSON.stringify(rows));
+    }
     return rows;
 }
+
+exports.gameList = async function(params) {
+    let gameQuery = '';
+    let allKey = 'game:list';
+    let key = 'game:list:s:'+params['status']+':r:'+params['report']+':remm:'+params['recommend']+':a:'+params['account']+':c:'+params['category']+':o:'+ params['offset']+':p:'+params['pageSize']+':s:'+params['sort'];
+    let rows = await redis.instance.get(key);
+    if(rows) {
+        return JSON.parse(rows);
+    }
+    for (let k in params ) {
+        if(params[k] !== '' && k !='sort' && k !='offset' && k !='pageSize') {
+            gameQuery =  gameQuery + ' and ' + k + '=\'' +params[k] +'\'';
+        }
+    }
+    let sortArr = params['sort'].split("_");
+    let sql = 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend from games where 1=1 ' + gameQuery + ' order by ? ? limit ?,?';
+    rows = await db.execute(db.READ, sql, [sortArr[0], sortArr[1], params['offset'], params['pageSize']]);
+    if(Object.keys(rows).length>0) {
+        let data = {};
+        data[key] = 1;
+        await redis.instance.hmset(allKey, data);
+        await redis.instance.set(key, JSON.stringify(rows));
+    }
+    return rows;
+}
+
+async function clearCache() {
+    let gameListKey = 'game:list';
+    let gameCountKey = 'game:count';
+    let list = await redis.instance.hgetall(gameListKey);
+    for(let k in list ) {
+        await redis.instance.del(k);
+        await redis.instance.hdel(gameListKey, k);
+    }
+    let countList = await redis.instance.hgetall(gameCountKey);
+    for(let ck in countList ) {
+        await redis.instance.del(ck);
+        await redis.instance.hdel(gameCountKey,ck);
+    }
+}
+
