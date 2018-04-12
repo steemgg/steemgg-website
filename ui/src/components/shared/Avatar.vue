@@ -1,11 +1,11 @@
 <template>
-  <div class="avatar" :style="'background-image: url(https://steemitimages.com/u/' + this.accountName + '/avatar'"></div>
+  <div class="avatar" :style="'background-image: url(https://steemitimages.com/u/' + this.account + '/avatar'"></div>
 </template>
 <script>
   export default {
     components: {
     },
-    props: ['accountName'],
+    props: ['account'],
     name: 'Avatar',
     data () {
       return {
@@ -21,7 +21,6 @@
   .avatar {
     vertical-align: top;
     display: inline-block;
-    margin-right: 25px;
     height: 36px;
     width: 36px;
     cursor: pointer;

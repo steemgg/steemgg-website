@@ -30,7 +30,7 @@
             <el-input ref="replyInput" autofocus placeholder="say something..." v-model="replyContent" :disabled="replying"></el-input>
             <div class="replyButtons">
               <el-button round @click="leaveReply = false;" :disabled="replying">Cancel</el-button>
-              <el-button round @click="postReply" :disabled="replying">Reply</el-button>
+              <el-button round @click="postReply" :loading="replying">Reply</el-button>
             </div>
           </div>
           <div class="commentReplies">
@@ -71,14 +71,20 @@
             this.votesCount++
             this.$message.success('Vote Successfully.')
           }).catch(error => {
-            this.$message.error('Vote Failed.')
-            console.log('Vote comment failed', error)
+            if (error.response.data.resultCode === 402) {
+              this.$message.error('You just voted, please wait for a while.')
+            } else {
+              this.$message.error('Vote Failed.')
+            }
+            console.log('Vote comment failed', error.response)
           })
+        } else {
+          this.$message.warning('Please log in first to vote.')
         }
       },
-
       canVote () {
-        return true
+        // user has login
+        return this.$store.state.loggedIn
       },
       postReply () {
         if (this.replyContent == null || this.replyContent.trim().length === 0) {
@@ -86,13 +92,14 @@
           this.replying = true
           gameService.postComment(this.comment.author, this.comment.permlink, this.replyContent).then(response => {
             console.log('comment response', response)
-            this.comment.replies.push({
+            this.comment.replies.unshift({
               author: response.author,
               total_payout_value: '0.000 SBD',
               pending_payout_value: '0.000 SBD',
               replies: [],
               permlink: response.permlink,
-              body: this.replyContent
+              body: this.replyContent,
+              last_update: moment().toISOString()
             })
             this.leaveReply = false
             this.$message.success('Post reply successfully.')
@@ -125,12 +132,15 @@
       },
 
       lateUpdate () {
-        return moment(this.comment.last_update).fromNow()
+        return moment(this.comment.last_update.endsWith('Z') ? this.comment.last_update : this.comment.last_update + 'Z').fromNow()
       }
     },
     mounted () {
       console.log('comment', this.comment)
       this.votesCount = this.comment.active_votes ? this.comment.active_votes.length : 0
+      if (this.comment) {
+        this.comment.replies.reverse()
+      }
     }
   }
 </script>

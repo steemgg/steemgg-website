@@ -33,19 +33,19 @@
                   <span v-for="tag in metadata.tags" class="gameTag">{{tag}}</span>
                 </div>
                 <div class="authorInfo">
-                  <avatar :accountName="game.account"></avatar>
+                  <avatar :account="game.account"></avatar>
                   <div class="accountName"><a :href="'https://steemit.com/@' + game.account" target="_blank">{{game.account}}</a></div>
                 </div>
                 <div class="description" v-html="compiledDescription">
                 </div>
-                <div class="comments">
+                <div class="comments" v-loading="loadingComment">
                   <div class="commentAction">
                     <div class="commentActionTitle">Comments</div>
                     <div class="commentActionText">
-                      <el-input placeholder="Leave a comment" v-model="gameComment"></el-input>
+                      <el-input placeholder="Leave a comment" v-model="gameComment" :disabled="posting"></el-input>
                     </div>
                     <div class="commentActionButton">
-                      <el-button round>Comment</el-button>
+                      <el-button round @click="postComment" :loading="posting">Comment</el-button>
                     </div>
                   </div>
                   <div v-for="comment in this.comments">
@@ -79,7 +79,6 @@
   import GameList from '../shared/GameList'
   import Avatar from '../shared/Avatar'
   import Comment from '../shared/Comment'
-  import mockData from '../../mocks/gameListMock'
   import moment from 'moment'
   import marked from 'marked'
   import GameService from '../../service/game.service'
@@ -96,14 +95,16 @@
     data () {
       return {
         isAuditMode: false,
-        similarGames: mockData.items,
+        similarGames: [],
         game: {},
         gameUrl: '',
         gameComment: '',
         comments: [],
         metadata: {},
         userInfo: {},
-        latestPost: null
+        latestPost: null,
+        posting: false,
+        loadingComment: false
       }
     },
     props: ['id'],
@@ -126,9 +127,9 @@
     methods: {
       canVote () {
         let canVote = true
-        if (this.latestPost != null && this.metadata.activeVotes != null) {
+        if (this.latestPost != null && this.metadata.activeVotes != null && this.$store.user) {
           for (let i = 0; i < this.metadata.activeVotes.length; i++) {
-            if (this.metadata.activeVotes[i].voter === 'steemitgame.test') {
+            if (this.metadata.activeVotes[i].voter === this.$store.user.account) {
               canVote = false
               break
             }
@@ -143,7 +144,7 @@
           weight = 5000
         }
         if (this.canVote()) {
-          gameService.vote(this.latestPost.author, this.latestPost.permlink, weight).then(response => {
+          gameService.vote(this.latestPost.account, this.latestPost.permlink, weight).then(response => {
             this.$message('vote successfully')
             this.refreshSteemitMetaData()
           }).catch(error => {
@@ -154,6 +155,34 @@
           this.$message({
             message: 'You have already vote this game.',
             type: 'warning'
+          })
+        }
+      },
+      postComment () {
+        if (this.gameComment.length > 0 && this.gameComment.length <= 5) {
+          this.$message.warning('comment is too short')
+        } else if (this.gameComment.length > 5 && this.latestPost) {
+          this.posting = true
+          gameService.postComment(this.latestPost.account, this.latestPost.permlink, this.gameComment).then(response => {
+            console.log('post comment successfully', response)
+            this.comments.unshift({
+              author: response.author,
+              total_payout_value: '0.000 SBD',
+              pending_payout_value: '0.000 SBD',
+              replies: [],
+              permlink: response.permlink,
+              body: this.gameComment,
+              last_update: moment().toISOString()
+            })
+          }).catch(error => {
+            if (error.response.data.resultCode === 402) {
+              this.$message.error('You just added comment, please wait for a while.')
+            } else {
+              this.$message.error('Add comment Failed.')
+            }
+            console.log('error posting comment', error.response)
+          }).finally(() => {
+            this.posting = false
           })
         }
       },
@@ -172,22 +201,53 @@
       refreshSteemitComments () {
         if (this.game && this.game.activities && this.game.activities.length > 0) {
           let activity = this.game.activities[this.game.activities.length - 1]
+          this.loadingComment = true
           gameService.getComments('', activity.account, activity.permlink).then(response => {
-            this.comments = response
+            this.comments = response.reverse()
+          }).catch(error => {
+            console.log('loading comment fail', error.reponse)
+            this.$message.error('Fail to load comment')
+          }).finally(() => {
+            this.loadingComment = false
           })
         }
+      },
+      fetchGame () {
+        if (this.id) {
+          gameService.getById(this.id).then(response => {
+            this.game = response
+            this.gameUrl = 'https://ipfs.io/ipfs/' + this.game.gameUrl.hash
+            console.log('mounted successfully', this.game)
+            this.refreshSteemitMetaData()
+            this.refreshSteemitComments()
+            this.fetchSimilarGame(this.game.category)
+          })
+        }
+      },
+      fetchSimilarGame (category) {
+        gameService.query({category: category, status: 0, limit: 10, sort: 'payout_desc'}).then(response => {
+          if (response.items.length > 0) {
+            this.similarGames = response.items
+          } else {
+            // get random top vote game
+            gameService.query({status: 0, limit: 10, sort: 'payout_desc'}).then(response => {
+              this.similarGames = response.items
+            }).catch(error => {
+              console.log('fetch top payout game error', error.response)
+            })
+          }
+        }).catch(error => {
+          console.log('fetch similar game error', error.response)
+        })
+      }
+    },
+    watch: {
+      'id': function (val, oldVal) {
+        this.fetchGame()
       }
     },
     mounted () {
-      if (this.id) {
-        gameService.getById(this.id).then(response => {
-          this.game = response
-          this.gameUrl = 'https://ipfs.io/ipfs/' + this.game.gameUrl.hash
-          console.log('mounted successfully', this.game)
-          this.refreshSteemitMetaData()
-          this.refreshSteemitComments()
-        })
-      }
+      this.fetchGame()
     }
   }
 </script>
@@ -197,6 +257,10 @@
     font-weight: bold;
   }
 
+  .description {
+    display: flex;
+    margin: 20px;
+  }
   .gamePlayer {
     background-color: #00B6FF;
     height: 400px;
@@ -271,6 +335,7 @@
   .authorInfo {
     display: flex;
     .accountName {
+      margin-left: 20px;
       line-height: 36px;
     }
   }

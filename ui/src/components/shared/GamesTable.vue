@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-table :data="items" style="width: 100%" :stripe=true>
+    <el-table :data="items" style="width: 100%" :stripe=true v-loading="loading">
       <el-table-column prop="id" label="ID" width="50">
       </el-table-column>
       <el-table-column prop="title" label="Name" width="150">
@@ -21,8 +21,9 @@
       <el-table-column label="Operations" width="180">
         <template slot-scope="scope">
           <el-button @click="viewDetails(scope.$index)" type="text" size="small">Detail</el-button>
-          <el-button @click="openDialog(scope.$index, 'approve')" type="text" size="small">Approve</el-button>
-          <el-button @click="openDialog(scope.$index, 'deny')" type="text" size="small">Deny</el-button>
+          <el-button @click="openDialog(scope.$index, 'Approve')" type="text" size="small" ng-if="type == 'audit' ">Approve</el-button>
+          <el-button @click="openDialog(scope.$index, 'Deny')" type="text" size="small" ng-if="type == 'report'">Deny</el-button>
+          <el-button @click="openDialog(scope.$index, 'Clear')" type="text" size="small" ng-if="type == 'report'">Clear Report</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -41,7 +42,7 @@
 </template>
 
 <script>
-  import { Table, TableColumn } from 'element-ui'
+//  import { Table, TableColumn } from 'element-ui'
   import moment from 'moment'
   import GameService from '../../service/game.service'
   const gameService = new GameService()
@@ -49,10 +50,10 @@
   export default {
 
     components: {
-      appTable: Table,
-      appTableColumn: TableColumn
+//      appTable: Table,
+//      appTableColumn: TableColumn
     },
-    props: ['items'],
+    props: ['items', 'type'],
     name: 'GamesTable',
     data () {
       return {
@@ -62,7 +63,8 @@
         form: {
           comment: ''
         },
-        labelWidth: '80px'
+        labelWidth: '80px',
+        loading: false
       }
     },
     methods: {
@@ -78,29 +80,49 @@
       openDialog (index, type) {
         this.dialogFormVisible = true
         this.activeIndex = index
-        this.actionTitle = (type === 'approve' ? 'Approve' : 'Deny')
+        this.actionTitle = type
       },
       approve () {
         this.dialogFormVisible = false
-        this.form.comment = ''
         console.log(`approve details of ${this.activeIndex} with comment`)
+        this.loading = true
         gameService.approve(this.items[this.activeIndex].id, this.form.comment).then(() => {
           this.$message.success('Game is approved.')
           this.items.splice(this.activeIndex, 1)
         }).catch(error => {
           console.log(error)
           this.$message.error('Approve action failed.')
+        }).finally(() => {
+          this.form.comment = ''
+          this.loading = false
         })
       },
       deny () {
         this.dialogFormVisible = false
-        this.form.comment = ''
-        console.log(`approve details of ${this.activeIndex}`)
+        console.log(`deny details of ${this.activeIndex}`)
+        this.loading = true
         gameService.deny(this.items[this.activeIndex].id, this.form.comment).then(() => {
           this.$message.success('Game is denied.')
         }).catch(error => {
           console.log(error)
           this.$message.error('Deny action failed.')
+        }).finally(() => {
+          this.form.comment = ''
+          this.loading = false
+        })
+      },
+      clear () {
+        this.dialogFormVisible = false
+        console.log(`approve details of ${this.activeIndex}`)
+        this.loading = true
+        gameService.undoReport(this.items[this.activeIndex].id, this.form.comment).then(() => {
+          this.$message.success('Game report status is cleared.')
+        }).catch(error => {
+          console.log(error)
+          this.$message.error('undo report action failed.')
+        }).finally(() => {
+          this.form.comment = ''
+          this.loading = false
         })
       },
       transformTime (time) {
