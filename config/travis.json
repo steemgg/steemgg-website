@@ -1,0 +1,37 @@
+{
+  "steemit": {
+    "db": {
+      "host": "db",
+      "port": 3306,
+      "dbName": "steemitgame",
+      "dbUser": "root",
+      "dbPass": "111111"
+    },
+    "redis": {
+      "host": "127.0.0.1",
+      "port": 6379
+    },
+    "dev": {
+      "username": "hello",
+      "password": "password"
+    },
+    "app": {
+      "uploadurl": "/src/app/upload",
+      "gameurl": "/src/app/public/games",
+      "rooturl": "/src/app",
+      "sc2": "https://v2.steemconnect.com",
+      "secret": "password"
+    },
+    "sc": {
+      "app": "steemitgame.app",
+      "cburl": "http://steemit.xxx/callback",
+      "url": "https://v2.steemconnect.com",
+      "secret":"password",
+      "scope": ["login","offline","vote","comment","comment_delete","comment_options","custom_json"]
+    },
+    "ipfs":{
+      "ip": "localhost",
+      "port": "5001"
+    }
+  }
+}
