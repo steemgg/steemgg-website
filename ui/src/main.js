@@ -14,6 +14,8 @@ import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+import { store } from './store/store'
+
 import {
   FormItem,
   Checkbox,
@@ -54,6 +56,7 @@ import {
   MessageBox
 } from 'element-ui'
 
+import infiniteScroll from 'vue-infinite-scroll'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 import mavonEditor from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
@@ -96,6 +99,7 @@ Vue.use(Dialog)
 // Vue.use(Notification)
 // Vue.use(Message)
 // Vue.use(MessageBox)
+Vue.use(infiniteScroll)
 Vue.use(VueAwesomeSwiper)
 Vue.use(mavonEditor)
 Vue.use(BootstrapVue)
@@ -114,6 +118,7 @@ Vue.config.productionTip = false
 new Vue({
   el: '#app',
   router,
+  store,
   template: '<App/>',
   components: { App }
 })

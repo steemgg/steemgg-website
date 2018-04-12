@@ -1,11 +1,12 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '@/components/HelloWorld'
 import GameEditForm from '@/components/views/GameEditForm'
 import HomePage from '@/components/views/HomePage'
 import GameAudit from '../components/views/GameAudit.vue'
 import GameBrowser from '../components/views/GameBrowser.vue'
 import GameDetail from '../components/views/GameDetail.vue'
+import UserSummary from '../components/views/UserSummary.vue'
+import { store } from '../store/store'
 
 Vue.use(Router)
 
@@ -17,11 +18,6 @@ export default new Router({
       component: HomePage
     },
     {
-      path: '/hello',
-      name: 'HelloWorld',
-      component: HelloWorld
-    },
-    {
       path: '/game/new',
       name: 'newGame',
       component: GameEditForm
@@ -30,12 +26,14 @@ export default new Router({
       path: '/game/edit/:id',
       name: 'editGame',
       component: GameEditForm,
-      props: true
-    },
-    {
-      path: '/game',
-      name: 'browseGame',
-      component: GameBrowser
+      props: true,
+      beforeEnter: (to, from, next) => {
+        if (store.state.loggedIn) {
+          next()
+        } else {
+          next(false)
+        }
+      }
     },
     {
       path: '/game/play/:id',
@@ -44,9 +42,28 @@ export default new Router({
       props: true
     },
     {
+      path: '/userProfile',
+      name: 'userProfile',
+      component: UserSummary
+      // beforeEnter: (to, from, next) => {
+      //   if (store.state.loggedIn === false) {
+      //     next(false)
+      //   } else {
+      //     next()
+      //   }
+      // }
+    },
+    {
       path: '/game/audit',
       name: 'auditGame',
-      component: GameAudit
+      component: GameAudit,
+      beforeEnter: (to, from, next) => {
+        if (store.state.user.role < 2) {
+          next(false)
+        } else {
+          next()
+        }
+      }
     },
     {
       path: '/game/browse',
