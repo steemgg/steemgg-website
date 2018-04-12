@@ -2,7 +2,6 @@ require('babel-core/register')({
       ignore: /node_modules\/(?!ProjectB)/
 });
 
-let config = require('config');
 let assert = require('assert');
 let redis = require('../api/lib/redis');
 let user = require('../api/models/user');
@@ -11,8 +10,8 @@ let testAccount = 'yh';
 let testToken = 'pass';
 
 redis.Initialize({
-    url: config.get('steemit.redis.host'),
-    port: config.get('steemit.redis.port')
+    url: "127.0.0.1",
+    port: 6379
 });
 
 describe('Api', function() {
