@@ -1,6 +1,8 @@
 # steemitgame-website
 The Official Web Site of steemitgame
 
+[![Build Status](https://travis-ci.org/steemitgame-team/steemitgame-website.svg?branch=develop)](https://travis-ci.org/steemitgame-team/steemitgame-website)
+
 
 
 # How to run the UI locally
