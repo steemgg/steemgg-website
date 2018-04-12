@@ -6,12 +6,34 @@ let config = require('config');
 let assert = require('assert');
 let redis = require('../api/lib/redis');
 let user = require('../api/models/user');
+let mockHttp = require('./mockHttp');
 let testAccount = 'yh';
 let testToken = 'pass';
 
 redis.Initialize({
     url: config.get('steemit.redis.host'),
     port: config.get('steemit.redis.port')
+});
+
+describe('Api', function() {
+    var server;
+
+    before(function() {
+        server = mockHttp.server.create();
+        server.start();
+    });
+
+    after(function() {
+        server.stop();
+    });
+
+    describe("GET /v1/me", function() {
+        it('returns 401', function() {
+            mockHttp.client.get('/v1/me', function(err, req, res, data) {
+                assert.equal(res.statusCode, 401);
+            });
+        });
+    });
 });
 
 describe('Redis', function() {
@@ -28,3 +50,4 @@ describe('Redis', function() {
         });
     });
 });
+

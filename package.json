@@ -1,10 +1,14 @@
 {
   "name": "steemitgame",
   "version": "0.0.1",
+  "description": "Based on Steemit Restful Api",
+  "main": "app.js",
+  "author": "bonjovis",
+  "license": "MIT",
   "private": true,
   "scripts": {
-      "test": "mocha",
-      "start" : "node bin/www",
+      "test": "mocha --timeout 10000",
+      "start" : "SET NODE_ENV=production && node bin/www",
       "start-dev" : "nodemon -L bin/www"
   },
   "dependencies": {
@@ -18,7 +22,8 @@
     "redis": "^2.8.0",
     "steem": "0.6.4",
     "config": "~1.28.1",
-    "request": "~2.83.0", "decompress": "~4.2.0",
+    "request": "~2.83.0",
+    "decompress": "~4.2.0",
     "express-session": "~1.15.6",
     "ipfs-api": "~17.1.3",
     "isomorphic-fetch": "~2.2.1",
@@ -36,6 +41,5 @@
   "devDependencies": {
     "mocha": "^3.0.0"
   },
-  "repository": "https://github.com/steemitgame-team/steemitgame-website.git",
-  "license": "MIT"
+  "repository": "https://github.com/steemitgame-team/steemitgame-website.git"
 }
