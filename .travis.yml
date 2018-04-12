@@ -5,6 +5,9 @@ services:
   - redis-server
 notifications:
   email:
-    - bizheng@gmail.com
-    - bonjovis1985@gmail.com
-    - b.robert.white@gmail.com
+    recipients:
+      - bizheng@gmail.com
+      - bonjovis1985@gmail.com
+      - b.robert.white@gmail.com
+    on_success: always # default: change
+    on_failure: always # default: always
