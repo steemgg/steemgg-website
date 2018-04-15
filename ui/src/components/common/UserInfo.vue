@@ -5,7 +5,18 @@
       <router-link class="fa fa-cog fa-2x fa-fw profile" :to="{name: 'userProfile'}" tag="i" title="Profile"></router-link>
       <el-button class='logout'  @click='logout'>Log out</el-button>
     </span>
-    <a class='nav-link' v-if='!$store.state.loggedIn' :href="loginStateUrl">Log In</a>
+    <a class='nav-link loginLink' v-if='!$store.state.loggedIn' @click="loginInfoVisible = true">Log In</a>
+    <el-dialog
+      title="Login with SteemConnect"
+      :visible.sync="loginInfoVisible"
+      width="30%">
+      <span>You will be redirected to SteemConnect to authenticate to the Steem blockchain. SteemConnect is developed and maintained by Steemit, Inc. and Busy.org.
+SteemGG.com will never access your private keys.</span>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="loginInfoVisible = false">Close</el-button>
+    <el-button type="primary" @click="login">Login with SteemConnect</el-button>
+  </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -22,7 +33,8 @@
       return {
         loggedIn: false,
         loading: false,
-        testMode: false
+        testMode: false,
+        loginInfoVisible: false
       }
     },
     methods: {
@@ -39,6 +51,10 @@
             this.loading = false
           })
         }
+      },
+      login () {
+        this.loginInfoVisible = false
+        window.location.href = 'https://v2.steemconnect.com/oauth2/authorize?client_id=steemitgame.app&redirect_uri=http%3A%2F%2Fdev.steemitgame.com%2Fcallback&scope=login,offline,vote,comment,comment_delete,comment_options,custom_json,claim_reward_balance&state=' + window.location.href
       }
     },
     mounted () {
@@ -70,10 +86,10 @@
     computed: {
       accountName () {
         return this.$store.getters.user.account
-      },
-      loginStateUrl () {
-        return 'https://v2.steemconnect.com/oauth2/authorize?client_id=steemitgame.app&redirect_uri=http%3A%2F%2Fdev.steemitgame.com%2Fcallback&scope=login,offline,vote,comment,comment_delete,comment_options,custom_json,claim_reward_balance&state=' + window.location.href
       }
+//      loginStateUrl () {
+//        return 'https://v2.steemconnect.com/oauth2/authorize?client_id=steemitgame.app&redirect_uri=http%3A%2F%2Fdev.steemitgame.com%2Fcallback&scope=login,offline,vote,comment,comment_delete,comment_options,custom_json,claim_reward_balance&state=' + window.location.href
+//      }
     }
   }
 </script>
@@ -81,6 +97,10 @@
   .userInfoContainer {
     margin-left: 20px;
     color: white;
+    .loginLink {
+      cursor: pointer;
+      font-size: 14px;
+    }
     .avatar {
       margin-right: 15px;
     }
