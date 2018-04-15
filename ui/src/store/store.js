@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import createPersistedState from 'vuex-persistedstate'
 
 Vue.use(Vuex)
 
@@ -20,10 +21,10 @@ export const store = new Vuex.Store({
       return state.user
     },
     isAdmin: state => {
-      return state.user.role === 3
+      return state.user.role === 2
     },
     isAuditor: state => {
-      return state.user.role >= 2
+      return state.user.role === 1
     }
   },
   mutations: {
@@ -42,5 +43,6 @@ export const store = new Vuex.Store({
       }
       state.loggedIn = false
     }
-  }
+  },
+  plugins: [createPersistedState()]
 })

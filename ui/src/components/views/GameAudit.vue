@@ -45,7 +45,7 @@
     },
     mounted () {
       this.loading = true
-      gameService.query({status: 0, report: 0, limit: 1000}).then(result => {
+      gameService.query({status: 0, report: 0, limit: 1000, includeComment: true}).then(result => {
         console.log(result)
         this.auditItems = result.items
         console.log('get the game item list', this.auditItems)
@@ -56,13 +56,13 @@
         this.loading = false
       })
 
-      gameService.query({status: 1, limit: 1000}).then(result => {
+      gameService.query({status: 1, limit: 1000, includeComment: true}).then(result => {
         console.log(result)
         this.liveItems = result.items
         console.log('get the game item list', this.reportItems)
       })
 
-      gameService.query({report: 1, limit: 1000}).then(result => {
+      gameService.query({report: 1, limit: 1000, includeComment: true}).then(result => {
         console.log(result)
         this.reportItems = result.items
         console.log('get the game item list', this.reportItems)

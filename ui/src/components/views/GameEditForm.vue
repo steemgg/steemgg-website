@@ -89,7 +89,7 @@
                   </el-form-item>
                   <el-form-item>
                     <!--<el-button type='primary' v-if="activity.permLink != null" @click="submitActivity(false)">Update</el-button>-->
-                    <el-button type='primary' :disabled="game.id == null || postingInProgress" @click="submitActivity(true)">New Post</el-button>
+                    <el-button type='primary' :disabled="game.id == null" :loading="postingInProgress" @click="submitActivity(true)">New Post</el-button>
                     <!--<el-button @click="cancelForm()">Cancel</el-button>-->
                   </el-form-item>
                 </el-form>
@@ -305,7 +305,12 @@
             }).catch(error => {
               console.log(error)
               this.postingInProgress = false
-              this.$message.error('Fail to create post in steemit.')
+              console.error('fail to post', error.response)
+              if (error.response.data.resultCode === 400) {
+                this.$message.warning('You just create a post, please wait for a while.')
+              } else {
+                this.$message.error('Fail to create post in steemit.')
+              }
             })
           } else {
             gameService.updateActivity(this.game.id, this.activity).then(activity => {
@@ -402,6 +407,7 @@
               })
             }
           }).catch(error => {
+            this.$message.error('Fail to load the game data, make sure the game exist!')
             console.log(error)
           })
         } else {

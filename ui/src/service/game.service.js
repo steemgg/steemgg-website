@@ -87,7 +87,9 @@ export default class GameService {
     clonnedActivity.gameid = gameId
     delete clonnedActivity.award
     delete clonnedActivity.permlink
-    return axios.post('v1/post', clonnedActivity)
+    return axios.post('v1/post', clonnedActivity).then(response => {
+      return response.data
+    })
   }
 
   updateActivity (gameId, activity) {

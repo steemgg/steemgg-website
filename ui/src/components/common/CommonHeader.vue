@@ -11,10 +11,10 @@
             <router-link class="nav-link" :to="{name: 'home'}" tag="a">Home </router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" :to="{name: 'newGame'}" tag="a"><i class="fa fa-cloud-upload fa-2x"></i></router-link>
+            <router-link class="nav-link" :to="{name: 'newGame'}" tag="a"><i class="fa fa-cloud-upload fa-2x"></i><span class="actionText">Upload Game</span></router-link>
           </li>
-          <li class="nav-item" v-if="$store.getters.user.role >= 2">
-            <router-link class="nav-link" :to="{name: 'auditGame'}" tag="a"><i class="fa fa-eye fa-2x" title="Audit Game"></i></router-link>
+          <li class="nav-item" v-if="$store.getters.user.role >= 1">
+            <router-link class="nav-link" :to="{name: 'auditGame'}" tag="a"><i class="fa fa-eye fa-2x" title="Audit Game"></i><span class="actionText">Audit Game</span></router-link>
           </li>
         </ul>
         <!--<form class="form-inline mt-2 mt-md-0">-->
@@ -53,6 +53,10 @@
         a {
           padding-bottom: 0px;
         }
+      }
+      .actionText {
+        padding-left: 5px;
+        font-size: 14px;
       }
     }
     .navbar {

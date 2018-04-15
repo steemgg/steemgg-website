@@ -18,31 +18,20 @@
     <div class="userSummary">
       <el-tabs v-model="activeName">
         <el-tab-pane label="Live Games" name="liveGames">
-          <div class="headerTitle">All Live Games</div>
           <div class="gameContainer">
             <span v-if="approvedGames.length == 0" class="emptyMessage">No live game right now.</span>
-            <div v-if="approvedGames.length > 0">
-              <game-grid v-if="approvedGames.length > 0" v-for="game in approvedGames" :game="game" :key="game.id"></game-grid>
-            </div>
+            <user-game-table v-if="approvedGames.length > 0" :items="approvedGames"></user-game-table>
           </div>
         </el-tab-pane>
         <el-tab-pane label="Pending Games" name="pendingGames">
-          <div class="headerTitle">All Pending Games</div>
           <div class="gameContainer">
             <span v-if="pendingGames.length == 0" class="emptyMessage">No pending game right now.</span>
-            <div v-if="pendingGames.length > 0">
-              <game-grid  v-for="game in pendingGames" :game="game" :key="game.id" :mode="edit"></game-grid>
-            </div>
+            <user-game-table v-if="pendingGames.length > 0" :items="pendingGames"></user-game-table>
           </div>
         </el-tab-pane>
         <el-tab-pane label="Reported Games" name="reportedGames">
-          <div class="headerTitle">All Reported Games</div>
-          <div class="gameContainer">
-            <span v-if="reportedGames.length == 0" class="emptyMessage">No reported game right now.</span>
-            <div v-if="reportedGames.length > 0">
-              <game-grid  v-for="game in pendingGames" :game="game" :key="game.id" :mode="edit"></game-grid>
-            </div>
-          </div>
+          <user-game-table :items="reportedGames" v-if="reportedGames.length > 0"></user-game-table>
+          <span v-if="reportedGames.length == 0"  class="emptyMessage">No reported game right now.</span>
         </el-tab-pane>
         <el-tab-pane label="Rewards" name="awards">Total rewards: {{totalPayout}}</el-tab-pane>
       </el-tabs>
@@ -55,8 +44,10 @@
   import CommonFooter from '../common/CommonFooter.vue'
   import GameList from '../shared/GameList'
   import GameGrid from '../shared/GameGrid.vue'
+  import CommentPopover from '../shared/CommentPopover.vue'
+  import UserGameTable from '../shared/UserGameTable.vue'
   import Avatar from '../shared/Avatar'
-//  import moment from 'moment'
+  import moment from 'moment'
   import GameService from '../../service/game.service'
   import axios from 'axios'
   const gameService = new GameService()
@@ -67,10 +58,13 @@
       CommonHeader,
       CommonFooter,
       GameGrid,
-      Avatar
+      Avatar,
+      CommentPopover,
+      UserGameTable
     },
     data () {
       return {
+        loading: false,
         approvedGames: [],
         pendingGames: [],
         reportedGames: [],
@@ -88,6 +82,24 @@
         this.fetchUserGames()
         this.fetchUserSteemInfo()
       },
+      playGame (index) {
+        console.log(`check details of ${index}`)
+        this.$router.push({
+          name: 'viewGame',
+          params: {
+            id: this.items[index].id
+          }
+        })
+      },
+      editGame (id) {
+        console.log(`edit of ${id}`)
+        this.$router.push({
+          name: 'editGame',
+          params: {
+            id: id
+          }
+        })
+      },
       fetchUserSteemInfo () {
         if (this.$store.state.user.account) {
           axios.get('https://api.steemjs.com/get_follow_count?account=' + this.$store.state.user.account).then(response => {
@@ -98,15 +110,15 @@
       },
       fetchUserGames () {
         console.log(1)
-        gameService.query({status: 1, creator: this.$store.getters.user.account}).then(response => {
+        gameService.query({status: 1, creator: this.$store.getters.user.account, includeComment: true}).then(response => {
           this.approvedGames = response.items
           this.calculateTotalPayout(this.approvedGames)
         })
-        gameService.query({status: 0, creator: this.$store.getters.user.account}).then(response => {
+        gameService.query({status: 0, creator: this.$store.getters.user.account, includeComment: true}).then(response => {
           this.pendingGames = response.items
           this.calculateTotalPayout(this.pendingGames)
         })
-        gameService.query({report: 1, creator: this.$store.getters.user.account}).then(response => {
+        gameService.query({report: 1, creator: this.$store.getters.user.account, includeComment: true}).then(response => {
           this.reportedGames = response.items
           this.calculateTotalPayout(this.reportedGames)
         })
@@ -115,36 +127,14 @@
         gameList.forEach(game => {
           this.totalPayout += game.payout
         })
+      },
+      transformTime (time) {
+        let result = moment(time).format('DD/MM/YYYY, h:mm')
+        return result
       }
     },
-    beforeRouteEnter (to, from, next) {
-      console.log('beforeRouteEnter')
-      next()
-    },
-    beforeRouteUpdate (to, from, next) {
-      console.log('beforeRouteUpdate')
-//      if (this.$store.getters.loggedIn) {
-//        this.initData()
-//        next()
-//      } else {
-//        this.$router.push({
-//          name: 'home'
-//        })
-//      }
-    },
     mounted () {
-      axios.get('v1/me').then(response => {
-        console.log('user logged in')
-        this.$store.commit('setUser', response.data)
-        this.initData()
-        this.loggedIn = true
-      }).catch(error => {
-        console.log(error)
-        this.loggedIn = false
-        this.$router.push('home')
-        this.$store.commit('deleteUser')
-      }).finally(() => {
-      })
+      this.initData()
     }
   }
 </script>
@@ -172,5 +162,10 @@
         font-size: 15px;
       }
     }
+  }
+
+  .emptyMessage {
+    font-weight: bold;
+    font-size: 20px;
   }
 </style>

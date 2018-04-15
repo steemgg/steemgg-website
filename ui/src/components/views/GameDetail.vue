@@ -78,7 +78,7 @@
             </el-form>
             <div slot="footer" class="dialog-footer">
               <el-button @click="dialogFormVisible = false">Cancel</el-button>
-              <el-button type="primary" @click="report">Confirm</el-button>
+              <el-button type="primary" @click="report" :disabled="commentIsEmpty">Confirm</el-button>
             </div>
           </el-dialog>
         </el-main>
@@ -141,8 +141,10 @@
       },
       votes () {
         return this.metadata && this.metadata.activeVotes ? this.metadata.activeVotes.length : 0
+      },
+      commentIsEmpty () {
+        return this.form.comment == null || this.form.comment.trim().length === 0
       }
-
     },
     methods: {
       openDialog () {
@@ -150,8 +152,10 @@
       },
       report () {
         gameService.report(this.game.id, this.form.comment).then(response => {
+          this.dialogFormVisible = false
           this.$message('report successfully')
         }).catch(error => {
+          this.dialogFormVisible = false
           console.log('Fail to report', error.response)
           this.$alert('Fail to report!.')
         })
@@ -247,11 +251,15 @@
         if (this.id) {
           gameService.getById(this.id).then(response => {
             this.game = response
-            this.gameUrl = 'https://ipfs.io/ipfs/' + this.game.gameUrl.hash
-            console.log('mounted successfully', this.game)
-            this.refreshSteemitMetaData()
-            this.refreshSteemitComments()
-            this.fetchSimilarGame(this.game.category)
+            if (this.game.status === 1) {
+              this.gameUrl = 'https://ipfs.io/ipfs/' + this.game.gameUrl.hash
+              console.log('mounted successfully', this.game)
+              this.refreshSteemitMetaData()
+              this.refreshSteemitComments()
+              this.fetchSimilarGame(this.game.category)
+            } else {
+              this.$message.error('This game cannot be played!')
+            }
           })
         }
       },

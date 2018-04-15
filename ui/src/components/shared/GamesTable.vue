@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-table :data="items" style="width: 100%" :stripe=true v-loading="loading">
+    <el-table :data="items" style="width: 100%" :stripe=true v-loading="loading" :empty-text="'None'">
       <el-table-column prop="id" label="ID" width="50">
       </el-table-column>
       <el-table-column prop="title" label="Name" width="150">
@@ -16,6 +16,8 @@
         <template slot-scope="scope">
           {{transformTime(scope.row.lastModified)}}
         </template>
+      </el-table-column>
+      <el-table-column prop="payout" label="Reward" width="80">
       </el-table-column>
       <el-table-column label="Audit History" width="150">
         <template slot-scope="scope">

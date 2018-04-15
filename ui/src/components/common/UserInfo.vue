@@ -5,7 +5,7 @@
       <router-link class="fa fa-cog fa-2x fa-fw profile" :to="{name: 'userProfile'}" tag="i" title="Profile"></router-link>
       <el-button class='logout'  @click='logout'>Log out</el-button>
     </span>
-    <a class='nav-link' v-if='!$store.state.loggedIn' href='https://v2.steemconnect.com/oauth2/authorize?client_id=steemitgame.app&redirect_uri=http%3A%2F%2Fdev.steemitgame.com%2Fcallback&scope=login,offline,vote,comment,comment_delete,comment_options,custom_json,claim_reward_balance'>Log In</a>
+    <a class='nav-link' v-if='!$store.state.loggedIn' :href="loginStateUrl">Log In</a>
   </div>
 </template>
 <script>
@@ -22,7 +22,7 @@
       return {
         loggedIn: false,
         loading: false,
-        testMode: false
+        testMode: true
       }
     },
     methods: {
@@ -70,6 +70,9 @@
     computed: {
       accountName () {
         return this.$store.getters.user.account
+      },
+      loginStateUrl () {
+        return 'https://v2.steemconnect.com/oauth2/authorize?client_id=steemitgame.app&redirect_uri=http%3A%2F%2Fdev.steemitgame.com%2Fcallback&scope=login,offline,vote,comment,comment_delete,comment_options,custom_json,claim_reward_balance&state=' + window.location.href
       }
     }
   }
