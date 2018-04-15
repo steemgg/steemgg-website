@@ -20,7 +20,14 @@ export default new Router({
     {
       path: '/game/new',
       name: 'newGame',
-      component: GameEditForm
+      component: GameEditForm,
+      beforeEnter: (to, from, next) => {
+        if (store.state.loggedIn) {
+          next()
+        } else {
+          next(false)
+        }
+      }
     },
     {
       path: '/game/edit/:id',

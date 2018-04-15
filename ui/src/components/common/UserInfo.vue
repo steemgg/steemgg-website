@@ -22,7 +22,7 @@
       return {
         loggedIn: false,
         loading: false,
-        testMode: true
+        testMode: false
       }
     },
     methods: {

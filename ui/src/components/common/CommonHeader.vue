@@ -11,7 +11,7 @@
             <router-link class="nav-link" :to="{name: 'home'}" tag="a">Home </router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" :to="{name: 'newGame'}" tag="a"><i class="fa fa-cloud-upload fa-2x"></i><span class="actionText">Upload Game</span></router-link>
+            <a class="nav-link" @click="uploadGame"><i class="fa fa-cloud-upload fa-2x" ></i><span class="actionText">Upload Game</span></a>
           </li>
           <li class="nav-item" v-if="$store.getters.user.role >= 1">
             <router-link class="nav-link" :to="{name: 'auditGame'}" tag="a"><i class="fa fa-eye fa-2x" title="Audit Game"></i><span class="actionText">Audit Game</span></router-link>
@@ -32,6 +32,15 @@
   export default {
     components: {UserInfo},
     name: 'CommonHeader',
+    methods: {
+      uploadGame () {
+        if (!this.$store.state.loggedIn) {
+          this.$message.warning('Please log in first to create game.')
+        } else {
+          this.$router.push('editGame')
+        }
+      }
+    },
     data () {
       return {
       }
@@ -49,6 +58,7 @@
     }
     .nav-link {
       font-size: 16px;
+      cursor: pointer;
       li {
         a {
           padding-bottom: 0px;
