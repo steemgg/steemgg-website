@@ -6,7 +6,7 @@ services:
   - mysql
 before_install:
   - mysql -e 'CREATE DATABASE IF NOT EXISTS steemitgame;'
-  - mysql -u root --default-character-set=utf8 baladay < test/steemitgame.sql
+  - mysql -u root --default-character-set=utf8 steemitgame < test/steemitgame.sql
 notifications:
   email:
     recipients:
