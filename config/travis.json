@@ -1,7 +1,7 @@
 {
   "steemit": {
     "db": {
-      "host": "db",
+      "host": "127.0.0.1",
       "port": 3306,
       "dbName": "steemitgame",
       "dbUser": "root",
@@ -16,9 +16,9 @@
       "password": "password"
     },
     "app": {
-      "uploadurl": "/src/app/upload",
-      "gameurl": "/src/app/public/games",
-      "rooturl": "/src/app",
+      "uploadurl": "/src/upload",
+      "gameurl": "/src/public/games",
+      "rooturl": "/src",
       "sc2": "https://v2.steemconnect.com",
       "secret": "password"
     },
