@@ -3,6 +3,10 @@ node_js:
       - "8"
 services:
   - redis-server
+  - mysql
+before_install:
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS steemitgame;'
+  - mysql -u root --default-character-set=utf8 baladay < test/steemitgame.sql
 notifications:
   email:
     recipients:

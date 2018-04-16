@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-      "test": "mocha --timeout 10000",
+      "test": "mocha --timeout 20000",
       "start" : "SET NODE_ENV=production && node bin/www",
       "start-dev" : "nodemon -L bin/www"
   },
