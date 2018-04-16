@@ -5,7 +5,7 @@
       "port": 3306,
       "dbName": "steemitgame",
       "dbUser": "root",
-      "dbPass": ""
+      "dbPass": "111111"
     },
     "redis": {
       "host": "127.0.0.1",
