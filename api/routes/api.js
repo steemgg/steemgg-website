@@ -19,7 +19,7 @@ module.exports = function(app) {
   app.post('/v1/comment/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.commentGame);
   app.post('/v1/vote/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.voteGame);
   app.post('/v1/report/:id', [morkSessionMiddleware, userMiddleware], api.reportGame);
-  app.get('/v1/me', api.me);
+  app.get('/v1/me', [morkSessionMiddleware, userMiddleware], api.me);
   app.get('/v1/logout', api.logout);
   app.get('/v1/test', api.test);
   app.get('/testLogin', api.index);

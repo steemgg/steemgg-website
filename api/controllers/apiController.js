@@ -69,24 +69,9 @@ exports.upload = function(req, res) {
 
 exports.me = async function(req, res) {
     try {
-        if (typeof req.session.accessToken === 'undefined') {
-            return res.status(401).json({resCode:CODE.NEED_LOGIN_ERROR.RESCODE, err:CODE.NEED_LOGIN_ERROR.DESC});
-        }
-        let result = await steem.me(req.session.accessToken);
-        let dbRes = await user.getUserByAccount(result.user);
-        let unix = Math.round(+new Date()/1000);
-        let userInfo = dbRes[0];
-        if(typeof userInfo === 'undefined') {
-            userInfo = {'account':result.user, 'userid':result.account.id, 'role':0, 'status':1, 'created':unix};
-            await user.addUser(userInfo);
-            let iso = new Date(userInfo['created']*1000).toISOString();
-            userInfo.created = iso;
-        }
-        req.session.user = userInfo;
-        await user.setUserToken("token:userid:"+userInfo.userid, req.session.accessToken);
+        let userInfo = req.session.user;
         return res.status(200).json(userInfo);
     } catch(err) {
-        console.error(err);
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else if (err instanceof SDKError) {
