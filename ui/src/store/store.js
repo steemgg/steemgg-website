@@ -24,7 +24,7 @@ export const store = new Vuex.Store({
       return state.user.role === 2
     },
     isAuditor: state => {
-      return state.user.role === 1
+      return state.user.role >= 1
     }
   },
   mutations: {

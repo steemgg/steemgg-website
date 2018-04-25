@@ -37,7 +37,9 @@
         if (!this.$store.state.loggedIn) {
           this.$message.warning('Please log in first to create game.')
         } else {
-          this.$router.push('editGame')
+          this.$router.push({
+            name: 'newGame'
+          })
         }
       }
     },
