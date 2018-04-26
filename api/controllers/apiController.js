@@ -235,7 +235,7 @@ exports.listGame = async function(req, res, next) {
         let pageSize = keys['pageSize'] = (typeof req.query.limit !== 'undefined') ? parseInt(req.query.limit, 10) : 20;
         let category = keys['category'] = (typeof req.query.category !== 'undefined') ? req.query.category : '';
         let creator = keys['account'] = (typeof req.query.creator !== 'undefined') ? req.query.creator : '';
-        let report = keys['report'] = (typeof req.query.report !== 'undefined') ?  parseInt(req.query.report,10) : 0;
+        let report = keys['report'] = (typeof req.query.report !== 'undefined') ?  parseInt(req.query.report,10) : '';
         let status = keys['status'] = (typeof req.query.status !== 'undefined') ? parseInt(req.query.status, 10) : 1;
         let recommend = keys['recommend'] = (typeof req.query.recommend !== 'undefined') ? parseInt(req.query.recommend, 10) : '';
         let sort = keys['sort'] = (typeof req.query.sort !== 'undefined') ? req.query.sort : 'created_desc';
