@@ -81,9 +81,14 @@ exports.countOfGames = async function(params) {
     let gameQuery = '';
     let allKey = 'game:count';
     let key = 'game:count:s:'+params['status']+':r:'+params['report']+':remm:'+params['recommend']+':a:'+params['account']+':c:'+params['category'];
-    let rows = await redis.instance.get(key);
-    if(rows) {
-        return JSON.parse(rows);
+    let list = await redis.instance.hgetall(allKey);
+    for(let k in list ) {
+        if(k == key) {
+            let rows = await redis.instance.get(key);
+            if(rows) {
+                return JSON.parse(rows);
+            }
+        }
     }
     for (let k in params ) {
         if(params[k] !== '' && k !='sort' && k !='offset' && k !='pageSize') {
@@ -106,9 +111,14 @@ exports.gameList = async function(params) {
     let gameQuery = '';
     let allKey = 'game:list';
     let key = 'game:list:s:'+params['status']+':r:'+params['report']+':remm:'+params['recommend']+':a:'+params['account']+':c:'+params['category']+':o:'+ params['offset']+':p:'+params['pageSize']+':s:'+params['sort'];
-    let rows = await redis.instance.get(key);
-    if(rows) {
-        return JSON.parse(rows);
+    let list = await redis.instance.hgetall(allKey);
+    for(let k in list ) {
+        if(k == key) {
+            let rows = await redis.instance.get(key);
+            if(rows) {
+                return JSON.parse(rows);
+            }
+        }
     }
     for (let k in params ) {
         if(params[k] !== '' && k !='sort' && k !='offset' && k !='pageSize') {
