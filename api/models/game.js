@@ -5,19 +5,19 @@ import redis from '../lib/redis';
 
 exports.addGame = async function(game) {
     let rows = await db.execute(db.WRITE, 'INSERT INTO games SET ?', game);
-    clearCache();
+    this.clearCache();
     return rows;
 }
 
 exports.deleteGame = async function(params) {
     let rows = await db.execute(db.WRITE, 'update games set status = 3 where id= ? and userid= ?', params);
-    clearCache();
+    this.clearCache();
     return rows;
 }
 
 exports.updateGame = async function(params) {
     let rows = await db.execute(db.WRITE, 'update games set ? where id= ? and userid= ?', params);
-    clearCache();
+    this.clearCache();
     return rows;
 }
 
@@ -25,14 +25,14 @@ exports.auditGame = async function(params, status) {
     let rows = await db.execute(db.WRITE, 'INSERT INTO comments SET ?', params);
     rows = await db.execute(db.WRITE, 'update comments set status = 1 and type = 0 where gameid= ?', params.gameid);
     rows = await db.execute(db.WRITE, 'update games set status=? where id= ?', [status,params.gameid]);
-    clearCache();
+    this.clearCache();
     return rows;
 }
 
 exports.reportGame = async function(params) {
     let rows = await db.execute(db.WRITE, 'INSERT INTO comments SET ?', params);
     rows = await db.execute(db.WRITE, 'update games set report=1 where id= ?', params.gameid);
-    clearCache();
+    this.clearCache();
     return rows;
 }
 
@@ -42,12 +42,12 @@ exports.canReportGame = async function(params) {
 }
 
 exports.reportComments = async function(params) {
-    let rows = await db.execute(db.READ, 'select id,gameid,account,permlink,userid,comment,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified  from comments where gameid=? and status=0 and type=0', params);
+    let rows = await db.execute(db.READ, 'select id,gameid,account,permlink,userid,comment,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from comments where gameid=? and status=0 and type=0', params);
     return rows;
 }
 
 exports.auditComments = async function(params) {
-    let rows = await db.execute(db.READ, 'select id,gameid,account,permlink,userid,comment,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified     from comments where gameid=? and status=0 and type=1', params);
+    let rows = await db.execute(db.READ, 'select id,gameid,account,permlink,userid,comment,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from comments where gameid=? and status=0 and type=1', params);
     return rows;
 }
 
@@ -126,8 +126,7 @@ exports.gameList = async function(params) {
     }
     return rows;
 }
-
-async function clearCache() {
+exports.clearCache = async function() {
     let gameListKey = 'game:list';
     let gameCountKey = 'game:count';
     let list = await redis.instance.hgetall(gameListKey);
