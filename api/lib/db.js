@@ -45,7 +45,7 @@ exports.getConn = function(type) {
             if (type === exports.WRITE) {
               state.pool.getConnection('WRITE', function (err, connection) {
                   if ( err ) {
-                      reject( new DBError('DB Error', err) )
+                      reject(err)
                   } else {
                       resolve( connection )
                   }
@@ -53,7 +53,7 @@ exports.getConn = function(type) {
             } else {
                 state.pool.getConnection('READ*', function (err, connection) {
                     if ( err ) {
-                        reject( new DBError('DB Error', err) )
+                        reject(err)
                     } else {
                         resolve( connection )
                     }
@@ -65,18 +65,22 @@ exports.getConn = function(type) {
 
 exports.execute = async function(type, sql, params) {
     return new Promise( async ( resolve, reject ) => {
-        let conn = await this.getConn(type);
-        conn.query(sql, params, function (err, rows){
-            conn.release(function(err){
+        try{
+            let conn = await this.getConn(type);
+            conn.query(sql, params, function (err, rows){
+                conn.release(function(err){
+                    if ( err ) {
+                        reject( err )
+                    }
+                });
                 if ( err ) {
-                    reject( new DBError('DB Error', err) )
+                    reject( err )
+                } else {
+                    resolve( rows )
                 }
             });
-            if ( err ) {
-                reject( new DBError('DB Error', err) )
-            } else {
-                resolve( rows )
-            }
-        });
+        } catch ( err ) {
+            reject( new DBError('DB Error', err) )
+        }
     });
 }

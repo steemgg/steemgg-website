@@ -3,6 +3,19 @@ node_js:
       - "8"
 services:
   - redis-server
+  - mysql
+addons:
+  apt:
+    sources:
+      - mysql-5.7-trusty
+    packages:
+      - mysql-server
+      - mysql-client
+before_install:
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS steemitgame;'
+  - mysql -u root --default-character-set=utf8 steemitgame < test/steemitgame.sql
+  - sudo mysql -e "use mysql; update user set authentication_string=PASSWORD('111111') where User='root'; update user set plugin='mysql_native_password';FLUSH PRIVILEGES;"
+  - sudo service mysql restart
 notifications:
   email:
     recipients:
