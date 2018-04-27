@@ -10,8 +10,8 @@ let game = require('../api/models/game');
 let mockHttp = require('./mockHttp');
 let testAccount = 'yh';
 let testToken = 'pass';
-let testUserId = '1';
-let testGameId = '1';
+let testUserId = '1000';
+let testGameId = '1000';
 
 redis.Initialize({
     url: config.get('steemit.redis.host'),
@@ -219,10 +219,14 @@ describe('DB', function() {
         });
         it('should payout activity',async function() {
             try{
-            let dbRes = await game.getPayoutActivities(testGameId);
-            assert.equal(dbRes[0].permlink, 'activity');
+                let dbRes = await game.getPayoutActivities();
+                for(let k in dbRes){
+                    if(dbRes[k].gameid == testGameId) {
+                        assert.equal(dbRes[k].permlink, 'activity');
+                    }
+                }
             } catch (err) {
-                assert.fail('test failed');
+                assert.fail('test failed'+err);
             }
         });
     });
@@ -334,7 +338,7 @@ describe('Query', function() {
                         assertListKey.push(key);
                     }
                 } catch (err) {
-                    assert.fail('test failed');
+                    assert.fail('test failed'+err);
                 }
             }
             let allKey = 'game:list';

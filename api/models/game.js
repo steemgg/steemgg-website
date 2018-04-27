@@ -96,7 +96,7 @@ exports.countOfGames = async function(params) {
         }
     }
     let sql = 'select count(1) as nums from games where 1=1 ' + gameQuery;
-    rows = await db.execute(db.READ, sql, []);
+    let rows = await db.execute(db.READ, sql, []);
     let count = rows[0]['nums'];
     if(count>0) {
         let data = {};
@@ -127,7 +127,7 @@ exports.gameList = async function(params) {
     }
     let sortArr = params['sort'].split("_");
     let sql = 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend from games where 1=1 ' + gameQuery + ' order by ? ? limit ?,?';
-    rows = await db.execute(db.READ, sql, [sortArr[0], sortArr[1], params['offset'], params['pageSize']]);
+    let rows = await db.execute(db.READ, sql, [sortArr[0], sortArr[1], params['offset'], params['pageSize']]);
     if(Object.keys(rows).length>0) {
         let data = {};
         data[key] = 1;
