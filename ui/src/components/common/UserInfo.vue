@@ -54,7 +54,7 @@ SteemGG.com will never access your private keys.</span>
       },
       login () {
         this.loginInfoVisible = false
-        window.location.href = 'https://v2.steemconnect.com/oauth2/authorize?client_id=steemitgame.app&redirect_uri=http%3A%2F%2Fdev.steemitgame.com%2Fcallback&scope=login,offline,vote,comment,comment_delete,comment_options,custom_json,claim_reward_balance&state=' + window.location.href
+        window.location.href = 'https://v2.steemconnect.com/oauth2/authorize?client_id=steemitgame.app&redirect_uri=http%3A%2F%2Fdev.steemitgame.com%2Fcallback&scope=login,offline,vote,comment,delete_comment,comment_options,custom_json,claim_reward_balance&state=' + window.location.href
       }
     },
     mounted () {

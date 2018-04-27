@@ -88,12 +88,12 @@
                     <el-select v-model="activity.reward" placeholder="请选择">
                       <el-option
                         :key="50"
-                        :label="'50%/50%'"
+                        :label="'50% SBD / 50% SP'"
                         :value="50">
                       </el-option>
                       <el-option
                         :key="100"
-                        :label="'100%'"
+                        :label="'100% Steem Power'"
                         :value="100">
                       </el-option>
                     </el-select>
