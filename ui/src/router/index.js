@@ -20,7 +20,14 @@ export default new Router({
     {
       path: '/game/new',
       name: 'newGame',
-      component: GameEditForm
+      component: GameEditForm,
+      beforeEnter: (to, from, next) => {
+        if (store.state.loggedIn) {
+          next()
+        } else {
+          next(false)
+        }
+      }
     },
     {
       path: '/game/edit/:id',
@@ -44,21 +51,21 @@ export default new Router({
     {
       path: '/userProfile',
       name: 'userProfile',
-      component: UserSummary
-      // beforeEnter: (to, from, next) => {
-      //   if (store.state.loggedIn === false) {
-      //     next(false)
-      //   } else {
-      //     next()
-      //   }
-      // }
+      component: UserSummary,
+      beforeEnter: (to, from, next) => {
+        if (store.state.loggedIn === false) {
+          next(false)
+        } else {
+          next()
+        }
+      }
     },
     {
       path: '/game/audit',
       name: 'auditGame',
       component: GameAudit,
       beforeEnter: (to, from, next) => {
-        if (store.state.user.role < 2) {
+        if (store.state.user.role < 1) {
           next(false)
         } else {
           next()

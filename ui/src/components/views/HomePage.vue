@@ -2,9 +2,9 @@
   <el-container>
     <el-header><common-header></common-header></el-header>
     <el-container>
-      <el-aside style="width: auto; background-color: rgb(238, 241, 246)">
-        <site-navigation></site-navigation>
-      </el-aside>
+      <!--<el-aside style="width: auto; background-color: rgb(238, 241, 246)">-->
+        <!--<site-navigation></site-navigation>-->
+      <!--</el-aside>-->
       <el-main>
         <game-slider></game-slider>
         <div class="game-list">

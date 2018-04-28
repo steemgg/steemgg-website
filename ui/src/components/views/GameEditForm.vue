@@ -44,7 +44,7 @@
                       </el-upload>
                     </div>
                   </el-form-item>
-                    <el-button type='primary' @click="submitForm('game')" :disabled="!$store.state.loggedIn">{{ actionText }}</el-button>
+                    <el-button type='primary' :loading="gameActionInProgress" @click="submitForm('game')" :disabled="!$store.state.loggedIn">{{ actionText }}</el-button>
                     <el-button @click="cancelForm()">Cancel</el-button>
                 </el-form>
               </div>
@@ -85,11 +85,23 @@
                     <input-tag :on-change='onTagChange' :tags='activity.tags'></input-tag>
                   </el-form-item>
                   <el-form-item label="reward">
-                    <el-slider v-model="activity.reward"></el-slider>
+                    <el-select v-model="activity.reward" placeholder="请选择">
+                      <el-option
+                        :key="50"
+                        :label="'50% SBD / 50% SP'"
+                        :value="50">
+                      </el-option>
+                      <el-option
+                        :key="100"
+                        :label="'100% Steem Power'"
+                        :value="100">
+                      </el-option>
+                    </el-select>
+                    <!--<el-slider v-model="activity.reward"></el-slider>-->
                   </el-form-item>
                   <el-form-item>
                     <!--<el-button type='primary' v-if="activity.permLink != null" @click="submitActivity(false)">Update</el-button>-->
-                    <el-button type='primary' :disabled="game.id == null || postingInProgress" @click="submitActivity(true)">New Post</el-button>
+                    <el-button type='primary' :disabled="game.id == null" :loading="postingInProgress" @click="submitActivity(true)">New Post</el-button>
                     <!--<el-button @click="cancelForm()">Cancel</el-button>-->
                   </el-form-item>
                 </el-form>
@@ -107,57 +119,38 @@
   import InputTag from 'vue-input-tag'
   import moment from 'moment'
   import CommonFooter from '../common/CommonFooter'
-  import { FormItem, Checkbox,
-    CheckboxGroup,
-    Form,
-    Col,
-    Switch,
-    Button,
-    Radio,
-    Input,
-    Container,
-    Footer,
-    Header,
-    Main,
-    Select,
-    Upload,
-    RadioGroup,
-    Slider
-  } from 'element-ui'
+//  import { FormItem, Checkbox,
+//    CheckboxGroup,
+//    Form,
+//    Col,
+//    Switch,
+//    Button,
+//    Radio,
+//    Input,
+//    Container,
+//    Footer,
+//    Header,
+//    Main,
+//    Select,
+//    Upload,
+//    RadioGroup,
+//    Slider
+//  } from 'element-ui'
   import vue2Dropzone from 'vue2-dropzone'
   import 'vue2-dropzone/dist/vue2Dropzone.css'
   import CommonHeader from '../common/CommonHeader'
   import GameService from '../../service/game.service'
-  import ElFormItem from '../../../node_modules/element-ui/packages/form/src/form-item'
-  import ElCollapseItem from '../../../node_modules/element-ui/packages/collapse/src/collapse-item'
+//  import ElFormItem from '../../../node_modules/element-ui/packages/form/src/form-item'
+//  import ElCollapseItem from '../../../node_modules/element-ui/packages/collapse/src/collapse-item'
 
   import { GAME_CATEGORY } from '../../service/const'
   const gameService = new GameService()
 
   export default {
     components: {
-      ElCollapseItem,
-      ElFormItem,
       CommonHeader,
-      Checkbox,
-      CheckboxGroup,
-      Form,
-      FormItem,
-      Col,
-      Switch,
-      Button,
-      Radio,
-      Input,
-      Container,
-      Footer,
-      Header,
-      InputTag,
-      Select,
       CommonFooter,
-      Main,
-      Upload,
-      RadioGroup,
-      Slider,
+      InputTag,
       vueDropzone: vue2Dropzone
     },
     props: ['id', 'mode'],
@@ -305,7 +298,12 @@
             }).catch(error => {
               console.log(error)
               this.postingInProgress = false
-              this.$message.error('Fail to create post in steemit.')
+              console.error('fail to post', error.response)
+              if (error.response.data.resultCode === 400) {
+                this.$message.warning('You just create a post, please wait for a while.')
+              } else {
+                this.$message.error('Fail to create post in steemit.')
+              }
             })
           } else {
             gameService.updateActivity(this.game.id, this.activity).then(activity => {
@@ -402,6 +400,7 @@
               })
             }
           }).catch(error => {
+            this.$message.error('Fail to load the game data, make sure the game exist!')
             console.log(error)
           })
         } else {

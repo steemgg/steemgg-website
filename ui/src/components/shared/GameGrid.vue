@@ -1,7 +1,7 @@
 <template>
   <div class="game-grid-container">
     <div class="game-grid-image" >
-      <div class="game-info-view view-ninth">
+      <div class="game-info-view view-ninth" @click="gotoGame">
         <img :src="thumbnail" class="game-cover-image"/>
         <div class="mask mask-1"></div>
         <div class="mask mask-2"></div>
@@ -19,9 +19,9 @@
           <!--<span data-icon="B">124</span>-->
           <!--<a href="#" class="info">Play</a>-->
         <!--</div>-->
-        <span class="like">
+        <span class="payout">
           <i class="fa fa-usd" aria-hidden="true"></i>
-          {{game.payout}}
+          <span class="payout-amount">{{game.payout}}</span>
         </span>
         <router-link v-if="mode != 'edit'" :to="{ name: 'viewGame', params: { id: game.id }}" tag="a" class="play">→</router-link>
         <router-link v-if="mode == 'edit'" :to="{ name: 'editGame', params: { id: game.id }}" tag="a" class="play">→</router-link>
@@ -38,6 +38,12 @@
     name: 'GameGrid',
     data () {
       return {
+      }
+    },
+    methods: {
+      gotoGame () {
+        alert(1)
+        this.$router.push({name: 'viewGame', params: { id: this.game.id }})
       }
     },
     computed: {
@@ -86,15 +92,19 @@
     width:300px;
     height: 200px;
   }
-  .game-info-view .like {
+  .game-info-view .payout {
     position: absolute;
     bottom: 10px;
     right: 60px;
     color: black;
   }
-  .game-info-view .like i {
+  .game-info-view .payout i {
     color: black;
   }
+  .game-info-view .payout .payout-amount {
+    font-size: 14px;
+  }
+
   .game-info-view h2 {
     text-transform: uppercase;
     color: #fff;
