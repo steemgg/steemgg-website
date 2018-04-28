@@ -354,15 +354,21 @@ exports.auditGame = async function(req, res, next) {
 exports.reportGame = async function(req, res, next) {
     try {
         let data = req.body;
+        let reportStatus = data.report;
         let author = req.session.user.account;
         if(await user.getInterval('comment:interval:'+author)){
             return res.status(500).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
         }
-        let dbRes = await game.canReportGame([req.session.user.userid, req.params.id]);
-        if(typeof dbRes[0] !== 'undefined') {
-            return res.status(500).json({ resultCode: CODE.HAS_REPORT_ERROR.RESCODE, err: CODE.HAS_REPORT_ERROR.DESC });
+        if(reportStatus == 1){
+            let dbRes = await game.canReportGame([req.session.user.userid, req.params.id]);
+            if(typeof dbRes[0] !== 'undefined') {
+                return res.status(500).json({ resultCode: CODE.HAS_REPORT_ERROR.RESCODE, err: CODE.HAS_REPORT_ERROR.DESC });
+            }
+        } else {
+            await game.unreportGame(req.params.id);
+            return res.status(200).json();
         }
-        dbRes = await game.getRecentlyActivity(req.params.id);
+        let dbRes = await game.getRecentlyActivity(req.params.id);
         if(typeof dbRes[0] === 'undefined') {
             return res.status(404).json({ resultCode: CODE.NOFOUND_ACTIVITY_ERROR.RESCODE, err: CODE.NOFOUND_ACTIVITY_ERROR.DESC });
         }

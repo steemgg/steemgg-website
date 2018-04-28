@@ -46,6 +46,13 @@ exports.reportComments = async function(params) {
     return rows;
 }
 
+exports.unreportGame = async function(gameId) {
+    await db.execute(db.WRITE, 'update comments set status = 1 and type = 0 where gameid= ?', gameId);
+    let rows = await db.execute(db.WRITE, 'update games set report=0 where id= ?', gameId);
+    this.clearCache();
+    return rows;
+}
+
 exports.auditComments = async function(params) {
     let rows = await db.execute(db.READ, 'select id,gameid,account,permlink,userid,comment,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from comments where gameid=? and status=0 and type=1', params);
     return rows;
