@@ -114,6 +114,7 @@
         gameService.approve(this.items[this.activeIndex].id, this.form.comment).then(() => {
           this.$message.success('Game is approved.')
           this.items.splice(this.activeIndex, 1)
+          this.$emit('gameApproved')
         }).catch(error => {
           console.log(error)
           this.$message.error('Approve action failed.')
@@ -129,6 +130,7 @@
         gameService.deny(this.items[this.activeIndex].id, this.form.comment).then(() => {
           this.$message.success('Game is denied.')
           this.items.splice(this.activeIndex, 1)
+          this.$emit('gameDenied')
         }).catch(error => {
           console.log(error)
           this.$message.error('Deny action failed.')
@@ -144,6 +146,7 @@
         gameService.undoReport(this.items[this.activeIndex].id, this.form.comment).then(() => {
           this.$message.success('Game report status is cleared.')
           this.items.splice(this.activeIndex, 1)
+          this.$emit('gameReportCleared')
         }).catch(error => {
           console.log(error)
           this.$message.error('undo report action failed.')
