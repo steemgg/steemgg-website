@@ -190,7 +190,7 @@ describe('DB', function() {
         });
         it('can report',async function() {
             try{
-                let dbRes = await game.canReportGame([testUserId,testGameId]);
+                let dbRes = await game.canReportGame([testGameId]);
                 assert.equal(dbRes.length, 1);
             } catch (err) {
                 assert.fail('test failed');

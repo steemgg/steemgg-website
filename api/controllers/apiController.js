@@ -359,7 +359,7 @@ exports.reportGame = async function(req, res, next) {
         if(await user.getInterval('comment:interval:'+author)){
             return res.status(500).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
         }
-        let dbRes = await game.canReportGame([req.session.user.userid, req.params.id]);
+        let dbRes = await game.canReportGame([req.params.id]);
         if(typeof dbRes[0] !== 'undefined') {
             if(reportStatus  == 1) {
                 return res.status(500).json({ resultCode: CODE.HAS_REPORT_ERROR.RESCODE, err: CODE.HAS_REPORT_ERROR.DESC });
