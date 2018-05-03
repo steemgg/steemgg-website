@@ -37,7 +37,7 @@ exports.reportGame = async function(params) {
 }
 
 exports.canReportGame = async function(params) {
-    let rows = await db.execute(db.READ, 'select id from comments where userid=? and gameid=? and status=0 and type=0', params);
+    let rows = await db.execute(db.READ, 'select id from comments where gameid=? and status=0 and type=0', params);
     return rows;
 }
 

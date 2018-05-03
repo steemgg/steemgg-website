@@ -190,6 +190,7 @@ exports.getGameDetail = async function(req, res, next) {
         }
     }
 };
+
 exports.updateGame = async function(req, res, next) {
     try{
         let unix = Math.round(+new Date()/1000);
@@ -209,6 +210,7 @@ exports.updateGame = async function(req, res, next) {
         }
     }
 };
+
 exports.deleteGame = async function(req, res, next) {
     try{
         let dbRes = await game.deleteGame([req.params.id, req.session.user.userid]);
@@ -359,7 +361,7 @@ exports.reportGame = async function(req, res, next) {
         if(await user.getInterval('comment:interval:'+author)){
             return res.status(500).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
         }
-        let dbRes = await game.canReportGame([req.session.user.userid, req.params.id]);
+        let dbRes = await game.canReportGame([req.params.id]);
         if(typeof dbRes[0] !== 'undefined') {
             if(reportStatus  == 1) {
                 return res.status(500).json({ resultCode: CODE.HAS_REPORT_ERROR.RESCODE, err: CODE.HAS_REPORT_ERROR.DESC });
@@ -397,22 +399,6 @@ exports.reportGame = async function(req, res, next) {
     }
 }
 
-exports.index = async function(req, res, next) {
-    try{
-        let indexUrl = await steem.getLoginUrl();
-        res.render('index', { title: '$$$ hello! Steem Game $$$', login: indexUrl });
-    } catch(err){
-        console.error(err);
-        if (err instanceof DBError) {
-            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
-        } else if (err instanceof SDKError) {
-            return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
-        } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
-        }
-    }
-};
-
 exports.logout = async function(req, res, next) {
     try{
         if (process.env.NODE_ENV !== 'development'){
@@ -436,17 +422,6 @@ exports.logout = async function(req, res, next) {
         }
     }
 };
-
-exports.test = async function(req, res, next) {
-    try {
-        let dbRes = await user.getUserToken("token:userid:477514");
-        console.log(dbRes);
-        return res.status(200).json(dbRes[0]);
-    } catch(err) {
-        console.error(err);
-        return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
-    }
-}
 
 function unzipFile(file, userid, cb) {
     var ret = decompress(file, config.get('steemit.app.gameurl')+"/"+userid,{
