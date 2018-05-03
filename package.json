@@ -1,11 +1,15 @@
 {
   "name": "steemitgame",
   "version": "0.0.1",
+  "description": "Based on Steemit Restful Api",
+  "main": "app.js",
+  "author": "bonjovis",
+  "license": "MIT",
   "private": true,
   "scripts": {
-    "test": "mocha",
-    "start": "node bin/www",
-    "start-dev": "nodemon -L bin/www"
+      "test": "mocha --timeout 20000",
+      "start" : "SET NODE_ENV=production && node bin/www",
+      "start-dev" : "nodemon -L bin/www"
   },
   "dependencies": {
     "body-parser": "~1.10.2",

@@ -31,7 +31,8 @@ sc2NewApi.Initialize({
     app: config.get('steemit.sc.app'),
     callbackURL: config.get('steemit.sc.cburl'),
     baseURL: config.get('steemit.sc.url'),
-    scope: config.get('steemit.sc.scope')
+    scope: config.get('steemit.sc.scope'),
+    secret: config.get('steemit.sc.secret')
 });
 
 var sess = {

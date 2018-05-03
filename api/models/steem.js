@@ -100,8 +100,13 @@ exports.revokeToken = async function(accessToken) {
     return result;
 }
 
-exports.reflashToken = async function(accessToken) {
-    let result = await sc2.instance.reflashToken(accessToken);
+exports.getToken = async function(code) {
+    let result = await sc2.instance.getToken(code);
+    return result;
+}
+
+exports.refreshToken = async function(refreshToken) {
+    let result = await sc2.instance.refreshToken(refreshToken);
     return result;
 }
 

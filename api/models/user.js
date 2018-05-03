@@ -23,6 +23,10 @@ exports.setUserToken = async function(key, value) {
     return result;
 }
 
+exports.setTokenExpire = async function(key, seconds) {
+    return await redis.instance.expire(key, seconds);
+}
+
 exports.setInterval = async function(key, seconds) {
     await redis.instance.set(key, true);
     return await redis.instance.expire(key, seconds);

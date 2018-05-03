@@ -3,7 +3,7 @@ import fs from 'fs';
 import config from 'config';
 import CODE from '../lib/code';
 import user from '../models/user';
-import redis from '../lib/redis';
+import steem from '../models/steem';
 import api from '../controllers/apiController';
 import callback from '../controllers/callbackController';
 
@@ -47,11 +47,24 @@ function morkSessionMiddleware (req, res, next) {
                 console.log({resCode:CODE.TEST_DATA_ERROR.RESCODE, err:CODE.TEST_DATA_ERROR.DESC});
                 next();
             } else {
-                let user = JSON.parse(result);
+                let userInfo = JSON.parse(result);
                 try{
-                    let result = await redis.instance.get("token:userid:"+user.userid);
-                    req.session.user = user;
-                    req.session.accessToken = result.toString();
+                    req.session.user = userInfo;
+                    let result = await user.getUserToken("token:userid:"+userInfo.userid);
+                    if(!result)
+                    {
+                        let refreshToken = await user.getUserToken("token:refresh:userid:"+userInfo.userid);
+                        if(refreshToken) {
+                            let refreshToken = await user.getUserToken("token:refresh:userid:"+userInfo.userid);
+                            let ret = await steem.refreshToken(refreshToken.toString());
+                            await user.setUserToken("token:userid:"+userInfo.userid, ret.access_token);
+                            await user.setTokenExpire("token:userid:"+userInfo.userid, ret.expires_in);
+                            await user.setUserToken("token:refresh:userid:"+userInfo.userid, ret.refresh_token);
+                            req.session.accessToken = ret.access_token;
+                        }
+                    } else {
+                        req.session.accessToken = result.toString();
+                    }
                     next();
                 } catch(err) {
                     console.error(err);
