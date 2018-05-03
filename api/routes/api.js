@@ -21,8 +21,6 @@ module.exports = function(app) {
   app.post('/v1/report/:id', [morkSessionMiddleware, userMiddleware], api.reportGame);
   app.get('/v1/me', [morkSessionMiddleware, userMiddleware], api.me);
   app.get('/v1/logout', api.logout);
-  app.get('/v1/test', api.test);
-  app.get('/testLogin', api.index);
   app.get('/callback', callback.auth);
 };
 
