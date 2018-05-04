@@ -24,7 +24,7 @@ const CODE = {
     DELETE_GAME_ERROR: {RESCODE:501,DESC:'delete game failed'},
     NOFOUND_GAME_ERROR: {RESCODE:502,DESC:'game not found'},
     NOFOUND_ACTIVITY_ERROR: {RESCODE:503,DESC:'activity not found'},
-    HAS_REPORT_ERROR: {RESCODE:504,DESC:'you have reported this game'},
+    HAS_REPORT_ERROR: {RESCODE:504,DESC:'this game has been reported'},
     NO_REPORT_ERROR: {RESCODE:504,DESC:'you have not reported this game'},
 
     //other
