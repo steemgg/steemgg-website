@@ -13,6 +13,7 @@ exports.auth = async function(req, res, next) {
         let result = await steem.getToken(code);
         let access_token = result.access_token;
         let refresh_token = result.refresh_token;
+        let expires_in = result.expires_in;
         let state =  (typeof req.query.state !== 'undefined') ?  req.query.state : '';
         result = await steem.me(access_token);
         let dbRes = await user.getUserByAccount(result.user);
@@ -25,7 +26,7 @@ exports.auth = async function(req, res, next) {
             userInfo.created = iso;
         }
         await user.setUserToken("token:userid:"+userInfo.userid, access_token);
-        await user.setTokenExpire("token:userid:"+userInfo.userid, result.expires_in);
+        await user.setTokenExpire("token:userid:"+userInfo.userid, expires_in);
         await user.setUserToken("token:refresh:userid:"+userInfo.userid, refresh_token);
         req.session.accessToken = access_token;
         req.session.user = userInfo;
