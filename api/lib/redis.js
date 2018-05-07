@@ -20,6 +20,7 @@ function Redis(host, port) {
     this.options.hdel = promisify(this.options.client.hdel).bind(this.options.client);
     this.options.hgetall = promisify(this.options.client.hgetall).bind(this.options.client);
     this.options.expire = promisify(this.options.client.expire).bind(this.options.client);
+    this.options.ttl = promisify(this.options.client.ttl).bind(this.options.client);
 }
 
 Redis.prototype.get = async function(key) {
@@ -48,6 +49,10 @@ Redis.prototype.del = async function(key) {
 
 Redis.prototype.hmset = async function(key, value) {
     return  await this.options.hmset(key, value);
+}
+
+Redis.prototype.ttl = async function(key) {
+    return  await this.options.ttl(key);
 }
 
 

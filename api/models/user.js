@@ -37,3 +37,7 @@ exports.getInterval = async function(key) {
     console.log(key, result);
     return result;
 }
+
+exports.getTTL = async function(key) {
+    return await redis.instance.ttl(key);
+}
