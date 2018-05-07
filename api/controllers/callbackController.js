@@ -3,6 +3,7 @@
 import CODE from '../lib/code';
 import user from '../models/user';
 import steem from '../models/steem';
+import config from 'config';
 
 exports.auth = async function(req, res, next) {
     try {
@@ -25,9 +26,13 @@ exports.auth = async function(req, res, next) {
             let iso = new Date(userInfo['created']*1000).toISOString();
             userInfo.created = iso;
         }
-        await user.setUserToken("token:userid:"+userInfo.userid, access_token);
-        await user.setTokenExpire("token:userid:"+userInfo.userid, expires_in);
-        await user.setUserToken("token:refresh:userid:"+userInfo.userid, refresh_token);
+        if (config.get('steemit.app.saveToken')){
+            await user.setUserToken("token:userid:"+userInfo.userid, access_token);
+            await user.setTokenExpire("token:userid:"+userInfo.userid, expires_in);
+            if(typeof refresh_token !== 'undefined') {
+                await user.setUserToken("token:refresh:userid:"+userInfo.userid, refresh_token);
+            }
+        }
         req.session.accessToken = access_token;
         req.session.user = userInfo;
         res.redirect(state);
