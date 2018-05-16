@@ -7,9 +7,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-      "test": "mocha --timeout 20000",
-      "start" : "SET NODE_ENV=production && node bin/www",
-      "start-dev" : "nodemon -L bin/www"
+    "test": "mocha --timeout 20000",
+    "start": "SET NODE_ENV=production && node bin/www",
+    "start-dev": "nodemon -L bin/www"
   },
   "dependencies": {
     "body-parser": "~1.10.2",
@@ -31,6 +31,7 @@
     "speakingurl": "^11.0.0",
     "secure-random": "^1.1.1",
     "diff-match-patch": "^1.0.0",
+    "connect-redis": "^3.3.3",
     "babel-cli": "^6.6.5",
     "babel-core": "^6.26.0",
     "babel-preset-env": "^1.6.1",
@@ -40,6 +41,5 @@
   "devDependencies": {
     "mocha": "^3.0.0"
   },
-  "repository": "https://github.com/steemitgame-team/steemitgame-website.git",
-  "license": "MIT"
+  "repository": "https://github.com/steemitgame-team/steemitgame-website.git"
 }

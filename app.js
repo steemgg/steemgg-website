@@ -10,6 +10,7 @@ var config = require('config');
 var db = require('./api/lib/db');
 var redis = require('./api/lib/redis');
 var sc2NewApi = require('./api/lib/sc2');
+var redisStore = require('connect-redis')(session);
 
 var app = express();
 
@@ -26,6 +27,8 @@ redis.Initialize({
     url: config.get('steemit.redis.host'),
     port: config.get('steemit.redis.port')
 });
+
+
 // init sc2
 sc2NewApi.Initialize({
     app: config.get('steemit.sc.app'),
@@ -37,7 +40,8 @@ sc2NewApi.Initialize({
 
 var sess = {
   secret: config.get('steemit.app.secret'),
-  cookie: {},
+  //cookie: {},
+  store: new redisStore({ host: config.get('steemit.redis.host'), port: config.get('steemit.redis.port'), client: redis.instance.client, ttl: config.get('steemit.app.sessionTime') }),
   resave: false,
   saveUninitialized: false
 }
@@ -49,7 +53,6 @@ if (app.get('env') === 'production') {
 
 app.use(session(sess))
 
-// uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());

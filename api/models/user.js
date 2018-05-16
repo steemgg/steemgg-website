@@ -34,6 +34,9 @@ exports.setInterval = async function(key, seconds) {
 
 exports.getInterval = async function(key) {
     let result = await redis.instance.get(key);
-    console.log(key, result);
     return result;
+}
+
+exports.getTTL = async function(key) {
+    return await redis.instance.ttl(key);
 }

@@ -70,6 +70,7 @@ exports.upload = function(req, res) {
 exports.me = async function(req, res) {
     try {
         let userInfo = req.session.user;
+        userInfo.gamePostingInterval = config.get('steemit.app.gamePostingInterval');
         return res.status(200).json(userInfo);
     } catch(err) {
         if (err instanceof DBError) {
@@ -93,8 +94,13 @@ exports.postGame = async function(req, res, next) {
         if(userInfo.account != dbRes[0]['account'] || data.gameid != dbRes[0]['id']) {
             return res.status(500).json({ resultCode: CODE.PARAMS_INCONSISTENT_ERROR.RESCODE, err: CODE.PARAMS_INCONSISTENT_ERROR.DESC });
         }
-        if(await user.getInterval('post:interval:'+userInfo.userid)){
-            return res.status(500).json({ resultCode: CODE.POST_INTERVAL_ERROR.RESCODE, err: CODE.POST_INTERVAL_ERROR.DESC });
+        let gameTTL = await user.getTTL('post:interval:game:'+data.gameid+':'+userInfo.userid);
+        if( gameTTL>0 ){
+            return res.status(500).json({ resultCode: CODE.POST_INTERVAL_ERROR.RESCODE, err: CODE.POST_INTERVAL_ERROR.DESC, ttl:gameTTL });
+        }
+        let postTTL = await user.getTTL('post:interval:'+userInfo.userid);
+        if( postTTL>0 ){
+            return res.status(500).json({ resultCode: CODE.POST_INTERVAL_ERROR.RESCODE, err: CODE.POST_INTERVAL_ERROR.DESC, ttl:postTTL });
         }
         let author = req.session.user.account;
         let permLink = await createPermlink(data.activityTitle, author, '', '');
@@ -103,7 +109,8 @@ exports.postGame = async function(req, res, next) {
         let activity = {userid:req.session.user.userid, account:req.session.user.account,gameid: data.gameid,lastModified: unix, permlink:permLink };
         await game.addActivity(activity);
         let iso = new Date(unix*1000).toISOString();
-        await user.setInterval('post:interval:'+userInfo.userid, 300);
+        await user.setInterval('post:interval:'+userInfo.userid, config.get('steemit.app.postingInterval'));
+        await user.setInterval('post:interval:game:'+data.gameid+':'+userInfo.userid, config.get('steemit.app.gamePostingInterval'));
         activity.lastModified = iso;
         return res.status(200).json(activity);
     } catch(err) {
@@ -150,7 +157,7 @@ exports.commentGame = async function(req, res, next) {
         let author = req.session.user.account;
         let permlink = createCommentPermlink(req.params.author,req.params.permlink);
         await steem.comment(req.session.accessToken, req.params.author,req.params.permlink, author, post.content, permlink);
-        await user.setInterval('comment:interval:'+userInfo.account, 10);
+        await user.setInterval('comment:interval:'+userInfo.account, config.get('steemit.app.commentInterval'));
         return res.status(200).json({content:post.content, author:author, permlink:permlink});
     } catch(err) {
         console.error(err);
@@ -303,7 +310,7 @@ exports.voteGame = async function(req, res, next) {
             return res.status(500).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
         }
         await steem.vote(req.session.accessToken, voter, author, permlink, parseInt(data.weight));
-        await user.setInterval('vote:interval:'+voter, 10);
+        await user.setInterval('vote:interval:'+voter, config.get('steemit.app.voteInterval'));
         return res.status(200).json({author:author,permlink:permlink,weight:parseInt(data.weight)});
     } catch(err) {
         console.error(err);
@@ -336,7 +343,7 @@ exports.auditGame = async function(req, res, next) {
         let parentAuthor = dbRes[0].account;
         let parentPermlink = dbRes[0].permlink;
         await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, data.comment, permlink);
-        await user.setInterval('comment:interval:'+author, 10);
+        await user.setInterval('comment:interval:'+author, config.get('steemit.app.commentInterval'));
         let unix = Math.round(+new Date()/1000);
         let audit = { userid:req.session.user.userid, account:req.session.user.account,gameid: req.params.id,lastModified: unix, permlink:permlink,comment:data.comment, type:1 };
         dbRes = await game.auditGame(audit, data.status);
@@ -382,7 +389,7 @@ exports.reportGame = async function(req, res, next) {
         let parentAuthor = dbRes[0].account;
         let parentPermlink = dbRes[0].permlink;
         await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, data.comment, permlink);
-        await user.setInterval('comment:interval:'+author, 10);
+        await user.setInterval('comment:interval:'+author, config.get('steemit.app.commentInterval'));
         let unix = Math.round(+new Date()/1000);
         let report = { userid:req.session.user.userid, account:req.session.user.account,gameid: req.params.id,lastModified: unix, permlink:permlink,comment:data.comment };
         dbRes = await game.reportGame(report);
