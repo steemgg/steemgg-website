@@ -40,7 +40,7 @@ sc2NewApi.Initialize({
 
 var sess = {
   secret: config.get('steemit.app.secret'),
-  //cookie: {},
+  cookie: { maxAge: 60 * 60 * 1000 },
   store: new redisStore({ host: config.get('steemit.redis.host'), port: config.get('steemit.redis.port'), client: redis.instance.client, ttl: config.get('steemit.app.sessionTime') }),
   resave: false,
   saveUninitialized: false
