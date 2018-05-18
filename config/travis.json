@@ -21,7 +21,12 @@
       "rooturl": "/src",
       "sc2": "https://v2.steemconnect.com",
       "secret": "password",
-      "saveToken": true
+      "saveToken": true,
+      "gamePostingInterval": "500",
+      "postingInterval": "300",
+      "commentInterval": "10",
+      "voteInterval": "3",
+      "sessionTime": "86400"
     },
     "sc": {
       "app": "steemitgame.app",
