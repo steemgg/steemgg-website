@@ -117,6 +117,31 @@ export default class GameService {
   }
 
   /**
+   * Read <code> activities </code> Array and get comments from steemit for each of them
+   * Then store them in a array with reverse order
+   * @param game
+   */
+  fetchAllSteemitComments (game) {
+    console.log('Enter: fetchAllSteemitComments')
+    let promises = []
+    let result = new Array(game.activities.length)
+    if (game.activities.length > 0) {
+      for (let i = 0; i < game.activities.length; i++) {
+        let activity = game.activities[i]
+        promises.push(this.getComments('', activity.account, activity.permlink).then(response => {
+          // promises.push(this.getContentData('steemitgame.test', activity.permlink).then(response => {
+          console.log('get comment for content: ' + activity.permlink, response)
+          result[game.activities.length - i - 1] = response.reverse()
+        }))
+      }
+    }
+    return Promise.all(promises).then(() => {
+      console.log('Exit: fetchAllSteemitComments')
+      return result
+    })
+  }
+
+  /**
    * Read <code> activities </code> Array and get award data from steemit for each of them
    * Then combine them together
    * @param game
@@ -135,8 +160,8 @@ export default class GameService {
       //   // already closed, get award directly from backend data
       //   result.totalPayout += activity.payout
       // } else {
-        // promises.push(steamApi.getContentAsync(/*activity.account*/'steemitgame.test', activity.permlink).then(response => {
-      promises.push(this.getContentData('steemitgame.test', activity.permlink).then(response => {
+      promises.push(this.getContentData(activity.account, activity.permlink).then(response => {
+      // promises.push(this.getContentData('steemitgame.test', activity.permlink).then(response => {
         console.log('get data for content: ' + activity.permlink, response)
         result.totalPayout += response.totalPayout
         if (response.tags.length > 0) {

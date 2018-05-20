@@ -20,8 +20,10 @@
           <div class="metadata">
             <span class="votes">
               <el-tooltip class="item" effect="dark" content="Vote" placement="top">
-                <i class="fa fa-thumbs-o-up" aria-hidden="true" :disabled="!canVote()" @click="voteUp()"></i> {{votesCount}}
+                <i v-if="!alreadyVoted" class="fa fa-thumbs-o-up" aria-hidden="true" @click="voteUp" v-loading="voting"></i>
+                <i v-if="alreadyVoted" class="fa fa-thumbs-up" aria-hidden="true" @click="voteUp"></i>
               </el-tooltip>
+              {{votesCount}}
             </span>
             <span class="award">${{payout}}</span>
             <span class="reply">
@@ -70,18 +72,25 @@
     methods: {
       voteUp () {
         if (this.$store.state.loggedIn) {
-          if (this.voting === false) {
-            this.voting = true
-            gameService.vote(this.comment.author, this.comment.permlink, 5000).then(response => {
-              this.votesCount++
-              this.$message.success('Vote Successfully.')
-            }).catch(error => {
-              if (error.response.data.resultCode === 402) {
-                this.$message.error('You just voted, please wait for a while.')
-              } else {
-                this.$message.error('Vote Failed.')
-              }
-              console.log('Vote comment failed', error.response)
+          if (this.alreadyVoted === false) {
+            if (this.voting === false) {
+              this.voting = true
+              gameService.vote(this.comment.author, this.comment.permlink, 5000).then(response => {
+                this.votesCount++
+                this.$message.success('Vote Successfully.')
+              }).catch(error => {
+                if (error.response.data.resultCode === 402) {
+                  this.$message.error('You just voted, please wait for a while.')
+                } else {
+                  this.$message.error('Vote Failed.')
+                }
+                console.log('Vote comment failed', error.response)
+              })
+            }
+          } else {
+            this.$message({
+              message: 'You have already voted this game.',
+              type: 'warning'
             })
           }
         } else {
@@ -139,6 +148,21 @@
 
       lateUpdate () {
         return moment(this.comment.last_update.endsWith('Z') ? this.comment.last_update : this.comment.last_update + 'Z').fromNow()
+      },
+
+      alreadyVoted () {
+        let voted = false
+        if (this.comment != null && this.comment.active_votes != null) {
+          for (let i = 0; i < this.comment.active_votes.length; i++) {
+            if (this.comment.active_votes[i].voter === this.$store.state.user.account) {
+              voted = true
+              break
+            }
+          }
+        } else {
+          voted = false
+        }
+        return voted
       }
     },
     mounted () {

@@ -108,6 +108,18 @@
               </div>
             </el-collapse-item>
           </el-collapse>
+          <el-dialog
+            title="Create a Post"
+            :visible.sync="postTipDialogVisible"
+            width="30%">
+            <div >
+              <div class="postTipContent">Congratulations! Your game has been created successfully. You can choose to create a post in steemit for your game now or later. Please be aware that until a post is created, your game will not be approved and cannot receive award. </div>
+              <div class="hidePostTipCheckbox"><el-checkbox v-model="hidePostTip" @change="doNotShowTip">Do not show this again.</el-checkbox></div>
+            </div>
+            <span slot="footer" class="dialog-footer">
+              <el-button type="primary" @click="postTipDialogVisible = false">Okay</el-button>
+            </span>
+          </el-dialog>
         </div>
       </div>
     </el-main>
@@ -119,30 +131,10 @@
   import InputTag from 'vue-input-tag'
   import moment from 'moment'
   import CommonFooter from '../common/CommonFooter'
-//  import { FormItem, Checkbox,
-//    CheckboxGroup,
-//    Form,
-//    Col,
-//    Switch,
-//    Button,
-//    Radio,
-//    Input,
-//    Container,
-//    Footer,
-//    Header,
-//    Main,
-//    Select,
-//    Upload,
-//    RadioGroup,
-//    Slider
-//  } from 'element-ui'
   import vue2Dropzone from 'vue2-dropzone'
   import 'vue2-dropzone/dist/vue2Dropzone.css'
   import CommonHeader from '../common/CommonHeader'
   import GameService from '../../service/game.service'
-//  import ElFormItem from '../../../node_modules/element-ui/packages/form/src/form-item'
-//  import ElCollapseItem from '../../../node_modules/element-ui/packages/collapse/src/collapse-item'
-
   import { GAME_CATEGORY } from '../../service/const'
   const gameService = new GameService()
 
@@ -162,6 +154,9 @@
         gameActionInProgress: false,
         errorMessage: '',
         useGameInfoAsPost: true,
+        hidePostTip: false,
+        postTipDialogVisible: false,
+        actionText: 'Create',
         game: {
           title: '',
           description: '',
@@ -238,11 +233,17 @@
                 this.game.id = game.id
                 this.gameActionInProgress = false
                 this.$notify({
-                  title: 'Game Created',
-                  message: 'Congratulations! Your game has been created. You can create a new Post to steemit now.',
+                  title: 'Game created',
+                  message: `Congratulations! The game '${game.title}' has been created successfully. You can create a new post now`,
                   type: 'success',
-                  offset: 100
+                  offset: 100,
+                  duration: 0
                 })
+                this.activeNames = ['newPost']
+                this.actionText = 'Update'
+                if (this.$store.getters.showPostTip) {
+                  this.postTipDialogVisible = true
+                }
               }).catch(error => {
                 console.log(error)
                 this.gameActionInProgress = false
@@ -259,7 +260,7 @@
                 this.gameActionInProgress = false
                 this.$notify({
                   title: 'Game Updated',
-                  message: 'Your game has been updated. You can create a new Post to steemit now.',
+                  message: 'Your game has been updated. You can choose to create a new Post to steemit.',
                   type: 'success',
                   offset: 100
                 })
@@ -278,6 +279,13 @@
           }
         })
       },
+      doNotShowTip () {
+        if (this.hidePostTip) {
+          this.$store.commit('hidePostTip')
+        } else {
+          this.$store.commit('showPostTip')
+        }
+      },
       getLastModifiedString (lastModified) {
         return moment(lastModified).fromNow()
       },
@@ -294,7 +302,13 @@
               this.resetActivity()
               this.postingInProgress = false
               this.game.activities.push(response)
-              this.$message.success('Create Post in steemit successfully!')
+              this.$notify({
+                title: 'Post Created',
+                message: 'You have created a post in steemit successfully!. You can find the post link in "Game Posts" section',
+                type: 'success',
+                offset: 100
+              })
+              this.activeNames = ['existingPosts', 'gameInfo']
             }).catch(error => {
               console.log(error)
               this.postingInProgress = false
@@ -366,7 +380,7 @@
       },
       onFileUploadFail (error, file) {
         console.log('Fail to upload game file', error)
-        this.$message.error('Fail to upload the image, please try it later.')
+        this.$message.error('Fail to upload the game file, please try it later.')
         this.game.gameUrl = null
       },
       onImageUploaded (file, response) {
@@ -393,6 +407,7 @@
               this.$refs.coverImageDropzone.dropzone.emit('complete', this.game.coverImage)
               this.$refs.coverImageDropzone.dropzone.files.push(this.game.coverImage)
               this.fileList = [this.game.gameUrl]
+              this.actionText = 'Update'
             } else {
               this.$message.error('You are not allowed to edit this game.')
               this.$router.push({
@@ -411,9 +426,6 @@
       }
     },
     computed: {
-      actionText () {
-        return this.game.id == null ? 'Create' : 'Update'
-      }
     },
     mounted () {
       console.log(this.$store.state.loggedIn)
@@ -494,5 +506,13 @@
         height: 200px;
       }
     }
+  }
+  .postTipContent {
+    display: flex;
+    text-align: left;
+  }
+  .hidePostTipCheckbox {
+    display: flex;
+    margin-top: 15px;
   }
 </style>

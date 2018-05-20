@@ -13,6 +13,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import 'github-markdown-css/github-markdown.css'
 
 import { store } from './store/store'
 

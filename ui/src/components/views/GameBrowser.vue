@@ -147,6 +147,7 @@
     display: flex;
     border-bottom: 5px solid darkseagreen;
     padding-bottom: 10px;
+    padding-top: 10px;
     /*flex-direction:row-reverse;*/
     padding-right: 20px;
     .filter {
