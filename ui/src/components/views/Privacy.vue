@@ -1,6 +1,8 @@
 <template>
   <div>
-    <common-header></common-header>
+    <el-header>
+      <common-header></common-header>
+    </el-header>
     <div class="markdown-body privacy">
       <p>Please read and accept the Privacy Policy Aggreement. You must scroll to the bottom to proceed.</p>
 
@@ -216,7 +218,9 @@
         <li>If you have any questions about this Privacy Policy, please email <a href="mailto:privacy@steemgg.com">privacy@steemgg.com</a></li>
       </ol>
     </div>
-    <common-footer></common-footer>
+    <el-footer>
+      <common-footer></common-footer>
+    </el-footer>
   </div>
 </template>
 <script>
@@ -235,6 +239,6 @@
 </script>
 <style>
   .privacy {
-    margin: 20px 20px 80px;
+    margin: 40px;
   }
 </style>

@@ -25,11 +25,11 @@
         </template>
       </el-table-column>
       <!--<el-table-column fixed="right" label="Operations" width="180">-->
-      <el-table-column label="Operations" width="180">
+      <el-table-column label="Operations" width="250">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.status == 0" @click="openDialog(scope.$index, 'Approve')" type="text" size="small" ng-if="type == 'audit' ">Approve</el-button>
-          <el-button v-if="scope.row.status == 1" @click="openDialog(scope.$index, 'Deny')" type="text" size="small" ng-if="type == 'report'">Deny</el-button>
-          <el-button v-if="scope.row.report == 1" @click="openDialog(scope.$index, 'Clear')" type="text" size="small" ng-if="type == 'report'">Clear Report</el-button>
+          <el-button v-if="scope.row.status == 0" @click="openDialog(scope.$index, 'Approve')" type="primary" round size="small" ng-if="type == 'audit' ">Approve</el-button>
+          <el-button v-if="scope.row.status == 1" @click="openDialog(scope.$index, 'Deny')" type="primary" round size="small" ng-if="type == 'report'">Deny</el-button>
+          <el-button v-if="scope.row.report == 1" @click="openDialog(scope.$index, 'Clear')" type="primary" round size="small" ng-if="type == 'report'">Clear Report</el-button>
           <el-button @click="viewDetails(scope.$index)" type="text" size="small">Detail</el-button>
         </template>
       </el-table-column>

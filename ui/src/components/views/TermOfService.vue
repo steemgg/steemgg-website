@@ -1,6 +1,8 @@
 <template>
   <div>
-    <common-header></common-header>
+    <el-header>
+      <common-header></common-header>
+    </el-header>
     <div class="markdown-body term">
       <p>Please read and accept the Terms of Service. You must scroll to the bottom to proceed.</p>
 
@@ -188,7 +190,9 @@
 
       <p>If you wish to report any privacy issue use <a href="mailto:privacy@steemgg.com">privacy@steemgg.com</a></p>
     </div>
-    <common-footer></common-footer>
+    <el-footer>
+      <common-footer></common-footer>
+    </el-footer>
   </div>
 </template>
 <script>
@@ -209,6 +213,6 @@
 </script>
 <style>
   .term {
-    margin: 20px 20px 80px;
+    margin: 40px;
   }
 </style>

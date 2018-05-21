@@ -43,6 +43,7 @@
       display: flex;
       align-items: center;
       font-size: 14px;
+      font-weight: bold;
       a {
         margin: 0 10px;
         color: white;

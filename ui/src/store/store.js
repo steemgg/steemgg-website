@@ -12,7 +12,8 @@ export const store = new Vuex.Store({
       'userid': '',
       'role': 0,
       'status': 1,
-      'created': null
+      'created': null,
+      'gamePostingInterval': 500
     },
     loggedIn: false,
     showPostTip: true

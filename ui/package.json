@@ -13,6 +13,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "@xkeshi/vue-countdown": "^0.6.0",
     "axios": "^0.17.1",
     "bluebird": "^3.5.1",
     "bootstrap": "^4.0.0-beta.2",

@@ -56,9 +56,11 @@ import {
   Notification,
   Message,
   MessageBox,
-  Tooltip
+  Tooltip,
+  Alert
 } from 'element-ui'
 
+import VueCountdown from '@xkeshi/vue-countdown'
 import infiniteScroll from 'vue-infinite-scroll'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 import mavonEditor from 'mavon-editor'
@@ -71,6 +73,7 @@ Vue.use(Button)
 Vue.use(Container)
 Vue.use(Footer)
 Vue.use(Aside)
+Vue.use(Alert)
 Vue.use(Header)
 Vue.use(Main)
 Vue.use(Radio)
@@ -108,6 +111,7 @@ Vue.use(infiniteScroll)
 Vue.use(VueAwesomeSwiper)
 Vue.use(mavonEditor)
 Vue.use(BootstrapVue)
+Vue.use(VueCountdown)
 
 const MsgBox = MessageBox
 Vue.prototype.$msgbox = MsgBox

@@ -36,7 +36,7 @@
                   </span>
                 </div>
                   <div v-if="showApprove" class="approve">
-                    <el-button @click="approveDialogFormVisible = true" :disabled="this.latestPost == null">Approve this game</el-button>
+                    <el-button @click="approveDialogFormVisible = true" :disabled="this.latestPost == null" type="primary">Approve this game</el-button>
                     <el-tooltip class="item" effect="dark" content="Cannot be approved because it does not have any post." placement="top">
                       <i v-if="this.latestPost == null" class="el-icon-warning" style="color: red"></i>
                     </el-tooltip>

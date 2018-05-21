@@ -1,6 +1,8 @@
 <template>
   <div>
-    <common-header></common-header>
+    <el-header>
+      <common-header></common-header>
+    </el-header>
     <div class="markdown-body cookiePolicy">
       <h1 id="cookiepolicy">Cookie Policy</h1>
 
@@ -47,7 +49,9 @@
       <p>Email:   <a href="mailto:info@steemgg.com">info@steemgg.com</a></p>
     </div>
     <div v-html="compiledPrivacy"></div>
-    <common-footer></common-footer>
+    <el-footer>
+      <common-footer></common-footer>
+    </el-footer>
   </div>
 </template>
 <script>
@@ -67,6 +71,6 @@
 </script>
 <style scoped>
   .cookiePolicy {
-    margin: 20px 20px 80px;
+    margin: 40px;
   }
 </style>
