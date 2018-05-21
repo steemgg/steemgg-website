@@ -11,6 +11,7 @@ function SteemConnect() {
     baseURL: 'https://v2.steemconnect.com',
     app: '',
     callbackURL: '',
+    secret: '',
     scope: [],
   };
 }
@@ -26,6 +27,9 @@ SteemConnect.prototype.setCallbackURL = function setCallbackURL(callbackURL) {
 };
 SteemConnect.prototype.setScope = function setScope(scope) {
   this.options.scope = scope;
+};
+SteemConnect.prototype.setSecret = function setSecret(secret) {
+  this.options.secret = secret;
 };
 
 SteemConnect.prototype.me = async function(accessToken) {
@@ -59,8 +63,23 @@ SteemConnect.prototype.revokeToken = async function revokeToken(accessToken) {
     return  await this.send('oauth2/token/revoke', 'POST', { token: accessToken }, accessToken);
 };
 
-SteemConnect.prototype.reflashToken = async function(accessToken){
-    return  await this.send('oauth2/token', 'GET', { token: accessToken }, accessToken);
+SteemConnect.prototype.getToken = async function(code){
+    return  await this.send('oauth2/token', 'POST', {
+        response_type: "refresh",
+        code: code,
+        client_id: this.options.app,
+        client_secret: this.options.secret,
+        scope: this.options.scope.join(','),
+    },'');
+}
+
+SteemConnect.prototype.refreshToken = async function(refreshToken){
+    return  await this.send('oauth2/token', 'POST', {
+        refresh_token: refreshToken,
+        client_id: this.options.app,
+        client_secret: this.options.secret,
+        scope: this.options.scope.join(','),
+    },'');
 }
 
 SteemConnect.prototype.send = async function send(route, method, body, accessToken) {
@@ -96,6 +115,7 @@ exports.Initialize = function Initialize(config) {
         if (config.app) this.instance.setApp(config.app);
         if (config.callbackURL) this.instance.setCallbackURL(config.callbackURL);
         if (config.scope) this.instance.setScope(config.scope);
+        if (config.secret) this.instance.setSecret(config.secret);
     }
     return this.instance;
 };
