@@ -1,26 +1,19 @@
 <template>
-  <div>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-      <a class="navbar-brand" href="#">SteemitGame</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarCollapse">
+  <div class="commentHeader">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark header-links">
+      <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">-->
+        <!--<span class="navbar-toggler-icon"></span>-->
+      <!--</button>-->
+      <div class="navbar-collapse " id="navbarCollapse">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <router-link class="nav-link" :to="{name: 'home'}" tag="a">Home </router-link>
+            <router-link class="nav-link" :to="{name: 'home'}" tag="a"><img src="../../assets/images/steemgg-logo-128x32.png" /> </router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link" :to="{name: 'newGame'}" tag="a">Upload Game</router-link>
+            <a class="nav-link" @click="uploadGame"><i class="fa fa-cloud-upload fa-2x" ></i><span class="actionText">Upload Game</span></a>
           </li>
-          <li class="nav-item" v-if="$store.getters.user.role >= 2">
-            <router-link class="nav-link" :to="{name: 'auditGame'}" tag="a">Audit Games</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" :to="{name: 'browseGame'}" tag="a">Browse Game</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" v-if="$store.state.loggedIn" :to="{name: 'userProfile'}" tag="a">Profile</router-link>
+          <li class="nav-item" v-if="$store.getters.user.role >= 1">
+            <router-link class="nav-link" :to="{name: 'auditGame'}" tag="a"><i class="fa fa-eye fa-2x" title="Audit Game"></i><span class="actionText">Audit Game</span></router-link>
           </li>
         </ul>
         <!--<form class="form-inline mt-2 mt-md-0">-->
@@ -38,6 +31,17 @@
   export default {
     components: {UserInfo},
     name: 'CommonHeader',
+    methods: {
+      uploadGame () {
+        if (!this.$store.state.loggedIn) {
+          this.$message.warning('Please log in first to create game.')
+        } else {
+          this.$router.push({
+            name: 'newGame'
+          })
+        }
+      }
+    },
     data () {
       return {
       }
@@ -49,10 +53,29 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
-  .log-out-link {
-    color: white;
-  }
-  .nav-link {
-    font-size: 16px;
+  .commentHeader {
+    .log-out-link {
+      color: white;
+    }
+    .nav-link {
+      font-size: 16px;
+      cursor: pointer;
+      li {
+        a {
+          padding-bottom: 0px;
+        }
+      }
+      .actionText {
+        padding-left: 5px;
+        font-size: 14px;
+      }
+    }
+    .navbar {
+      height: 50px;
+      margin-bottom: 0px;
+    }
+    .header-links {
+      height: 60px;
+    }
   }
 </style>

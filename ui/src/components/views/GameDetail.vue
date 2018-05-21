@@ -17,18 +17,30 @@
                   {{game.title}}
                 </div>
                 <div class="gameMetadata">
-                  <span class="modifiedTime">{{postedTime}}</span>
+                  <span class="modifiedTime">Added on {{postedTime}}</span>
                   <span class="totalPayout">${{metadata.totalPayout}}</span>
                   <span class="activeVotes">
-                    <i class="fa fa-thumbs-o-up" aria-hidden="true" @click="vote"></i> {{votes}}
+                    <el-tooltip class="item" effect="dark" content="Vote" placement="top">
+                      <i v-if="!alreadyVoted" class="fa fa-thumbs-o-up" aria-hidden="true" @click="voteUp" v-loading="voting"></i>
+                      <i v-if="alreadyVoted" class="fa fa-thumbs-up" aria-hidden="true" @click="voteUp"></i>
+                    </el-tooltip>
+                     {{votes}}
                   </span>
-                  <span class="report">
-                    <i class="fa fa-flag-checkered" aria-hidden="true"></i>
+                  <span class="report" @click="openDialog">
+                    <el-tooltip class="item" effect="dark" content="Report" placement="top">
+                      <i class="fa fa-flag-checkered" aria-hidden="true"></i>
+                    </el-tooltip>
                   </span>
                   <span class="type">
                     Type: {{game.category}}
                   </span>
                 </div>
+                  <div v-if="showApprove" class="approve">
+                    <el-button @click="approveDialogFormVisible = true" :disabled="this.latestPost == null" type="primary">Approve this game</el-button>
+                    <el-tooltip class="item" effect="dark" content="Cannot be approved because it does not have any post." placement="top">
+                      <i v-if="this.latestPost == null" class="el-icon-warning" style="color: red"></i>
+                    </el-tooltip>
+                  </div>
                 <div class="gameTags">
                   <span v-for="tag in metadata.tags" class="gameTag">{{tag}}</span>
                 </div>
@@ -36,7 +48,7 @@
                   <avatar :account="game.account"></avatar>
                   <div class="accountName"><a :href="'https://steemit.com/@' + game.account" target="_blank">{{game.account}}</a></div>
                 </div>
-                <div class="description" v-html="compiledDescription">
+                <div class="description markdown-body" v-html="compiledDescription">
                 </div>
                 <div class="comments" v-loading="loadingComment">
                   <div class="commentAction">
@@ -65,6 +77,29 @@
               </div>
             </el-col>
           </el-row>
+          <el-dialog title="Report Game" :visible.sync="dialogFormVisible">
+            <el-form :model="form">
+              <el-form-item label="Report comment">
+                <el-input :rows="3" v-model="form.comment" auto-complete="off" type="textarea"></el-input>
+              </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+              <el-button @click="dialogFormVisible = false">Cancel</el-button>
+              <el-button type="primary" @click="report" :disabled="commentIsEmpty" :loading="reporting">Confirm</el-button>
+            </div>
+          </el-dialog>
+
+          <el-dialog title="Approve Game" :visible.sync="approveDialogFormVisible">
+            <el-form :model="form">
+              <el-form-item label="Approve comment">
+                <el-input :rows="3" v-model="form.approveComment" auto-complete="off" type="textarea"></el-input>
+              </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+              <el-button @click="approveDialogFormVisible = false">Cancel</el-button>
+              <el-button type="primary" @click="approve" :disabled="approveCommentIsEmpty" :loading="approving">Confirm</el-button>
+            </div>
+          </el-dialog>
         </el-main>
       </el-container>
       <el-footer>
@@ -104,7 +139,18 @@
         userInfo: {},
         latestPost: null,
         posting: false,
-        loadingComment: false
+        showApprove: false,
+        loadingComment: false,
+        reporting: false,
+        approving: false,
+        voting: false,
+        dialogFormVisible: false,
+        approveDialogFormVisible: false,
+
+        form: {
+          comment: '',
+          approveComment: ''
+        }
       }
     },
     props: ['id'],
@@ -121,39 +167,83 @@
       },
       votes () {
         return this.metadata && this.metadata.activeVotes ? this.metadata.activeVotes.length : 0
-      }
-
-    },
-    methods: {
-      canVote () {
-        let canVote = true
-        if (this.latestPost != null && this.metadata.activeVotes != null && this.$store.user) {
+      },
+      commentIsEmpty () {
+        return this.form.comment == null || this.form.comment.trim().length === 0
+      },
+      approveCommentIsEmpty () {
+        return this.form.approveComment == null || this.form.approveComment.trim().length === 0
+      },
+      alreadyVoted () {
+        let voted = false
+        if (this.latestPost != null && this.metadata.activeVotes != null) {
           for (let i = 0; i < this.metadata.activeVotes.length; i++) {
-            if (this.metadata.activeVotes[i].voter === this.$store.user.account) {
-              canVote = false
+            if (this.metadata.activeVotes[i].voter === this.$store.state.user.account) {
+              voted = true
               break
             }
           }
         } else {
-          canVote = false
+          voted = false
         }
-        return canVote
+        return voted
+      }
+    },
+    methods: {
+      openDialog () {
+        this.dialogFormVisible = true
       },
-      vote (weight) {
-        if (weight == null) {
-          weight = 5000
-        }
-        if (this.canVote()) {
-          gameService.vote(this.latestPost.account, this.latestPost.permlink, weight).then(response => {
-            this.$message('vote successfully')
-            this.refreshSteemitMetaData()
-          }).catch(error => {
-            console.log('Fail to vote ', this.latestPost, error)
-            this.$alert('Fail to vote, please try it later.')
-          })
+      report () {
+        this.reporting = true
+        gameService.report(this.game.id, this.form.comment).then(response => {
+          this.dialogFormVisible = false
+          this.$message('report successfully')
+        }).catch(error => {
+          this.dialogFormVisible = false
+          console.log('Fail to report', error.response)
+          this.$alert('Fail to report!.')
+        }).finally(() => {
+          this.form.comment = ''
+          this.reporting = false
+        })
+      },
+      approve () {
+        this.approving = true
+        gameService.approve(this.game.id, this.form.approveComment).then(response => {
+          this.approveDialogFormVisible = false
+          this.showApprove = false
+          this.$message('Approve successfully')
+        }).catch(error => {
+          this.approveDialogFormVisible = false
+          console.log('Fail to report', error.response)
+          this.$alert('Fail to report!.')
+        }).finally(() => {
+          this.form.approveComment = ''
+          this.approving = false
+        })
+      },
+      voteUp () {
+        if (this.$store.state.loggedIn) {
+          if (this.alreadyVoted === false) {
+            this.voting = true
+            gameService.vote(this.latestPost.account, this.latestPost.permlink, 5000).then(response => {
+              this.$message('vote successfully')
+              this.refreshSteemitMetaData()
+            }).catch(error => {
+              console.log('Fail to vote ', this.latestPost, error)
+              this.$alert('Fail to vote, please try it later.')
+            }).finally(() => {
+              this.voting = false
+            })
+          } else {
+            this.$message({
+              message: 'You have already voted this game.',
+              type: 'warning'
+            })
+          }
         } else {
           this.$message({
-            message: 'You have already vote this game.',
+            message: 'Please log in first to vote this game.',
             type: 'warning'
           })
         }
@@ -195,15 +285,16 @@
           gameService.fetchSteemitMetadata(this.game).then(response => {
             console.log('get steem data', response)
             this.metadata = response
+          }).catch(error => {
+            console.log('fail to get steem data', error.response)
           })
         }
       },
       refreshSteemitComments () {
         if (this.game && this.game.activities && this.game.activities.length > 0) {
-          let activity = this.game.activities[this.game.activities.length - 1]
           this.loadingComment = true
-          gameService.getComments('', activity.account, activity.permlink).then(response => {
-            this.comments = response.reverse()
+          gameService.fetchAllSteemitComments(this.game).then(response => {
+            this.comments = response.reduce((acc, currentValue) => { return acc.concat(currentValue) }, [])
           }).catch(error => {
             console.log('loading comment fail', error.reponse)
             this.$message.error('Fail to load comment')
@@ -213,14 +304,23 @@
         }
       },
       fetchGame () {
+        this.showApprove = false
         if (this.id) {
           gameService.getById(this.id).then(response => {
             this.game = response
-            this.gameUrl = 'https://ipfs.io/ipfs/' + this.game.gameUrl.hash
-            console.log('mounted successfully', this.game)
-            this.refreshSteemitMetaData()
-            this.refreshSteemitComments()
-            this.fetchSimilarGame(this.game.category)
+            if (this.game.status === 1 || this.$store.getters.isAuditor || (this.$store.state.loggedIn && this.$store.getters.user.account === this.game.account)) {
+              this.gameUrl = 'https://ipfs.io/ipfs/' + this.game.gameUrl.hash
+              console.log('mounted successfully', this.game)
+              this.showApprove = this.$store.getters.isAuditor && this.game && this.game.status === 0
+              this.refreshSteemitMetaData()
+              this.refreshSteemitComments()
+              this.fetchSimilarGame(this.game.category)
+            } else {
+              this.$message.error('This game has not been approved so cannot be played!')
+            }
+          }).catch(error => {
+            console.log('Fail to load the game with id: ' + this.id, error)
+            this.$message.error('Fail to load the game. Please make sure the game exist.')
           })
         }
       },
@@ -268,7 +368,12 @@
 
   .gameInfo {
     padding: 10px;
+    font-size: 1.5em;
 
+    .gameTitle {
+      display: flex;
+      font-weight: bold;
+    }
     .comments {
       margin-top: 20px;
       .commentAction {
@@ -292,9 +397,11 @@
   .gameTags {
     margin: 20px 0;
     display: flex;
+    flex-wrap:wrap;
     .gameTag {
       display: inline;
       margin-right: 12px;
+      margin-top:12px;
       /*line-height: 32px;*/
       padding: 4px 6px;
       background: rgba(94,109,130,.1);
@@ -308,11 +415,15 @@
   .gameMetadata {
     height: 30px;
     line-height: 30px;
-    span {
+    span{
       padding-left: 20px;
     }
 
-    .activeVotes {
+    span:first-child {
+      padding-left: 0px;
+    }
+
+    .activeVotes, .report {
       float: right;
       i {
         cursor: pointer;
@@ -321,6 +432,7 @@
 
     .modifiedTime {
       float: left;
+      font-weight:bold;
     }
 
     .totalPayout {

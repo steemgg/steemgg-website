@@ -20,14 +20,20 @@
       "gameurl": "/src/public/games",
       "rooturl": "/src",
       "sc2": "https://v2.steemconnect.com",
-      "secret": "password"
+      "secret": "password",
+      "saveToken": true,
+      "gamePostingInterval": "500",
+      "postingInterval": "300",
+      "commentInterval": "10",
+      "voteInterval": "3",
+      "sessionTime": "86400"
     },
     "sc": {
       "app": "steemitgame.app",
       "cburl": "http://steemit.xxx/callback",
       "url": "https://v2.steemconnect.com",
       "secret":"password",
-      "scope": ["login","offline","vote","comment","comment_delete","comment_options","custom_json"]
+      "scope": ["login","vote","comment","comment_delete","comment_options","custom_json"]
     },
     "ipfs":{
       "ip": "localhost",

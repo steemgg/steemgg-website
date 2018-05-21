@@ -37,12 +37,19 @@ exports.reportGame = async function(params) {
 }
 
 exports.canReportGame = async function(params) {
-    let rows = await db.execute(db.READ, 'select id from comments where userid=? and gameid=? and status=0 and type=0', params);
+    let rows = await db.execute(db.READ, 'select id from comments where gameid=? and status=0 and type=0', params);
     return rows;
 }
 
 exports.reportComments = async function(params) {
     let rows = await db.execute(db.READ, 'select id,gameid,account,permlink,userid,comment,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from comments where gameid=? and status=0 and type=0', params);
+    return rows;
+}
+
+exports.unreportGame = async function(gameId) {
+    await db.execute(db.WRITE, 'update comments set status = 1 and type = 0 where gameid= ?', gameId);
+    let rows = await db.execute(db.WRITE, 'update games set report=0 where id= ?', gameId);
+    this.clearCache();
     return rows;
 }
 
@@ -81,9 +88,14 @@ exports.countOfGames = async function(params) {
     let gameQuery = '';
     let allKey = 'game:count';
     let key = 'game:count:s:'+params['status']+':r:'+params['report']+':remm:'+params['recommend']+':a:'+params['account']+':c:'+params['category'];
-    let rows = await redis.instance.get(key);
-    if(rows) {
-        return JSON.parse(rows);
+    let list = await redis.instance.hgetall(allKey);
+    for(let k in list ) {
+        if(k == key) {
+            let rows = await redis.instance.get(key);
+            if(rows) {
+                return JSON.parse(rows);
+            }
+        }
     }
     for (let k in params ) {
         if(params[k] !== '' && k !='sort' && k !='offset' && k !='pageSize') {
@@ -91,7 +103,7 @@ exports.countOfGames = async function(params) {
         }
     }
     let sql = 'select count(1) as nums from games where 1=1 ' + gameQuery;
-    rows = await db.execute(db.READ, sql, []);
+    let rows = await db.execute(db.READ, sql, []);
     let count = rows[0]['nums'];
     if(count>0) {
         let data = {};
@@ -106,9 +118,14 @@ exports.gameList = async function(params) {
     let gameQuery = '';
     let allKey = 'game:list';
     let key = 'game:list:s:'+params['status']+':r:'+params['report']+':remm:'+params['recommend']+':a:'+params['account']+':c:'+params['category']+':o:'+ params['offset']+':p:'+params['pageSize']+':s:'+params['sort'];
-    let rows = await redis.instance.get(key);
-    if(rows) {
-        return JSON.parse(rows);
+    let list = await redis.instance.hgetall(allKey);
+    for(let k in list ) {
+        if(k == key) {
+            let rows = await redis.instance.get(key);
+            if(rows) {
+                return JSON.parse(rows);
+            }
+        }
     }
     for (let k in params ) {
         if(params[k] !== '' && k !='sort' && k !='offset' && k !='pageSize') {
@@ -117,7 +134,7 @@ exports.gameList = async function(params) {
     }
     let sortArr = params['sort'].split("_");
     let sql = 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend from games where 1=1 ' + gameQuery + ' order by ? ? limit ?,?';
-    rows = await db.execute(db.READ, sql, [sortArr[0], sortArr[1], params['offset'], params['pageSize']]);
+    let rows = await db.execute(db.READ, sql, [sortArr[0], sortArr[1], params['offset'], params['pageSize']]);
     if(Object.keys(rows).length>0) {
         let data = {};
         data[key] = 1;

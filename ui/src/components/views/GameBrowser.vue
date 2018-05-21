@@ -1,6 +1,9 @@
 <template>
   <div class="game-browser-container">
-    <common-header></common-header>
+    <el-header>
+      <common-header></common-header>
+    </el-header>
+    <div class="games-container">
       <div class="filters">
         <span class="filter">
           <span class="filterLabel">Catetory: </span>
@@ -30,7 +33,10 @@
           <game-grid v-for="game in items" :game="game" :key="game.id"></game-grid>
         </div>
       </div>
-    <common-footer></common-footer>
+    </div>
+    <el-footer>
+      <common-footer></common-footer>
+    </el-footer>
   </div>
 </template>
 
@@ -143,12 +149,16 @@
     display: flex;
     flex-wrap: wrap;
   }
+  .games-container {
+    padding: 0 20px;
+  }
   .filters {
     display: flex;
     border-bottom: 5px solid darkseagreen;
     padding-bottom: 10px;
+    padding: 20px;
     /*flex-direction:row-reverse;*/
-    padding-right: 20px;
+    padding-right: 10px 20px;
     .filter {
       margin: 0 10px;
       .filterLabel {

@@ -13,6 +13,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import 'github-markdown-css/github-markdown.css'
 
 import { store } from './store/store'
 
@@ -45,6 +46,7 @@ import {
   Menu,
   MenuItem,
   MenuItemGroup,
+  Popover,
   Submenu,
   Slider,
   Tabs,
@@ -53,9 +55,12 @@ import {
   Loading,
   Notification,
   Message,
-  MessageBox
+  MessageBox,
+  Tooltip,
+  Alert
 } from 'element-ui'
 
+import VueCountdown from '@xkeshi/vue-countdown'
 import infiniteScroll from 'vue-infinite-scroll'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 import mavonEditor from 'mavon-editor'
@@ -68,6 +73,7 @@ Vue.use(Button)
 Vue.use(Container)
 Vue.use(Footer)
 Vue.use(Aside)
+Vue.use(Alert)
 Vue.use(Header)
 Vue.use(Main)
 Vue.use(Radio)
@@ -91,11 +97,13 @@ Vue.use(TabPane)
 Vue.use(Menu)
 Vue.use(MenuItem)
 Vue.use(MenuItemGroup)
+Vue.use(Popover)
 Vue.use(Submenu)
 Vue.use(Slider)
 Vue.use(Loading)
 Vue.use(Icon)
 Vue.use(Dialog)
+Vue.use(Tooltip)
 // Vue.use(Notification)
 // Vue.use(Message)
 // Vue.use(MessageBox)
@@ -103,6 +111,7 @@ Vue.use(infiniteScroll)
 Vue.use(VueAwesomeSwiper)
 Vue.use(mavonEditor)
 Vue.use(BootstrapVue)
+Vue.use(VueCountdown)
 
 const MsgBox = MessageBox
 Vue.prototype.$msgbox = MsgBox
