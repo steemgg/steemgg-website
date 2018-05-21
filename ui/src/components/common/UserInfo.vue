@@ -10,7 +10,7 @@
       title="Login with SteemConnect"
       :visible.sync="loginInfoVisible"
       width="30%">
-      <span>You will be redirected to SteemConnect to authenticate to the Steem blockchain. SteemConnect is developed and maintained by Steemit, Inc. and Busy.org.
+      <span class="login-tip">You will be redirected to SteemConnect to authenticate to the Steem blockchain. SteemConnect is developed and maintained by Steemit, Inc. and Busy.org.
 SteemGG.com will never access your private keys.</span>
       <span slot="footer" class="dialog-footer">
     <el-button @click="loginInfoVisible = false">Close</el-button>
@@ -54,7 +54,7 @@ SteemGG.com will never access your private keys.</span>
       },
       login () {
         this.loginInfoVisible = false
-        window.location.href = 'https://v2.steemconnect.com/oauth2/authorize?client_id=steemitgame.app&redirect_uri=http%3A%2F%2Fdev.steemitgame.com%2Fcallback&scope=login,offline,vote,comment,delete_comment,comment_options,custom_json,claim_reward_balance&state=' + window.location.href
+        window.location.href = 'https://v2.steemconnect.com/oauth2/authorize?client_id=steemitgame.app&redirect_uri=http%3A%2F%2Fdev.steemitgame.com%2Fcallback&scope=login,offline,vote,comment,delete_comment,comment_options,custom_json,claim_reward_balance&response_type=code&state=' + window.location.href
       }
     },
     mounted () {

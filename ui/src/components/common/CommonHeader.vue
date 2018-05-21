@@ -1,14 +1,13 @@
 <template>
   <div class="commentHeader">
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-      <a class="" href="#">SteemitGame</a>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark header-links">
       <!--<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">-->
         <!--<span class="navbar-toggler-icon"></span>-->
       <!--</button>-->
-      <div class="collapse navbar-collapse" id="navbarCollapse">
+      <div class="navbar-collapse " id="navbarCollapse">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <router-link class="nav-link" :to="{name: 'home'}" tag="a">Home </router-link>
+            <router-link class="nav-link" :to="{name: 'home'}" tag="a"><img src="../../assets/images/steemgg-logo-128x32.png" /> </router-link>
           </li>
           <li class="nav-item">
             <a class="nav-link" @click="uploadGame"><i class="fa fa-cloud-upload fa-2x" ></i><span class="actionText">Upload Game</span></a>
@@ -74,6 +73,9 @@
     .navbar {
       height: 50px;
       margin-bottom: 0px;
+    }
+    .header-links {
+      height: 60px;
     }
   }
 </style>

@@ -4,6 +4,10 @@
     <el-main>
       <div class="editFormContainer">
         <div class='gameEditForm'>
+          <div class="previewButton" v-if="this.game.id != null">
+            <el-button v-if="this.game.status != null && this.game.status === 0" type="primary" round @click="previewGame">Preview Game</el-button>
+            <el-button v-if="this.game.status != null && this.game.status !== 0" type="primary" round @click="previewGame">Play Game</el-button>
+          </div>
           <el-collapse v-model="activeNames">
             <el-collapse-item title="Game Information" name="gameInfo">
               <div>
@@ -78,11 +82,11 @@
                   <el-form-item label='Activity Title' prop="activityTitle" v-if="!useGameInfoAsPost">
                     <el-input :disabled="useGameInfoAsPost" v-model='activity.activityTitle'></el-input>
                   </el-form-item>
-                  <el-form-item label='Activity Description' prop="activityDesc" v-if="!useGameInfoAsPost">
-                    <el-input :disabled="useGameInfoAsPost" v-model='activity.activityDesc' type="textarea" :rows="2" placeholder="This will be posted to steemit, game description will be used if empty"></el-input>
+                  <el-form-item label='Activity Description' prop="activityDescription" v-if="!useGameInfoAsPost">
+                    <el-input :disabled="useGameInfoAsPost" v-model='activity.activityDescription' type="textarea" :rows="2" placeholder="This will be posted to steemit, game description will be used if empty"></el-input>
                   </el-form-item>
                   <el-form-item label='Tags'>
-                    <input-tag :on-change='onTagChange' :tags='activity.tags'></input-tag>
+                    <input-tag :on-change='onTagChange' :tags='activity.tags' limit="4"></input-tag>
                   </el-form-item>
                   <el-form-item label="reward">
                     <el-select v-model="activity.reward" placeholder="请选择">
@@ -100,14 +104,38 @@
                     <!--<el-slider v-model="activity.reward"></el-slider>-->
                   </el-form-item>
                   <el-form-item>
+                    <div>
+                    <count-down :time="postingWaitTime" v-if="postingWaitTime > 0" @countdownend="this.postingWaitTime = -1">
+                      <template slot-scope="props">
+                        <div role="alert postingIntervalMessage" class="el-alert el-alert--warning">
+                          <i class="el-alert__icon el-icon-warning"></i>
+                          <div class="el-alert__content">
+                            <span class="el-alert__title">You need to wait for {{ props.hours }}:{{ props.minutes }}:{{ props.seconds }} before creating your next post.</span>
+                          </div>
+                        </div>
+                      </template>
+                    </count-down>
+                    </div>
                     <!--<el-button type='primary' v-if="activity.permLink != null" @click="submitActivity(false)">Update</el-button>-->
-                    <el-button type='primary' :disabled="game.id == null" :loading="postingInProgress" @click="submitActivity(true)">New Post</el-button>
+                    <el-button type='primary' :disabled="game.id == null || this.postingWaitTime > 0" :loading="postingInProgress" @click="submitActivity(true)">New Post</el-button>
                     <!--<el-button @click="cancelForm()">Cancel</el-button>-->
                   </el-form-item>
                 </el-form>
               </div>
             </el-collapse-item>
           </el-collapse>
+          <el-dialog
+            title="Create a Post"
+            :visible.sync="postTipDialogVisible"
+            width="30%">
+            <div >
+              <div class="postTipContent">Congratulations! Your game has been created successfully. You can choose to create a post in steemit for your game now or later. Please be aware that until a post is created, your game will not be approved and cannot receive award. </div>
+              <div class="hidePostTipCheckbox"><el-checkbox v-model="hidePostTip" @change="doNotShowTip">Do not show this again.</el-checkbox></div>
+            </div>
+            <span slot="footer" class="dialog-footer">
+              <el-button type="primary" @click="postTipDialogVisible = false">Okay</el-button>
+            </span>
+          </el-dialog>
         </div>
       </div>
     </el-main>
@@ -119,31 +147,12 @@
   import InputTag from 'vue-input-tag'
   import moment from 'moment'
   import CommonFooter from '../common/CommonFooter'
-//  import { FormItem, Checkbox,
-//    CheckboxGroup,
-//    Form,
-//    Col,
-//    Switch,
-//    Button,
-//    Radio,
-//    Input,
-//    Container,
-//    Footer,
-//    Header,
-//    Main,
-//    Select,
-//    Upload,
-//    RadioGroup,
-//    Slider
-//  } from 'element-ui'
   import vue2Dropzone from 'vue2-dropzone'
   import 'vue2-dropzone/dist/vue2Dropzone.css'
   import CommonHeader from '../common/CommonHeader'
   import GameService from '../../service/game.service'
-//  import ElFormItem from '../../../node_modules/element-ui/packages/form/src/form-item'
-//  import ElCollapseItem from '../../../node_modules/element-ui/packages/collapse/src/collapse-item'
-
   import { GAME_CATEGORY } from '../../service/const'
+  import VueCountdown from '@xkeshi/vue-countdown'
   const gameService = new GameService()
 
   export default {
@@ -151,7 +160,8 @@
       CommonHeader,
       CommonFooter,
       InputTag,
-      vueDropzone: vue2Dropzone
+      vueDropzone: vue2Dropzone,
+      CountDown: VueCountdown
     },
     props: ['id', 'mode'],
     name: 'GameEditForm',
@@ -162,6 +172,10 @@
         gameActionInProgress: false,
         errorMessage: '',
         useGameInfoAsPost: true,
+        hidePostTip: false,
+        postTipDialogVisible: false,
+        actionText: 'Create',
+        postingWaitTime: -1,
         game: {
           title: '',
           description: '',
@@ -203,7 +217,7 @@
             { min: 5, max: 255, message: 'Title should between 5 - 255 characters', trigger: 'blur' },
             { required: true, message: 'Please input the post title', trigger: 'blur' }
           ],
-          activityDesc: [
+          activityDescription: [
             { max: 3000, message: 'Description max 3000 characters', trigger: 'blur' },
             { required: true, message: 'Please input the post body', trigger: 'blur' }
           ]
@@ -238,11 +252,17 @@
                 this.game.id = game.id
                 this.gameActionInProgress = false
                 this.$notify({
-                  title: 'Game Created',
-                  message: 'Congratulations! Your game has been created. You can create a new Post to steemit now.',
+                  title: 'Game created',
+                  message: `Congratulations! The game '${game.title}' has been created successfully. You can create a new post now`,
                   type: 'success',
-                  offset: 100
+                  offset: 100,
+                  duration: 0
                 })
+                this.activeNames = ['newPost']
+                this.actionText = 'Update'
+                if (this.$store.getters.showPostTip) {
+                  this.postTipDialogVisible = true
+                }
               }).catch(error => {
                 console.log(error)
                 this.gameActionInProgress = false
@@ -259,7 +279,7 @@
                 this.gameActionInProgress = false
                 this.$notify({
                   title: 'Game Updated',
-                  message: 'Your game has been updated. You can create a new Post to steemit now.',
+                  message: 'Your game has been updated. You can choose to create a new Post to steemit.',
                   type: 'success',
                   offset: 100
                 })
@@ -278,8 +298,35 @@
           }
         })
       },
+      previewGame () {
+        this.$router.push({
+          name: 'viewGame',
+          params: {
+            id: this.game.id
+          }
+        })
+      },
+      doNotShowTip () {
+        if (this.hidePostTip) {
+          this.$store.commit('hidePostTip')
+        } else {
+          this.$store.commit('showPostTip')
+        }
+      },
       getLastModifiedString (lastModified) {
         return moment(lastModified).fromNow()
+      },
+      updateActivityInterval () {
+        console.log('Entering updateActivityInterval')
+        this.postingWaitTime = -1
+        if (this.game.activities && this.game.activities.length > 0) {
+          let lastPostTime = this.game.activities[this.game.activities.length - 1].lastModified
+          console.log(moment(lastPostTime).valueOf())
+          console.log(moment(lastPostTime).valueOf() + this.$store.getters.user.gamePostingInterval * 1000 - moment().valueOf())
+
+          this.postingWaitTime = moment(lastPostTime).valueOf() + this.$store.getters.user.gamePostingInterval * 1000 - moment().valueOf()
+        }
+        console.log('Existing updateActivityInterval')
       },
       submitActivity (isNew) {
         if (this.game.id) {
@@ -294,7 +341,14 @@
               this.resetActivity()
               this.postingInProgress = false
               this.game.activities.push(response)
-              this.$message.success('Create Post in steemit successfully!')
+              this.updateActivityInterval()
+              this.$notify({
+                title: 'Post Created',
+                message: 'You have created a post in steemit successfully!. You can find the post link in "Game Posts" section',
+                type: 'success',
+                offset: 100
+              })
+              this.activeNames = ['existingPosts', 'gameInfo']
             }).catch(error => {
               console.log(error)
               this.postingInProgress = false
@@ -344,6 +398,10 @@
 
       onTagChange () {
         console.log('tag changed')
+        if (this.activity.tags.length > 4) {
+          this.activity.tags.splice(4)
+          this.$message.info('Only allow up to 4 tags.')
+        }
       },
       onFileRemoved (file, fileList) {
         console.log(file, fileList)
@@ -366,7 +424,7 @@
       },
       onFileUploadFail (error, file) {
         console.log('Fail to upload game file', error)
-        this.$message.error('Fail to upload the image, please try it later.')
+        this.$message.error('Fail to upload the game file, please try it later.')
         this.game.gameUrl = null
       },
       onImageUploaded (file, response) {
@@ -382,6 +440,12 @@
         console.log('image removed', file)
         this.game.coverImage = null
       },
+      postCountDownEnded () {
+
+      },
+      checkPostInterval () {
+
+      },
       initData () {
         if (this.id != null) {
           gameService.getById(this.id).then(game => {
@@ -393,6 +457,8 @@
               this.$refs.coverImageDropzone.dropzone.emit('complete', this.game.coverImage)
               this.$refs.coverImageDropzone.dropzone.files.push(this.game.coverImage)
               this.fileList = [this.game.gameUrl]
+              this.actionText = 'Update'
+              this.updateActivityInterval()
             } else {
               this.$message.error('You are not allowed to edit this game.')
               this.$router.push({
@@ -411,9 +477,6 @@
       }
     },
     computed: {
-      actionText () {
-        return this.game.id == null ? 'Create' : 'Update'
-      }
     },
     mounted () {
       console.log(this.$store.state.loggedIn)
@@ -427,6 +490,7 @@
 
 <style lang='scss' scoped>
   .editFormContainer {
+    text-align: center;
     display: flex;
     justify-content: center;
     .gameEditForm {
@@ -483,16 +547,39 @@
 <style lang="scss">
   .editFormContainer {
     .gameEditForm {
+      .previewButton {
+        display:flex;
+        place-content: flex-end;
+      }
       .el-collapse-item__header {
         font-weight: bold;
         font-size: 15px;
-        color: royalblue;
+        color: white;
+        font-weight:bold;
+        border-radius: 0 0 20px 20px;
+        margin-bottom:5px;
+        background-color:#409EFF;
       }
 
       .dropzone .dz-preview .dz-image img{
         width: 330px;
         height: 200px;
       }
+
+      .el-collapse-item__content {
+        padding: 0 10px;
+        .postingIntervalMessage {
+          margin-bottom: 10px;
+        }
+      }
     }
+  }
+  .postTipContent {
+    display: flex;
+    text-align: left;
+  }
+  .hidePostTipCheckbox {
+    display: flex;
+    margin-top: 15px;
   }
 </style>

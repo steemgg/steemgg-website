@@ -42,7 +42,6 @@
     },
     methods: {
       gotoGame () {
-        alert(1)
         this.$router.push({name: 'viewGame', params: { id: this.game.id }})
       }
     },

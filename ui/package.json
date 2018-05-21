@@ -13,11 +13,13 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "@xkeshi/vue-countdown": "^0.6.0",
     "axios": "^0.17.1",
     "bluebird": "^3.5.1",
     "bootstrap": "^4.0.0-beta.2",
     "bootstrap-vue": "^1.4.0",
     "element-ui": "^2.0.5",
+    "github-markdown-css": "^2.10.0",
     "lodash": "^4.17.4",
     "marked": "^0.3.12",
     "mavon-editor": "^2.4.16",
