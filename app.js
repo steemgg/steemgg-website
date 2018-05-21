@@ -40,7 +40,6 @@ sc2NewApi.Initialize({
 
 var sess = {
   secret: config.get('steemit.app.secret'),
-  cookie: { maxAge: 60 * 60 * 1000 },
   store: new redisStore({ host: config.get('steemit.redis.host'), port: config.get('steemit.redis.port'), client: redis.instance.client, ttl: config.get('steemit.app.sessionTime') }),
   resave: false,
   saveUninitialized: false
@@ -48,7 +47,6 @@ var sess = {
 
 if (app.get('env') === 'production') {
   app.set('trust proxy', 1) // trust first proxy
-  sess.cookie.secure = true // serve secure cookies
 }
 
 app.use(session(sess))
