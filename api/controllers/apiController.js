@@ -108,6 +108,7 @@ exports.postGame = async function(req, res, next) {
         let unix = Math.round(+new Date()/1000);
         let activity = {userid:req.session.user.userid, account:req.session.user.account,gameid: data.gameid,lastModified: unix, permlink:permLink };
         await game.addActivity(activity);
+        await game.updateActivityCount([data.gameid,req.session.user.userid]);
         let iso = new Date(unix*1000).toISOString();
         await user.setInterval('post:interval:'+userInfo.userid, config.get('steemit.app.postingInterval'));
         await user.setInterval('post:interval:game:'+data.gameid+':'+userInfo.userid, config.get('steemit.app.gamePostingInterval'));
