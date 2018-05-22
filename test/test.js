@@ -233,7 +233,6 @@ describe('DB', function() {
             try{
                 await game.updateActivityCount([testGameId,testUserId]);
                 let dbRes = await game.getGameById(testGameId);
-                console.log(dbRes);
                 assert.equal(dbRes[0].activities, 1);
             } catch (err) {
                 assert.fail('test failed'+err);
