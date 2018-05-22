@@ -48,7 +48,7 @@ exports.canReportGame = async function(params) {
 }
 
 exports.reportComments = async function(params) {
-    let rows = await db.execute(db.READ, 'select id,gameid,account,permlink,userid,comment,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from comments where gameid=? and status=0 and type=0', params);
+    let rows = await db.execute(db.READ, 'select id,gameid,account,permlink,userid,comment,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from comments where gameid=? and status=0 and type=0 order by lastModified desc', params);
     return rows;
 }
 
@@ -60,7 +60,7 @@ exports.unreportGame = async function(gameId) {
 }
 
 exports.auditComments = async function(params) {
-    let rows = await db.execute(db.READ, 'select id,gameid,account,permlink,userid,comment,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from comments where gameid=? and status=0 and type=1', params);
+    let rows = await db.execute(db.READ, 'select id,gameid,account,permlink,userid,comment,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from comments where gameid=? and status=0 and type=1 order by lastModified desc', params);
     return rows;
 }
 
@@ -86,7 +86,7 @@ exports.getRecentlyActivity = async function(gameId) {
 
 exports.getPayoutActivities = async function() {
     let time = Math.floor(new Date() / 1000) - 86400*7;
-    let rows = await db.execute(db.READ, 'select id,gameid,account,userid,permlink,vote,payout,status,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModifie from activities where lastModified<? and status=0',time);
+    let rows = await db.execute(db.READ, 'select id,gameid,account,userid,permlink,vote,payout,status,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from activities where lastModified<? and status=0  order by lastModified desc',time);
     return rows;
 }
 
