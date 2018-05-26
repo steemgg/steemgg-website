@@ -190,7 +190,7 @@
           activityTitle: '',
           activityDescription: '',
           reward: 100,
-          tags: ['abc', 'eef']
+          tags: []
         },
         fileList: [],
         rules: {
