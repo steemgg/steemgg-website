@@ -116,7 +116,7 @@ export function createPermlink(title, author, parent_author, parent_permlink) {
       s = base58.encode(secureRandom.randomBuffer(4));
     }
 
-    steem.api.setOptions({url:'wss://steemd-int.steemit.com'});
+    steem.api.setOptions({url:'https://api.steemit.com'});
     return steem.api
       .getContentAsync(author, s)
       .then(content => {
