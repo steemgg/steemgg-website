@@ -92,15 +92,15 @@ exports.postGame = async function(req, res, next) {
             return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
         }
         if(userInfo.account != dbRes[0]['account'] || data.gameid != dbRes[0]['id']) {
-            return res.status(500).json({ resultCode: CODE.PARAMS_INCONSISTENT_ERROR.RESCODE, err: CODE.PARAMS_INCONSISTENT_ERROR.DESC });
+            return res.status(400).json({ resultCode: CODE.PARAMS_INCONSISTENT_ERROR.RESCODE, err: CODE.PARAMS_INCONSISTENT_ERROR.DESC });
         }
         let gameTTL = await user.getTTL('post:interval:game:'+data.gameid+':'+userInfo.userid);
         if( gameTTL>0 ){
-            return res.status(500).json({ resultCode: CODE.POST_INTERVAL_ERROR.RESCODE, err: CODE.POST_INTERVAL_ERROR.DESC, ttl:gameTTL });
+            return res.status(400).json({ resultCode: CODE.POST_INTERVAL_ERROR.RESCODE, err: CODE.POST_INTERVAL_ERROR.DESC, ttl:gameTTL });
         }
         let postTTL = await user.getTTL('post:interval:'+userInfo.userid);
         if( postTTL>0 ){
-            return res.status(500).json({ resultCode: CODE.POST_INTERVAL_ERROR.RESCODE, err: CODE.POST_INTERVAL_ERROR.DESC, ttl:postTTL });
+            return res.status(400).json({ resultCode: CODE.POST_INTERVAL_ERROR.RESCODE, err: CODE.POST_INTERVAL_ERROR.DESC, ttl:postTTL });
         }
         let author = req.session.user.account;
         let permLink = await createPermlink(data.activityTitle, author, '', '');
@@ -152,7 +152,7 @@ exports.commentGame = async function(req, res, next) {
     try{
         let userInfo = req.session.user;
         if(await user.getInterval('comment:interval:'+userInfo.account)){
-            return res.status(500).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
+            return res.status(400).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
         }
         let post = req.body;
         let author = req.session.user.account;
@@ -303,12 +303,12 @@ exports.voteGame = async function(req, res, next) {
         let data = req.body;
         let voter = req.session.user.account;
         if(await user.getInterval('vote:interval:'+voter)){
-            return res.status(500).json({ resultCode: CODE.VOTE_INTERVAL_ERROR.RESCODE, err: CODE.VOTE_INTERVAL_ERROR.DESC });
+            return res.status(400).json({ resultCode: CODE.VOTE_INTERVAL_ERROR.RESCODE, err: CODE.VOTE_INTERVAL_ERROR.DESC });
         }
         let author = req.params.author;
         let permlink = req.params.permlink;
         if( typeof voter === 'undefined' || typeof author === 'undefined' || typeof author === 'undefined' || typeof data.weight ==='undefined' ){
-            return res.status(500).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
+            return res.status(400).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
         }
         await steem.vote(req.session.accessToken, voter, author, permlink, parseInt(data.weight));
         await user.setInterval('vote:interval:'+voter, config.get('steemit.app.voteInterval'));
@@ -335,10 +335,10 @@ exports.auditGame = async function(req, res, next) {
         }
         let author = req.session.user.account;
         if(await user.getInterval('comment:interval:'+author)){
-            return res.status(500).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
+            return res.status(400).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
         }
         if(typeof data.status === 'undefined' ) {
-            return res.status(500).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
+            return res.status(400).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
         }
         let permlink = createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
         let parentAuthor = dbRes[0].account;
@@ -367,12 +367,12 @@ exports.reportGame = async function(req, res, next) {
         let reportStatus = data.report;
         let author = req.session.user.account;
         if(await user.getInterval('comment:interval:'+author)){
-            return res.status(500).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
+            return res.status(400).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
         }
         let dbRes = await game.canReportGame([req.params.id]);
         if(typeof dbRes[0] !== 'undefined') {
             if(reportStatus  == 1) {
-                return res.status(500).json({ resultCode: CODE.HAS_REPORT_ERROR.RESCODE, err: CODE.HAS_REPORT_ERROR.DESC });
+                return res.status(400).json({ resultCode: CODE.HAS_REPORT_ERROR.RESCODE, err: CODE.HAS_REPORT_ERROR.DESC });
             } else {
                 await game.unreportGame(req.params.id);
                 return res.status(200).json();
