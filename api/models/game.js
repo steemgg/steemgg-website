@@ -65,7 +65,7 @@ exports.auditComments = async function(params) {
 }
 
 exports.getGameById = async function(gameId) {
-    let rows = await db.execute(db.READ, 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend,activities from games where id=?', gameId);
+    let rows = await db.execute(db.READ, 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend,activities,width,height from games where id=?', gameId);
     return rows;
 }
 
@@ -139,7 +139,7 @@ exports.gameList = async function(params) {
         }
     }
     let sortArr = params['sort'].split("_");
-    let sql = 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend,activities from games where 1=1 ' + gameQuery + ' order by ? ? limit ?,?';
+    let sql = 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend,activities,width,height from games where 1=1 ' + gameQuery + ' order by ? ? limit ?,?';
     let rows = await db.execute(db.READ, sql, [sortArr[0], sortArr[1], params['offset'], params['pageSize']]);
     if(Object.keys(rows).length>0) {
         let data = {};

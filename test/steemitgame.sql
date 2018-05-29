@@ -67,6 +67,8 @@ CREATE TABLE `games` (
   `gameUrl` varchar(500) DEFAULT NULL,
   `vote` int(11) DEFAULT '0',
   `payout` double(255,2) DEFAULT '0.00',
+  `width` int(11) DEFAULT '0',
+  `height` int(11) DEFAULT '0',
   `created` int(11) NOT NULL,
   `lastModified` int(11) DEFAULT NULL,
   `report` tinyint(1) DEFAULT '0' COMMENT '0 未举报，1 被举报',

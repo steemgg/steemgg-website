@@ -131,7 +131,7 @@ exports.addGame = async function(req, res, next) {
         let userInfo = req.session.user;
         let data = req.body;
         let unix = Math.round(+new Date()/1000);
-        let gameInfo = {userid:userInfo.userid,account:userInfo.account,created:unix,lastModified:unix,gameUrl:data.gameUrl,coverImage:data.coverImage,version:data.version,title:data.title,category:data.category,description:data.description};
+        let gameInfo = {userid:userInfo.userid,account:userInfo.account,created:unix,lastModified:unix,gameUrl:data.gameUrl,coverImage:data.coverImage,version:data.version,title:data.title,category:data.category,description:data.description,width:data.width,height:data.height};
         let dbRes = await game.addGame(gameInfo);
         let iso = new Date(unix*1000).toISOString();
         gameInfo.id = dbRes.insertId;
@@ -203,7 +203,7 @@ exports.updateGame = async function(req, res, next) {
     try{
         let unix = Math.round(+new Date()/1000);
         let data = req.body;
-        let dbRes = await game.updateGame([{ title:data.title,coverImage:data.coverImage,description:data.description,category:data.category,gameUrl:data.gameUrl,lastModified:unix }, req.params.id, req.session.user.userid]);
+        let dbRes = await game.updateGame([{ title:data.title,coverImage:data.coverImage,description:data.description,category:data.category,gameUrl:data.gameUrl,lastModified:unix,width:data.width,height:data.height }, req.params.id, req.session.user.userid]);
         if (dbRes.changedRows == 1){
             return res.status(200).send();
         } else {
