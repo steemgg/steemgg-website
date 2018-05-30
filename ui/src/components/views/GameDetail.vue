@@ -9,8 +9,14 @@
           <el-row>
             <el-col :xs="24" :sm="24" :md="24" :lg="18" :xl="18">
               <div class="gamePlayer">
+                <fullscreen ref="fullscreen" @change="fullscreenChange" class="full-screen-container">
                 <!--<img :src="game.coverImg" class="game-cover-image"/>-->
-                <iframe msallowfullscreen="true" allowfullscreen="true" id="game_drop" height="400px" style="height:400px; width: 100%" frameborder="0" scrolling="no" allowtransparency="true" webkitallowfullscreen="true" mozallowfullscreen="true" :src="gameUrl" ></iframe>
+                  <iframe msallowfullscreen="true" allowfullscreen="true" id="game_drop" style="height:100%; width: 100%" frameborder="0" scrolling="no" allowtransparency="true" webkitallowfullscreen="true" mozallowfullscreen="true" :src="gameUrl" ></iframe>
+                  <!--<button type="button" @click="toggle" >Full Screen</button>-->
+                  <button type="button" @click="toggle" class="btn btn-default btn-game-fullscreen">
+                    <i v-if="this.fullscreen === false" class="material-icons">fullscreen</i>
+                    <i v-if="this.fullscreen === true" class="material-icons">fullscreen_exit</i></button>
+                </fullscreen>
               </div>
               <div class="gameInfo">
                 <div class="gameTitle">
@@ -146,6 +152,7 @@
         voting: false,
         dialogFormVisible: false,
         approveDialogFormVisible: false,
+        fullscreen: false,
 
         form: {
           comment: '',
@@ -213,6 +220,15 @@
           this.approveDialogFormVisible = false
           this.showApprove = false
           this.$message('Approve successfully')
+          this.comments.unshift({
+            author: response.author,
+            total_payout_value: '0.000 SBD',
+            pending_payout_value: '0.000 SBD',
+            replies: [],
+            permlink: response.permlink,
+            body: this.form.approveComment,
+            last_update: moment().toISOString()
+          })
         }).catch(error => {
           this.approveDialogFormVisible = false
           console.log('Fail to report', error.response)
@@ -339,6 +355,12 @@
         }).catch(error => {
           console.log('fetch similar game error', error.response)
         })
+      },
+      toggle () {
+        this.$refs['fullscreen'].toggle() // recommended
+      },
+      fullscreenChange (fullscreen) {
+        this.fullscreen = fullscreen
       }
     },
     watch: {
@@ -393,6 +415,32 @@
         }
       }
     }
+  }
+  .full-screen-container {
+    height: 400px;
+    width: 100%;
+    position: relative;
+
+    .btn-game-fullscreen {
+      position:absolute;
+      right:10px;
+      bottom:10px;
+      padding:0;
+      font-size:36px;
+      line-height:1px;
+      text-align:center;
+      outline:none
+    }
+
+    &.fullscreen {
+      .btn-game-fullscreen {
+        left:10px;
+        top:10px;
+        right:auto;
+        bottom:auto;
+      }
+    }
+
   }
   .gameTags {
     margin: 20px 0;

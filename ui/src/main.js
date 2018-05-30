@@ -66,6 +66,7 @@ import VueAwesomeSwiper from 'vue-awesome-swiper'
 import mavonEditor from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
 import 'element-ui/lib/theme-chalk/display.css'
+import fullscreen from 'vue-fullscreen'
 
 Vue.use(FormItem)
 Vue.use(Form)
@@ -112,6 +113,7 @@ Vue.use(VueAwesomeSwiper)
 Vue.use(mavonEditor)
 Vue.use(BootstrapVue)
 Vue.use(VueCountdown)
+Vue.use(fullscreen)
 
 const MsgBox = MessageBox
 Vue.prototype.$msgbox = MsgBox
