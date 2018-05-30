@@ -69,14 +69,14 @@ export default class GameService {
   }
 
   report (gameId, comment) {
-    return axios.post(`v1/audit/${gameId}`, {
+    return axios.post(`v1/report/${gameId}`, {
       report: 1,
       comment: comment
     })
   }
 
   undoReport (gameId, comment) {
-    return axios.post(`v1/audit/${gameId}`, {
+    return axios.post(`v1/report/${gameId}`, {
       report: 0,
       comment: comment
     })
