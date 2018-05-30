@@ -208,7 +208,9 @@
         }).catch(error => {
           this.dialogFormVisible = false
           console.log('Fail to report', error.response)
-          this.$alert('Fail to report!.')
+          this.$alert('Sorry, error happens during report this game. Please try it later.', 'Fail to report', {
+            confirmButtonText: 'Close'
+          })
         }).finally(() => {
           this.form.comment = ''
           this.reporting = false
@@ -231,8 +233,10 @@
           })
         }).catch(error => {
           this.approveDialogFormVisible = false
-          console.log('Fail to report', error.response)
-          this.$alert('Fail to report!.')
+          console.log('Fail to approve', error.response)
+          this.$alert('Sorry, error happens during approve this game. Please try it later.', 'Fail to approve', {
+            confirmButtonText: 'Close'
+          })
         }).finally(() => {
           this.form.approveComment = ''
           this.approving = false
