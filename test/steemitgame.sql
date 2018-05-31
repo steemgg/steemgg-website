@@ -70,6 +70,7 @@ CREATE TABLE `games` (
   `created` int(11) NOT NULL,
   `lastModified` int(11) DEFAULT NULL,
   `report` tinyint(1) DEFAULT '0' COMMENT '0 未举报，1 被举报',
+  `activities` int(8) DEFAULT '0',
   `status` tinyint(1) DEFAULT '0' COMMENT '0未审核submitted，1已审核approved，2未通过审核denied，3已删除deleted',
   `recommend` tinyint(1) DEFAULT '0' COMMENT '0未推荐，1推荐',
   PRIMARY KEY (`id`),
