@@ -49,8 +49,8 @@
                     </div>
                   </el-form-item>
                   <!--<el-form-item>-->
-                  <div class="copyRightWrapper">
-                    <el-checkbox v-if="!gameExists" v-model="copyRightClaim"></el-checkbox>
+                  <div class="copyRightWrapper" v-if="!gameExists">
+                    <el-checkbox  v-model="copyRightClaim"></el-checkbox>
                     <span class="copyRightText"> I acknowledge that I own the copyright of the game, and I have already embedded my steemit account id (eg. @steemit.account) into the game.</span>
                   </div>
                   <!--</el-form-item>-->
