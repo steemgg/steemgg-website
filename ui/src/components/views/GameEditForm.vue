@@ -4,9 +4,9 @@
     <el-main>
       <div class="editFormContainer">
         <div class='gameEditForm'>
-          <div class="previewButton" v-if="this.game.id != null">
-            <el-button v-if="this.game.status != null && this.game.status === 0" type="primary" round @click="previewGame">Preview Game</el-button>
-            <el-button v-if="this.game.status != null && this.game.status !== 0" type="primary" round @click="previewGame">Play Game</el-button>
+          <div class="previewButton" v-if="gameExists">
+            <el-button v-if="this.game.status != null && this.game.status === 0" type="success" round @click="previewGame">Preview Game</el-button>
+            <el-button v-if="this.game.status != null && this.game.status !== 0" type="success" round @click="previewGame">Play Game</el-button>
           </div>
           <el-collapse v-model="activeNames">
             <el-collapse-item title="Game Information" name="gameInfo">
@@ -48,8 +48,16 @@
                       </el-upload>
                     </div>
                   </el-form-item>
-                    <el-button type='primary' :loading="gameActionInProgress" @click="submitForm('game')" :disabled="!$store.state.loggedIn">{{ actionText }}</el-button>
+                  <!--<el-form-item>-->
+                  <div class="copyRightWrapper">
+                    <el-checkbox v-if="!gameExists" v-model="copyRightClaim"></el-checkbox>
+                    <span class="copyRightText"> I acknowledge that I own the copyright of the game, and I have already embedded my steemit account id (eg. @steemit.account) into the game.</span>
+                  </div>
+                  <!--</el-form-item>-->
+                  <div class="gameCreationActionWrapper">
+                    <el-button type='primary' :loading="gameActionInProgress" @click="submitForm('game')" :disabled="!$store.state.loggedIn || (this.game.id == null && copyRightClaim === false)">{{ actionText }}</el-button>
                     <el-button @click="cancelForm()">Cancel</el-button>
+                  </div>
                 </el-form>
               </div>
             </el-collapse-item>
@@ -176,6 +184,7 @@
         postTipDialogVisible: false,
         actionText: 'Create',
         postingWaitTime: -1,
+        copyRightClaim: false,
         game: {
           title: '',
           description: '',
@@ -249,7 +258,8 @@
               this.gameActionInProgress = true
               gameService.create(this.game).then((game) => {
                 // pop up success message
-                this.game.id = game.id
+                this.game = game
+                this.game.status = 0
                 this.gameActionInProgress = false
                 this.$notify({
                   title: 'Game created',
@@ -440,12 +450,6 @@
         console.log('image removed', file)
         this.game.coverImage = null
       },
-      postCountDownEnded () {
-
-      },
-      checkPostInterval () {
-
-      },
       initData () {
         if (this.id != null) {
           gameService.getById(this.id).then(game => {
@@ -471,12 +475,17 @@
           })
         } else {
           this.activeNames = ['gameInfo']
+          this.actionText = 'Create'
+          this.copyRightClaim = false
           this.resetGame()
           this.resetActivity()
         }
       }
     },
     computed: {
+      gameExists () {
+        return this.game.id != null
+      }
     },
     mounted () {
       console.log(this.$store.state.loggedIn)
@@ -503,7 +512,6 @@
       width: 70%;
       min-width: 560px;
 
-
       .dropzone {
         padding: 0;
         .dz-preview {
@@ -524,6 +532,15 @@
         .game-resource-upload {
           width: 400px;
         }
+      }
+      .copyRightWrapper {
+        margin: 0 50px 10px;
+        .copyRightText {
+          padding-left: 10px;
+        }
+      }
+      .gameCreationActionWrapper {
+        margin-bottom: 10px;
       }
       .activityList {
         .activityHeader {
@@ -557,8 +574,10 @@
         color: white;
         font-weight:bold;
         border-radius: 0 0 20px 20px;
-        margin-bottom:5px;
+        margin:5px 0px;
         background-color:#409EFF;
+        height: 40px;
+        line-height: 40px;
       }
 
       .dropzone .dz-preview .dz-image img{
