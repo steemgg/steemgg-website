@@ -85,6 +85,8 @@
                   this.$message.error('Vote Failed.')
                 }
                 console.log('Vote comment failed', error.response)
+              }).finally(() => {
+                this.voting = false
               })
             }
           } else {
