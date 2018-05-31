@@ -7,17 +7,19 @@
       <el-container>
         <el-main>
           <el-row>
+            <div class="gamePlayer">
+              <fullscreen ref="fullscreen" @change="fullscreenChange" class="full-screen-container" >
+                <div class="frameWrapper" :style="{ width: this.fullscreen ? '100%' : (game.width + 'px'),  height: this.fullscreen ? '100%' : (game.height + 'px')}">
+                  <!--<img :src="game.coverImg" class="game-cover-image"/>-->
+                  <iframe msallowfullscreen="true" allowfullscreen="true" id="game_drop" :width="this.fullscreen ? '100%' : game.width" :height="this.fullscreen ? '100%' : game.height" frameborder="0" scrolling="no" allowtransparency="true" webkitallowfullscreen="true" mozallowfullscreen="true" :src="gameUrl" ></iframe>
+                </div>
+                <!--<button type="button" @click="toggle" >Full Screen</button>-->
+                <button type="button" @click="toggle" class="btn btn-default btn-game-fullscreen">
+                  <i v-if="this.fullscreen === false" class="material-icons">fullscreen</i>
+                  <i v-if="this.fullscreen === true" class="material-icons">fullscreen_exit</i></button>
+              </fullscreen>
+            </div>
             <el-col :xs="24" :sm="24" :md="24" :lg="18" :xl="18">
-              <div class="gamePlayer">
-                <fullscreen ref="fullscreen" @change="fullscreenChange" class="full-screen-container">
-                <!--<img :src="game.coverImg" class="game-cover-image"/>-->
-                  <iframe msallowfullscreen="true" allowfullscreen="true" id="game_drop" style="height:100%; width: 100%" frameborder="0" scrolling="no" allowtransparency="true" webkitallowfullscreen="true" mozallowfullscreen="true" :src="gameUrl" ></iframe>
-                  <!--<button type="button" @click="toggle" >Full Screen</button>-->
-                  <button type="button" @click="toggle" class="btn btn-default btn-game-fullscreen">
-                    <i v-if="this.fullscreen === false" class="material-icons">fullscreen</i>
-                    <i v-if="this.fullscreen === true" class="material-icons">fullscreen_exit</i></button>
-                </fullscreen>
-              </div>
               <div class="gameInfo">
                 <div class="gameTitle">
                   {{game.title}}
@@ -328,6 +330,13 @@
         if (this.id) {
           gameService.getById(this.id).then(response => {
             this.game = response
+            // fallback for old game which does not have width and height
+            if (this.game.width == null) {
+//              this.game.width =
+            }
+            if (this.game.height == null) {
+
+            }
             if (this.game.status === 1 || this.$store.getters.isAuditor || (this.$store.state.loggedIn && this.$store.getters.user.account === this.game.account)) {
               this.gameUrl = 'https://ipfs.io/ipfs/' + this.game.gameUrl.hash
               console.log('mounted successfully', this.game)
@@ -388,8 +397,8 @@
     margin: 20px;
   }
   .gamePlayer {
-    background-color: #00B6FF;
-    height: 400px;
+    background-color: #5bc0de;
+    /*height: 400px;*/
   }
 
   .gameInfo {
@@ -421,10 +430,16 @@
     }
   }
   .full-screen-container {
-    height: 400px;
+    /*height: 400px;*/
     width: 100%;
     position: relative;
+    margin-left: auto;
+    margin-right: auto;
 
+    .frameWrapper {
+      margin-left: auto;
+      margin-right: auto;
+    }
     .btn-game-fullscreen {
       position:absolute;
       right:10px;

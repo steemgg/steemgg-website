@@ -31,6 +31,7 @@ import {
   Button,
   Radio,
   Input,
+  InputNumber,
   Container,
   Aside,
   Footer,
@@ -105,6 +106,7 @@ Vue.use(Loading)
 Vue.use(Icon)
 Vue.use(Dialog)
 Vue.use(Tooltip)
+Vue.use(InputNumber)
 // Vue.use(Notification)
 // Vue.use(Message)
 // Vue.use(MessageBox)

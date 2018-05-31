@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-table :data="items" style="width: 100%" :stripe=true v-loading="loading" :empty-text="'None'">
-      <el-table-column prop="id" label="ID" width="50">
+      <el-table-column prop="id" label="ID" width="100">
       </el-table-column>
       <el-table-column prop="title" label="Name" width="150">
       </el-table-column>
@@ -49,7 +49,6 @@
 </template>
 
 <script>
-//  import { Table, TableColumn } from 'element-ui'
   import moment from 'moment'
   import GameService from '../../service/game.service'
   import CommentPopover from './CommentPopover.vue'

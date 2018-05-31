@@ -47,6 +47,9 @@ export default class GameService {
   }
 
   query (params) {
+    if (params && params.limit == null) {
+      params.limit = 1000
+    }
     return axios.get('v1/game', {
       params: params
     }).then(response => {
