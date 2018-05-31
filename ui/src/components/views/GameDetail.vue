@@ -171,6 +171,9 @@
           return ''
         }
       },
+//      thumbnail () {
+//        return 'http://ipfs.io/ipfs/' + this.game.coverImage.hash
+//      },
       postedTime () {
         return moment(this.game.lastModified).fromNow()
       },
@@ -390,6 +393,7 @@
   .similarGameTitle {
     font-size: 20px;
     font-weight: bold;
+    margin-left: 20px;
   }
 
   .description {
