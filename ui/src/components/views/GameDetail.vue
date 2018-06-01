@@ -333,13 +333,6 @@
         if (this.id) {
           gameService.getById(this.id).then(response => {
             this.game = response
-            // fallback for old game which does not have width and height
-            if (this.game.width == null) {
-//              this.game.width =
-            }
-            if (this.game.height == null) {
-
-            }
             if (this.game.status === 1 || this.$store.getters.isAuditor || (this.$store.state.loggedIn && this.$store.getters.user.account === this.game.account)) {
               this.gameUrl = 'https://ipfs.io/ipfs/' + this.game.gameUrl.hash
               console.log('mounted successfully', this.game)

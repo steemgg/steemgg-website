@@ -167,12 +167,10 @@
   import GameService from '../../service/game.service'
   import { GAME_CATEGORY } from '../../service/const'
   import VueCountdown from '@xkeshi/vue-countdown'
-  import ElFormItem from '../../../node_modules/element-ui/packages/form/src/form-item'
   const gameService = new GameService()
 
   export default {
     components: {
-      ElFormItem,
       CommonHeader,
       CommonFooter,
       InputTag,
