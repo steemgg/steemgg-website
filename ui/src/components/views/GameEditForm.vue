@@ -24,10 +24,17 @@
                     <div slot="tip" class="el-upload__tip">jpg/png files with a size less than 500kb</div>
                   </el-form-item>
                   <el-form-item label='Game width' prop="width">
-                    <el-input-number v-model="game.width" :min="300" :max="3000" label="Game width"></el-input-number> <span class="px">px</span> (300px ~ 3000px)
+                    <el-tooltip content="Min: 300px; Max: 3000px" placement="top" effect="light">
+                      <el-input-number v-model="game.width" :min="300" :max="3000" label="Game width"></el-input-number>
+                    </el-tooltip>
+                    <span class="px">px</span>
+                    <!--<i class="fa fa-question-circle-o" aria-hidden="true"></i>-->
                   </el-form-item>
                   <el-form-item label='Game height' prop="height">
-                    <el-input-number v-model="game.height" :min="300" :max="3000" label="Game height"></el-input-number> <span class="px">px</span> (300px ~ 3000px)
+                    <el-tooltip content="Min: 300px; Max: 3000px" placement="top" effect="light">
+                      <el-input-number v-model="game.height" :min="300" :max="3000" label="Game height"></el-input-number>
+                    </el-tooltip>
+                    <span class="px">px</span>
                   </el-form-item>
                   <el-form-item label='Game type' prop="category">
                     <el-select v-model="game.category" filterable placeholder="Select">
