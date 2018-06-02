@@ -62,11 +62,11 @@
     data () {
       return {
         votesCount: 0,
-        alreadyVotes: false,
         leaveReply: false,
         replyContent: '',
         replying: false,
-        voting: false
+        voting: false,
+        alreadyVoted: false
       }
     },
     methods: {
@@ -77,6 +77,7 @@
               this.voting = true
               gameService.vote(this.comment.author, this.comment.permlink, 5000).then(response => {
                 this.votesCount++
+                this.alreadyVoted = true
                 this.$message.success('Vote Successfully.')
               }).catch(error => {
                 if (error.response.data.resultCode === 402) {
@@ -127,6 +128,20 @@
             this.replying = false
           })
         }
+      },
+      checkAlreadyVoted () {
+        let voted = false
+        if (this.comment != null && this.comment.active_votes != null) {
+          for (let i = 0; i < this.comment.active_votes.length; i++) {
+            if (this.comment.active_votes[i].voter === this.$store.state.user.account) {
+              voted = true
+              break
+            }
+          }
+        } else {
+          voted = false
+        }
+        return voted
       }
     },
     computed: {
@@ -150,28 +165,14 @@
 
       lateUpdate () {
         return moment(this.comment.last_update.endsWith('Z') ? this.comment.last_update : this.comment.last_update + 'Z').fromNow()
-      },
-
-      alreadyVoted () {
-        let voted = false
-        if (this.comment != null && this.comment.active_votes != null) {
-          for (let i = 0; i < this.comment.active_votes.length; i++) {
-            if (this.comment.active_votes[i].voter === this.$store.state.user.account) {
-              voted = true
-              break
-            }
-          }
-        } else {
-          voted = false
-        }
-        return voted
       }
     },
     mounted () {
-      console.log('comment', this.comment)
+      console.log('Render comment:', this.comment)
       this.votesCount = this.comment.active_votes ? this.comment.active_votes.length : 0
       if (this.comment) {
         this.comment.replies.reverse()
+        this.alreadyVoted = this.checkAlreadyVoted()
       }
     }
   }
