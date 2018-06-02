@@ -16,7 +16,8 @@ export const store = new Vuex.Store({
       'gamePostingInterval': 500
     },
     loggedIn: false,
-    showPostTip: true
+    showPostTip: true,
+    cookieAlert: true
   },
   getters: {
     user: state => {
@@ -30,6 +31,9 @@ export const store = new Vuex.Store({
     },
     showPostTip: state => {
       return state.showPostTip
+    },
+    showCookieAlert: state => {
+      return state.cookieAlert
     }
   },
   mutations: {
@@ -42,6 +46,12 @@ export const store = new Vuex.Store({
     },
     showPostTip (state) {
       state.showPostTip = true
+    },
+    hideCookieAlert (state) {
+      state.cookieAlert = false
+    },
+    showCookieAlert (state) {
+      state.cookieAlert = true
     },
     deleteUser (state) {
       state.user = {
