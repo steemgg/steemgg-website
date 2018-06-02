@@ -24,10 +24,10 @@
                     <div slot="tip" class="el-upload__tip">jpg/png files with a size less than 500kb</div>
                   </el-form-item>
                   <el-form-item label='Game width' prop="width">
-                    <el-input-number v-model="game.width" :min="300" :max="3000" label="Game width"></el-input-number>
+                    <el-input-number v-model="game.width" :min="300" :max="3000" label="Game width"></el-input-number> <span class="px">px</span> (300px ~ 3000px)
                   </el-form-item>
                   <el-form-item label='Game height' prop="height">
-                    <el-input-number v-model="game.height" :min="300" :max="3000" label="Game height"></el-input-number>
+                    <el-input-number v-model="game.height" :min="300" :max="3000" label="Game height"></el-input-number> <span class="px">px</span> (300px ~ 3000px)
                   </el-form-item>
                   <el-form-item label='Game type' prop="category">
                     <el-select v-model="game.category" filterable placeholder="Select">
@@ -100,7 +100,7 @@
                     <el-input :disabled="useGameInfoAsPost" v-model='activity.activityDescription' type="textarea" :rows="2" placeholder="This will be posted to steemit, game description will be used if empty"></el-input>
                   </el-form-item>
                   <el-form-item label='Tags'>
-                    <input-tag :on-change='onTagChange' :tags='activity.tags' limit="4"></input-tag>
+                    <input-tag :on-change='onTagChange' :tags='activity.tags' limit="4" placeholder="Use 'Enter', 'comma' or 'tab' to separate tags"></input-tag>
                   </el-form-item>
                   <el-form-item label="reward">
                     <el-select v-model="activity.reward" placeholder="请选择">
@@ -540,6 +540,10 @@
         }
       }
 
+      .px {
+        font-weight:bold;
+        color: #409EFF;
+      }
       .dropzone .dz-preview.dz-error .dz-error-message {
         display: none;
       }
