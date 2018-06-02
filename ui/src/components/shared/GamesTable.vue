@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-table :data="items" style="width: 100%" :stripe=true v-loading="loading" :empty-text="'None'">
-      <el-table-column prop="id" label="ID" width="50">
+      <el-table-column prop="id" label="ID" width="100">
       </el-table-column>
       <el-table-column prop="title" label="Name" width="150">
       </el-table-column>
@@ -28,8 +28,8 @@
       <el-table-column label="Operations" width="250">
         <template slot-scope="scope">
           <el-button v-if="scope.row.status == 0" @click="openDialog(scope.$index, 'Approve')" type="primary" round size="small" ng-if="type == 'audit' ">Approve</el-button>
-          <el-button v-if="scope.row.status == 1" @click="openDialog(scope.$index, 'Deny')" type="primary" round size="small" ng-if="type == 'report'">Deny</el-button>
-          <el-button v-if="scope.row.report == 1" @click="openDialog(scope.$index, 'Clear')" type="primary" round size="small" ng-if="type == 'report'">Clear Report</el-button>
+          <el-button v-if="scope.row.status == 1" @click="openDialog(scope.$index, 'Deny Game')" type="primary" round size="small" ng-if="type == 'report'">Deny Game</el-button>
+          <el-button v-if="scope.row.report == 1" @click="openDialog(scope.$index, 'Dismiss Report')" type="primary" round size="small" ng-if="type == 'report'">Dismiss Report</el-button>
           <el-button @click="viewDetails(scope.$index)" type="text" size="small">Detail</el-button>
         </template>
       </el-table-column>
@@ -49,7 +49,6 @@
 </template>
 
 <script>
-//  import { Table, TableColumn } from 'element-ui'
   import moment from 'moment'
   import GameService from '../../service/game.service'
   import CommentPopover from './CommentPopover.vue'

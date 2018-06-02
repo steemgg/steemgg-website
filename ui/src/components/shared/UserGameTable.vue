@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-table :data="items" style="width: 100%" :stripe=true v-loading="loading" :empty-text="'None'">
-      <el-table-column prop="id" label="ID" width="50">
+      <el-table-column prop="id" label="ID" width="100">
       </el-table-column>
       <el-table-column prop="title" label="Name" width="150">
       </el-table-column>
@@ -27,7 +27,8 @@
       <el-table-column label="Operations" width="180">
         <template slot-scope="scope">
           <el-button @click="editGame(scope.row.id)" type="text" size="small" >Edit</el-button>
-          <el-button v-if="scope.row.status == 1" @click="playGame(scope.row.id)" type="text" size="small">Play Game</el-button>
+          <el-button v-if="scope.row.status == 1" @click="playGame(scope.row.id)" type="success" round size="small">Play</el-button>
+          <el-button v-if="scope.row.status == 0" @click="playGame(scope.row.id)" type="success" round size="small">Preview</el-button>
         </template>
       </el-table-column>
     </el-table>

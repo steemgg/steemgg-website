@@ -9,6 +9,7 @@ import './assets/style/bootstrap.css'
 import './assets/style/style.css'
 import './assets/style/app.scss'
 import './assets/style/_fonts.scss'
+import './assets/style/variables.scss'
 import 'element-ui/lib/theme-chalk/index.css'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
@@ -31,6 +32,7 @@ import {
   Button,
   Radio,
   Input,
+  InputNumber,
   Container,
   Aside,
   Footer,
@@ -105,6 +107,7 @@ Vue.use(Loading)
 Vue.use(Icon)
 Vue.use(Dialog)
 Vue.use(Tooltip)
+Vue.use(InputNumber)
 // Vue.use(Notification)
 // Vue.use(Message)
 // Vue.use(MessageBox)

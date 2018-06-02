@@ -9,21 +9,34 @@
             <el-button v-if="this.game.status != null && this.game.status !== 0" type="success" round @click="previewGame">Play Game</el-button>
           </div>
           <el-collapse v-model="activeNames">
-            <el-collapse-item title="Game Information" name="gameInfo">
+            <el-collapse-item title="Game information" name="gameInfo">
               <div>
                 <el-form ref='game' :rules='rules' :model='game' label-width='150px'>
-                  <el-form-item label='Game Title' prop="title">
+                  <el-form-item label='Game title' prop="title">
                     <el-input v-model='game.title'></el-input>
                   </el-form-item>
-                  <el-form-item label='Game Description' prop="description">
+                  <el-form-item label='Game description' prop="description">
                     <!--<el-input v-model='game.description' type="textarea" :rows="2" placeholder="Please input description of your game"></el-input>-->
                     <mavon-editor language="en" :subfield="false" v-model='game.description'></mavon-editor>
                   </el-form-item>
-                  <el-form-item label='Cover Image' prop="coverImage">
+                  <el-form-item label='Cover image' prop="coverImage">
                     <vue-dropzone ref="coverImageDropzone" @vdropzone-success="onImageUploaded" @vdropzone-removed-file="onImageRemoved" @vdropzone-error="onImageUploadFail" id="dropzone" :options="dropzoneOptions"></vue-dropzone>
                     <div slot="tip" class="el-upload__tip">jpg/png files with a size less than 500kb</div>
                   </el-form-item>
-                  <el-form-item label='Game Type' prop="category">
+                  <el-form-item label='Game width' prop="width">
+                    <el-tooltip content="Min: 300px; Max: 3000px" placement="top" effect="light">
+                      <el-input-number v-model="game.width" :min="300" :max="3000" label="Game width"></el-input-number>
+                    </el-tooltip>
+                    <span class="px">px</span>
+                    <!--<i class="fa fa-question-circle-o" aria-hidden="true"></i>-->
+                  </el-form-item>
+                  <el-form-item label='Game height' prop="height">
+                    <el-tooltip content="Min: 300px; Max: 3000px" placement="top" effect="light">
+                      <el-input-number v-model="game.height" :min="300" :max="3000" label="Game height"></el-input-number>
+                    </el-tooltip>
+                    <span class="px">px</span>
+                  </el-form-item>
+                  <el-form-item label='Game type' prop="category">
                     <el-select v-model="game.category" filterable placeholder="Select">
                       <el-option v-for="item in gameTypeOptions" :key="item.value" :label="item.label" :value="item.value">
                       </el-option>
@@ -94,7 +107,7 @@
                     <el-input :disabled="useGameInfoAsPost" v-model='activity.activityDescription' type="textarea" :rows="2" placeholder="This will be posted to steemit, game description will be used if empty"></el-input>
                   </el-form-item>
                   <el-form-item label='Tags'>
-                    <input-tag :on-change='onTagChange' :tags='activity.tags' limit="4"></input-tag>
+                    <input-tag :on-change='onTagChange' :tags='activity.tags' limit="4" placeholder="Use 'Enter', 'comma' or 'tab' to separate tags"></input-tag>
                   </el-form-item>
                   <el-form-item label="reward">
                     <el-select v-model="activity.reward" placeholder="请选择">
@@ -193,7 +206,9 @@
           activities: [],
           gameUrl: null,
           lastModified: null,
-          account: null
+          account: null,
+          width: 1024,
+          height: 768
         },
         activity: {
           activityTitle: '',
@@ -211,6 +226,14 @@
             { required: true, message: 'Please input game description', trigger: 'blur' },
             { max: 3000, message: 'Description max 3000 characters', trigger: 'blur' }
           ],
+//          width: [
+//            { required: true, message: 'Please input game width', trigger: 'blur' },
+//            { type: 'number', message: 'Width must be a number'}
+//          ],
+//          height: [
+//            { required: true, message: 'Please input game height', trigger: 'blur' },
+//            { type: 'number', message: 'Height must be a number'}
+//          ],
           category: [
             { required: true, message: 'Please select game type', trigger: 'change' }
           ],
@@ -400,7 +423,9 @@
           activities: [],
           gameUrl: null,
           lastModified: null,
-          account: null
+          account: null,
+          width: 1024,
+          height: 768
         }
         this.fileList = []
         this.$refs.coverImageDropzone.dropzone.removeAllFiles(true)
@@ -522,6 +547,10 @@
         }
       }
 
+      .px {
+        font-weight:bold;
+        color: #409EFF;
+      }
       .dropzone .dz-preview.dz-error .dz-error-message {
         display: none;
       }
