@@ -104,7 +104,14 @@ exports.postGame = async function(req, res, next) {
         }
         let author = req.session.user.account;
         let permLink = await createPermlink(data.activityTitle, author, '', '');
-        let result = await steem.post(req.session.accessToken, author, data.activityTitle, data.activityDescription, data.reward, data.tags,permLink);
+        let tags = data.tags;
+        if(!tags.includes('steemgg') || tags.indexOf('steemgg')>5){
+            tags.unshift('steemgg');
+        }
+        for(let i=tags.length;i>5;i--) {
+            tags.pop();
+        }
+        let result = await steem.post(req.session.accessToken, author, data.activityTitle, data.activityDescription, data.reward, tags,permLink);
         let unix = Math.round(+new Date()/1000);
         let activity = {userid:req.session.user.userid, account:req.session.user.account,gameid: data.gameid,lastModified: unix, permlink:permLink };
         await game.addActivity(activity);
@@ -175,6 +182,22 @@ exports.getGameDetail = async function(req, res, next) {
         let dbRes = await game.getGameById(req.params.id);
         if(typeof dbRes[0] === 'undefined') {
             return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
+        }
+        if(dbRes[0]['status']!=1) {
+            if (typeof req.session.user == 'undefined') {
+                return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
+                let user = req.session.user;
+                if (user.role == 1 || user.role == 2 || creator === user.account) {
+                    keys['status'] = status;
+                }
+            } else {
+                let user = req.session.user;
+                if (typeof user.account !== dbRes[0]['account']) {
+                    if( user.role == 0 ) {
+                        return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
+                    }
+                }
+            }
         }
         let steemitRes = await game.getActivitiesById(req.params.id);
         if(steemitRes.length>0){
