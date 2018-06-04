@@ -11,7 +11,7 @@
       :visible.sync="loginInfoVisible"
       width="30%">
       <span class="login-tip">You will be redirected to SteemConnect to authenticate to the Steem blockchain. SteemConnect is developed and maintained by Steemit, Inc. and Busy.org.
-SteemGG.com will never access your private keys.</span>
+Steemgg.com will never access your private keys.</span>
       <span slot="footer" class="dialog-footer">
     <el-button @click="loginInfoVisible = false">Close</el-button>
     <el-button type="primary" @click="login">Login with SteemConnect</el-button>
