@@ -15,7 +15,7 @@ db.connect(function(err) {
 async function getReward(){
     try{
         let dbRes = await game.getPayoutActivities();
-        steem.api.setOptions({url:'wss://steemd-int.steemit.com'});
+        steem.api.setOptions({url:'https://api.steemit.com'});
         let conn = await db.getConn('write');
         let nums = Object.keys(dbRes).length;
         let i = 0;

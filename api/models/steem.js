@@ -49,7 +49,7 @@ exports.post = function(accessToken, author, title, content, reward, tags, perml
         'comment',
         {
             parent_author: "",
-            parent_permlink: "steemitgame",
+            parent_permlink: "steemgg",
             author: author,
             permlink,
             title: title,
