@@ -24,3 +24,5 @@ notifications:
       - 195643+bobdos@users.noreply.github.com
     on_success: always # default: change
     on_failure: always # default: always
+script:
+  - ./build.sh
