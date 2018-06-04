@@ -9,10 +9,12 @@ import './assets/style/bootstrap.css'
 import './assets/style/style.css'
 import './assets/style/app.scss'
 import './assets/style/_fonts.scss'
+import './assets/style/variables.scss'
 import 'element-ui/lib/theme-chalk/index.css'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import 'github-markdown-css/github-markdown.css'
 
 import { store } from './store/store'
 
@@ -30,6 +32,7 @@ import {
   Button,
   Radio,
   Input,
+  InputNumber,
   Container,
   Aside,
   Footer,
@@ -55,14 +58,17 @@ import {
   Notification,
   Message,
   MessageBox,
-  Tooltip
+  Tooltip,
+  Alert
 } from 'element-ui'
 
+import VueCountdown from '@xkeshi/vue-countdown'
 import infiniteScroll from 'vue-infinite-scroll'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 import mavonEditor from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
 import 'element-ui/lib/theme-chalk/display.css'
+import fullscreen from 'vue-fullscreen'
 
 Vue.use(FormItem)
 Vue.use(Form)
@@ -70,6 +76,7 @@ Vue.use(Button)
 Vue.use(Container)
 Vue.use(Footer)
 Vue.use(Aside)
+Vue.use(Alert)
 Vue.use(Header)
 Vue.use(Main)
 Vue.use(Radio)
@@ -100,6 +107,7 @@ Vue.use(Loading)
 Vue.use(Icon)
 Vue.use(Dialog)
 Vue.use(Tooltip)
+Vue.use(InputNumber)
 // Vue.use(Notification)
 // Vue.use(Message)
 // Vue.use(MessageBox)
@@ -107,6 +115,8 @@ Vue.use(infiniteScroll)
 Vue.use(VueAwesomeSwiper)
 Vue.use(mavonEditor)
 Vue.use(BootstrapVue)
+Vue.use(VueCountdown)
+Vue.use(fullscreen)
 
 const MsgBox = MessageBox
 Vue.prototype.$msgbox = MsgBox

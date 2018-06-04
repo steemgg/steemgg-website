@@ -12,9 +12,12 @@ export const store = new Vuex.Store({
       'userid': '',
       'role': 0,
       'status': 1,
-      'created': null
+      'created': null,
+      'gamePostingInterval': 500
     },
-    loggedIn: false
+    loggedIn: false,
+    showPostTip: true,
+    cookieAlert: true
   },
   getters: {
     user: state => {
@@ -25,12 +28,30 @@ export const store = new Vuex.Store({
     },
     isAuditor: state => {
       return state.user.role >= 1
+    },
+    showPostTip: state => {
+      return state.showPostTip
+    },
+    showCookieAlert: state => {
+      return state.cookieAlert
     }
   },
   mutations: {
     setUser (state, user) {
       state.user = user
       state.loggedIn = true
+    },
+    hidePostTip (state) {
+      state.showPostTip = false
+    },
+    showPostTip (state) {
+      state.showPostTip = true
+    },
+    hideCookieAlert (state) {
+      state.cookieAlert = false
+    },
+    showCookieAlert (state) {
+      state.cookieAlert = true
     },
     deleteUser (state) {
       state.user = {

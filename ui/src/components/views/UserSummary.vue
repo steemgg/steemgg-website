@@ -146,6 +146,7 @@
     }
   }
   .userInfo {
+    text-align: center;
     background-color: #171F24;
     text-shadow: 1px 1px 4px black;
     min-height: 100px;

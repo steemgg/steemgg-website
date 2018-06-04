@@ -19,7 +19,11 @@
           <div class="list-title-wrapper" ><span class="list-name">New Games</span><span class="view-more"><router-link :to="{ name: 'browseGame', params: {}}" tag="span">Show More...</router-link></span></div>
           <game-list :queryParameter="newGameParam"></game-list>
         </div>
+        <div v-if="$store.getters.showCookieAlert" class="cookieAlert">
+          <span>This website uses cookies to ensure you get the best experience on our website. <router-link class="cookieLink" :to="{name: 'cookiePolicy'}" tag="a">Learn more</router-link></span><span class="cookieDismiss" @click="dismissCookieAlert">Got it</span>
+        </div>
       </el-main>
+
     </el-container>
     <el-footer> <common-footer></common-footer></el-footer>
   </el-container>
@@ -45,6 +49,7 @@
       return {
         title: '',
         description: '',
+        hideCookieAlert: false,
         popularParam: {
           // status: 1,
           sort: 'vote_desc',
@@ -62,12 +67,19 @@
           limit: 10
         }
       }
+    },
+    methods: {
+      dismissCookieAlert () {
+        console.log('hide cookie alert')
+        this.$store.commit('hideCookieAlert')
+      }
     }
   }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
+  @import '../../assets/style/variables.scss';
   .game-list {
     margin-top: 20px;
     /*box-shadow: 3px 3px 0px #aaa;*/
@@ -96,6 +108,37 @@
         }
       }
     }
-
+  }
+  .cookieAlert {
+    position: fixed;
+    bottom: 70px;
+    width: calc(100% - 100px);
+    margin-left: 30px;
+    height: 50px;
+    z-index:10000;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 50px;
+    padding: 0 20px;
+    background-color: $sgg-blue;
+    color: white;
+    .cookieLink {
+      color: #dddddd;
+      margin-left: 10px;
+      text-decoration: underline;
+    }
+    .cookieDismiss {
+      float: right;
+      border: 2px solid white;
+      height: 30px;
+      line-height: 30px;
+      padding: 0 30px;
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      &:hover {
+        cursor: pointer;
+      }
+    }
   }
 </style>

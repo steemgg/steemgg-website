@@ -6,6 +6,9 @@ import GameAudit from '../components/views/GameAudit.vue'
 import GameBrowser from '../components/views/GameBrowser.vue'
 import GameDetail from '../components/views/GameDetail.vue'
 import UserSummary from '../components/views/UserSummary.vue'
+import Privacy from '../components/views/Privacy.vue'
+import CookiePolicy from '../components/views/CookiePolicy.vue'
+import TermOfService from '../components/views/TermOfService.vue'
 import { store } from '../store/store'
 
 Vue.use(Router)
@@ -76,6 +79,21 @@ export default new Router({
       path: '/game/browse',
       name: 'browseGame',
       component: GameBrowser
+    },
+    {
+      path: '/cookiePolicy',
+      name: 'cookiePolicy',
+      component: CookiePolicy
+    },
+    {
+      path: '/termsofservice',
+      name: 'termsOfService',
+      component: TermOfService
+    },
+    {
+      path: '/privacy',
+      name: 'privacy',
+      component: Privacy
     }
   ]
 })

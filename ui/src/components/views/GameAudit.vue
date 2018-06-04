@@ -1,6 +1,8 @@
 <template>
   <div>
+    <el-header>
     <common-header></common-header>
+    </el-header>
     <div class="listContainer">
       <el-tabs v-model="activeTab" type="border-card" @tab-click="handleClick" v-loading="loading">
         <el-tab-pane label="Pending Game" name="audit"><app-game-table :items="auditItems" type="audit" @gameApproved="updateLiveGames"  class="audit-table"></app-game-table></el-tab-pane>
@@ -8,7 +10,9 @@
         <el-tab-pane label="Live Game" name="live"><app-game-table :items="liveItems" type="live" @gameDenied="updatePendingGames" class="audit-table"></app-game-table></el-tab-pane>
       </el-tabs>
     </div>
-    <common-footer></common-footer>
+    <el-footer>
+      <common-footer></common-footer>
+    </el-footer>
   </div>
 </template>
 
@@ -57,7 +61,7 @@
 
       updatePendingGames () {
         this.loading = true
-        gameService.query({status: 0, report: 0, limit: 1000, includeComment: true}).then(result => {
+        gameService.query({status: 0, limit: 1000, includeComment: true}).then(result => {
           console.log(result)
           this.auditItems = result.items
           console.log('get the game item list', this.auditItems)

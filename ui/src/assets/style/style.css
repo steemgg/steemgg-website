@@ -10,3 +10,9 @@
 #app .el-main {
   padding: 0 20px;
 }
+
+
+.login-tip {
+  display: flex;
+  text-align: left;
+}
