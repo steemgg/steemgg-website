@@ -92,19 +92,26 @@ exports.postGame = async function(req, res, next) {
             return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
         }
         if(userInfo.account != dbRes[0]['account'] || data.gameid != dbRes[0]['id']) {
-            return res.status(500).json({ resultCode: CODE.PARAMS_INCONSISTENT_ERROR.RESCODE, err: CODE.PARAMS_INCONSISTENT_ERROR.DESC });
+            return res.status(400).json({ resultCode: CODE.PARAMS_INCONSISTENT_ERROR.RESCODE, err: CODE.PARAMS_INCONSISTENT_ERROR.DESC });
         }
         let gameTTL = await user.getTTL('post:interval:game:'+data.gameid+':'+userInfo.userid);
         if( gameTTL>0 ){
-            return res.status(500).json({ resultCode: CODE.POST_INTERVAL_ERROR.RESCODE, err: CODE.POST_INTERVAL_ERROR.DESC, ttl:gameTTL });
+            return res.status(400).json({ resultCode: CODE.POST_INTERVAL_ERROR.RESCODE, err: CODE.POST_INTERVAL_ERROR.DESC, ttl:gameTTL });
         }
         let postTTL = await user.getTTL('post:interval:'+userInfo.userid);
         if( postTTL>0 ){
-            return res.status(500).json({ resultCode: CODE.POST_INTERVAL_ERROR.RESCODE, err: CODE.POST_INTERVAL_ERROR.DESC, ttl:postTTL });
+            return res.status(400).json({ resultCode: CODE.POST_INTERVAL_ERROR.RESCODE, err: CODE.POST_INTERVAL_ERROR.DESC, ttl:postTTL });
         }
         let author = req.session.user.account;
         let permLink = await createPermlink(data.activityTitle, author, '', '');
-        let result = await steem.post(req.session.accessToken, author, data.activityTitle, data.activityDescription, data.reward, data.tags,permLink);
+        let tags = data.tags;
+        if(!tags.includes('steemgg') || tags.indexOf('steemgg')>5){
+            tags.unshift('steemgg');
+        }
+        for(let i=tags.length;i>5;i--) {
+            tags.pop();
+        }
+        let result = await steem.post(req.session.accessToken, author, data.activityTitle, data.activityDescription, data.reward, tags,permLink);
         let unix = Math.round(+new Date()/1000);
         let activity = {userid:req.session.user.userid, account:req.session.user.account,gameid: data.gameid,lastModified: unix, permlink:permLink };
         await game.addActivity(activity);
@@ -131,7 +138,7 @@ exports.addGame = async function(req, res, next) {
         let userInfo = req.session.user;
         let data = req.body;
         let unix = Math.round(+new Date()/1000);
-        let gameInfo = {userid:userInfo.userid,account:userInfo.account,created:unix,lastModified:unix,gameUrl:data.gameUrl,coverImage:data.coverImage,version:data.version,title:data.title,category:data.category,description:data.description};
+        let gameInfo = {userid:userInfo.userid,account:userInfo.account,created:unix,lastModified:unix,gameUrl:data.gameUrl,coverImage:data.coverImage,version:data.version,title:data.title,category:data.category,description:data.description,width:data.width,height:data.height};
         let dbRes = await game.addGame(gameInfo);
         let iso = new Date(unix*1000).toISOString();
         gameInfo.id = dbRes.insertId;
@@ -152,7 +159,7 @@ exports.commentGame = async function(req, res, next) {
     try{
         let userInfo = req.session.user;
         if(await user.getInterval('comment:interval:'+userInfo.account)){
-            return res.status(500).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
+            return res.status(400).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
         }
         let post = req.body;
         let author = req.session.user.account;
@@ -175,6 +182,22 @@ exports.getGameDetail = async function(req, res, next) {
         let dbRes = await game.getGameById(req.params.id);
         if(typeof dbRes[0] === 'undefined') {
             return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
+        }
+        if(dbRes[0]['status']!=1) {
+            if (typeof req.session.user == 'undefined') {
+                return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
+                let user = req.session.user;
+                if (user.role == 1 || user.role == 2 || creator === user.account) {
+                    keys['status'] = status;
+                }
+            } else {
+                let user = req.session.user;
+                if (typeof user.account !== dbRes[0]['account']) {
+                    if( user.role == 0 ) {
+                        return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
+                    }
+                }
+            }
         }
         let steemitRes = await game.getActivitiesById(req.params.id);
         if(steemitRes.length>0){
@@ -203,7 +226,7 @@ exports.updateGame = async function(req, res, next) {
     try{
         let unix = Math.round(+new Date()/1000);
         let data = req.body;
-        let dbRes = await game.updateGame([{ title:data.title,coverImage:data.coverImage,description:data.description,category:data.category,gameUrl:data.gameUrl,lastModified:unix }, req.params.id, req.session.user.userid]);
+        let dbRes = await game.updateGame([{ title:data.title,coverImage:data.coverImage,description:data.description,category:data.category,gameUrl:data.gameUrl,lastModified:unix,width:data.width,height:data.height }, req.params.id, req.session.user.userid]);
         if (dbRes.changedRows == 1){
             return res.status(200).send();
         } else {
@@ -303,12 +326,12 @@ exports.voteGame = async function(req, res, next) {
         let data = req.body;
         let voter = req.session.user.account;
         if(await user.getInterval('vote:interval:'+voter)){
-            return res.status(500).json({ resultCode: CODE.VOTE_INTERVAL_ERROR.RESCODE, err: CODE.VOTE_INTERVAL_ERROR.DESC });
+            return res.status(400).json({ resultCode: CODE.VOTE_INTERVAL_ERROR.RESCODE, err: CODE.VOTE_INTERVAL_ERROR.DESC });
         }
         let author = req.params.author;
         let permlink = req.params.permlink;
         if( typeof voter === 'undefined' || typeof author === 'undefined' || typeof author === 'undefined' || typeof data.weight ==='undefined' ){
-            return res.status(500).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
+            return res.status(400).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
         }
         await steem.vote(req.session.accessToken, voter, author, permlink, parseInt(data.weight));
         await user.setInterval('vote:interval:'+voter, config.get('steemit.app.voteInterval'));
@@ -335,10 +358,10 @@ exports.auditGame = async function(req, res, next) {
         }
         let author = req.session.user.account;
         if(await user.getInterval('comment:interval:'+author)){
-            return res.status(500).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
+            return res.status(400).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
         }
         if(typeof data.status === 'undefined' ) {
-            return res.status(500).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
+            return res.status(400).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
         }
         let permlink = createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
         let parentAuthor = dbRes[0].account;
@@ -367,12 +390,12 @@ exports.reportGame = async function(req, res, next) {
         let reportStatus = data.report;
         let author = req.session.user.account;
         if(await user.getInterval('comment:interval:'+author)){
-            return res.status(500).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
+            return res.status(400).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
         }
         let dbRes = await game.canReportGame([req.params.id]);
         if(typeof dbRes[0] !== 'undefined') {
             if(reportStatus  == 1) {
-                return res.status(500).json({ resultCode: CODE.HAS_REPORT_ERROR.RESCODE, err: CODE.HAS_REPORT_ERROR.DESC });
+                return res.status(400).json({ resultCode: CODE.HAS_REPORT_ERROR.RESCODE, err: CODE.HAS_REPORT_ERROR.DESC });
             } else {
                 await game.unreportGame(req.params.id);
                 return res.status(200).json();

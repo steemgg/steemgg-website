@@ -12,7 +12,7 @@ module.exports = function(app) {
   app.get('/v1/game', [morkSessionMiddleware], api.listGame);
   app.post('/v1/game', [morkSessionMiddleware, userMiddleware], api.addGame);
   app.post('/v1/post', [morkSessionMiddleware, userMiddleware], api.postGame);
-  app.get('/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.getGameDetail);
+  app.get('/v1/game/:id', [], api.getGameDetail);
   app.put('/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.updateGame);
   app.delete('/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.deleteGame);
   app.post('/v1/audit/:id', [morkSessionMiddleware, userMiddleware], api.auditGame);
