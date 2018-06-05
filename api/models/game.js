@@ -30,7 +30,7 @@ exports.updateActivityCount = async function(params) {
 exports.auditGame = async function(params, status) {
     let rows = await db.execute(db.WRITE, 'INSERT INTO comments SET ?', params);
     rows = await db.execute(db.WRITE, 'update comments set status = 1 and type = 0 where gameid= ?', params.gameid);
-    rows = await db.execute(db.WRITE, 'update games set status=? where id= ?', [status,params.gameid]);
+    rows = await db.execute(db.WRITE, 'update games set status=?, report=0  where id= ?', [status,params.gameid]);
     this.clearCache();
     return rows;
 }
