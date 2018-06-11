@@ -139,7 +139,7 @@ describe('DB', function() {
                 description:'test game for unit test'
             };
             try{
-                await game.updateGame([gameInfo,testGameId,testUserId]);
+                await game.updateGameSelf([gameInfo,testGameId,testUserId]);
                 let dbRes = await game.getGameById(testGameId);
                 assert.equal(dbRes[0].gameUrl, 'modify test');
             } catch (err) {

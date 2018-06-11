@@ -6,4 +6,8 @@ cd ../../../
 npm run build-prod
 cd ../
 tar -cvf  ui.tar.gz ui/dist/
-#npm run build-staging
+rm -rf ui/dist/
+cd ui
+npm run build-staging
+cd ../
+tar -cvf  ui-staging.tar.gz ui/dist/

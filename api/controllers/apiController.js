@@ -224,7 +224,16 @@ exports.updateGame = async function(req, res, next) {
     try{
         let unix = Math.round(+new Date()/1000);
         let data = req.body;
-        let dbRes = await game.updateGame([{ title:data.title,coverImage:data.coverImage,description:data.description,category:data.category,gameUrl:data.gameUrl,lastModified:unix,width:data.width,height:data.height }, req.params.id, req.session.user.userid]);
+        let dbRes = null;
+        data.lastModified = unix;
+        if(typeof data.recommend !== 'undefined' || typeof data.status !== 'undefined' || typeof data.payout !== 'undefined' || typeof data.vote !== 'undefined' ) {
+            if (req.session.user.role != 2){
+                return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
+            }
+            dbRes = await game.updateGame([data, req.params.id, req.session.user.userid]);
+        } else {
+            dbRes = await game.updateGameSelf([data, req.params.id, req.session.user.userid]);
+        }
         if (dbRes.changedRows == 1){
             return res.status(200).send();
         } else {
