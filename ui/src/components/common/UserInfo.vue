@@ -20,12 +20,12 @@ SteemGG.com will never access your private keys.</span>
   </div>
 </template>
 <script>
-  import axios from 'axios'
   import Avatar from '../shared/Avatar'
-  import ElButton from '../../../node_modules/element-ui/packages/button/src/button'
+  import GameService from '../../service/game.service'
+  const gameService = new GameService()
+
   export default {
     components: {
-      ElButton,
       Avatar
     },
     name: 'UserInfo',
@@ -44,7 +44,7 @@ SteemGG.com will never access your private keys.</span>
           this.loggedIn = false
         } else {
           this.loading = true
-          axios.get('v1/logout').then(response => {
+          gameService.logout().then(response => {
             this.$message.success('log out successfully')
             this.$store.commit('deleteUser')
           }).finally(() => {
@@ -70,7 +70,7 @@ SteemGG.com will never access your private keys.</span>
         this.loggedIn = true
       } else {
         this.loading = true
-        axios.get('v1/me').then(response => {
+        gameService.fetchUser().then(response => {
           console.log('user logged in')
           this.$store.commit('setUser', response.data)
           this.loggedIn = true
