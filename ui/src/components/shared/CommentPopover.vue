@@ -3,7 +3,7 @@
     <el-popover
       ref="dynamic"
       placement="bottom"
-      width="550"
+      width="600"
       trigger="click">
       <el-table :data="comments" :empty-text="'None'">
         <el-table-column width="100" property="account" label="User"></el-table-column>

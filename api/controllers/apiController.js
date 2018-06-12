@@ -13,8 +13,6 @@ import user from '../models/user';
 import steem from '../models/steem';
 import game from '../models/game';
 import querystring from 'querystring';
-import {createPermlink} from '../vendor/steemitHelpers';
-import {createCommentPermlink} from '../vendor/steemitHelpers';
 import {SDKError} from '../errors/SDKError';
 import {DBError} from '../errors/DBError';
 
@@ -103,7 +101,7 @@ exports.postGame = async function(req, res, next) {
             return res.status(400).json({ resultCode: CODE.POST_INTERVAL_ERROR.RESCODE, err: CODE.POST_INTERVAL_ERROR.DESC, ttl:postTTL });
         }
         let author = req.session.user.account;
-        let permLink = await createPermlink(data.activityTitle, author, '', '');
+        let permLink = steem.createPermlink(data.activityTitle, author);
         let tags = data.tags;
         if(!tags.includes('steemgg') || tags.indexOf('steemgg')>5){
             tags.unshift('steemgg');
@@ -163,7 +161,7 @@ exports.commentGame = async function(req, res, next) {
         }
         let post = req.body;
         let author = req.session.user.account;
-        let permlink = createCommentPermlink(req.params.author,req.params.permlink);
+        let permlink = steem.createCommentPermlink(req.params.author,req.params.permlink);
         await steem.comment(req.session.accessToken, req.params.author,req.params.permlink, author, post.content, permlink);
         await user.setInterval('comment:interval:'+userInfo.account, config.get('steemit.app.commentInterval'));
         return res.status(200).json({content:post.content, author:author, permlink:permlink});
@@ -363,7 +361,7 @@ exports.auditGame = async function(req, res, next) {
         if(typeof data.status === 'undefined' ) {
             return res.status(400).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
         }
-        let permlink = createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
+        let permlink = steem.createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
         let parentAuthor = dbRes[0].account;
         let parentPermlink = dbRes[0].permlink;
         await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, data.comment, permlink);
@@ -409,7 +407,7 @@ exports.reportGame = async function(req, res, next) {
         if(typeof dbRes[0] === 'undefined') {
             return res.status(404).json({ resultCode: CODE.NOFOUND_ACTIVITY_ERROR.RESCODE, err: CODE.NOFOUND_ACTIVITY_ERROR.DESC });
         }
-        let permlink = createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
+        let permlink = steem.createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
         let parentAuthor = dbRes[0].account;
         let parentPermlink = dbRes[0].permlink;
         await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, data.comment, permlink);
