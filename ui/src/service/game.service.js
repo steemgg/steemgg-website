@@ -292,6 +292,10 @@ export default class GameService {
   }
 
   fetchUser () {
-    axiosInstance.get('/v1/me')
+    return axiosInstance.get('/v1/me')
+  }
+
+  logout () {
+    return axiosInstance.get('v1/logout')
   }
 }
