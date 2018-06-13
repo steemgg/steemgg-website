@@ -11,10 +11,11 @@ module.exports = function(app) {
   app.all('*',function (req, res, next) {
       let allowedOrigins = config.get('steemit.app.allowedOrigins');
       let origin = req.headers.origin;
+      res.header("Access-Control-Allow-Credentials", "true");
       if(allowedOrigins.indexOf(origin) > -1){
           res.setHeader('Access-Control-Allow-Origin', origin);
       }
-      res.header('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild');
+      res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
       res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
 
       if (req.method == 'OPTIONS') {
