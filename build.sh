@@ -12,7 +12,7 @@ git clone https://github.com/steemgg/ui-dev.git
 cp -rf  ui/dist/* ui-dev
 cd ui-dev
 git commit -a -m "commit"
-git push --force --quiet "https://bonjovis:${GH_TOKEN}@github.com/steemgg/ui-dev.git"
+git push --force --quiet "https://${GH_TOKEN}@github.com/steemgg/ui-dev.git"
 cd ../
 rm -rf ui/dist/
 cd ui
@@ -23,6 +23,6 @@ git clone https://github.com/steemgg/ui-staging.git
 cp -rf  ui/dist/* ui-staging
 cd ui-staging
 git commit -a -m "commit"
-git push --force --quiet "https://bonjovis:${GH_TOKEN}@github.com/steemgg/ui-staging.git"
+git push --force --quiet "https://${GH_TOKEN}@github.com/steemgg/ui-staging.git"
 cd ../
 rm -rf ui/dist/
