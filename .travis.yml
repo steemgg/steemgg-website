@@ -40,5 +40,5 @@ deploy:
     - ui-staging.tar.gz
   skip_cleanup: true
   on:
-    repo: steemitgame-team/steemitgame-website
+    repo: steemgg/steemgg-website
     branch: develop
