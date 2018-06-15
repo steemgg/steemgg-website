@@ -12,6 +12,7 @@
     "lint": "eslint --ext .js,.vue src test/unit/specs",
     "build-prod": "node build/build.js",
     "build-staging": "node build/build-staging.js"
+    "build-remote-dev": "node build/build-staging.js"
   },
   "dependencies": {
     "@xkeshi/vue-countdown": "^0.6.0",

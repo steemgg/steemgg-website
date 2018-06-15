@@ -1,7 +1,7 @@
 'use strict'
 require('./check-versions')()
 
-process.env.NODE_ENV = 'staging'
+process.env.NODE_ENV = 'remote-dev'
 
 const ora = require('ora')
 const rm = require('rimraf')
@@ -11,7 +11,7 @@ const webpack = require('webpack')
 const config = require('../config')
 const webpackConfig = require('./webpack.staging.conf')
 
-const spinner = ora('building for staging...')
+const spinner = ora('building for dev server...')
 spinner.start()
 
 rm(path.join(config.build.assetsRoot, config.build.assetsSubDirectory), err => {

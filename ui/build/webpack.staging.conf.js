@@ -10,7 +10,9 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 
-const env = require('../config/staging.env')
+const env = process.env.NODE_ENV === 'staging'
+  ? require('../config/staging.env')
+  : require('../config/remote-dev.env')
 
 const webpackConfig = merge(baseWebpackConfig, {
   module: {
