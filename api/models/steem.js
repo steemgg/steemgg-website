@@ -8,9 +8,9 @@ import secureRandom from 'secure-random';
 exports.comment = function(accessToken, parentAuthor, parentPermlink, author, content, permlink) {
     let operations = [];
     let metaData = {
-        community: 'steemitgame',
-        tags: ['steemitgame'],
-        app: `steemitgame.app/test`
+        community: 'steemgg',
+        tags: ['steemgg'],
+        app: `steemgg.app/test`
     };
     let commentOp = [
         'comment',
@@ -33,7 +33,7 @@ exports.post = function(accessToken, author, title, content, reward, tags, perml
     let extensions = [[0, {
         beneficiaries: [
             {
-                account: 'steemitgame.dev',
+                account: 'steemgg',
                 weight: 2500
             }
         ]
@@ -42,7 +42,7 @@ exports.post = function(accessToken, author, title, content, reward, tags, perml
     let operations = [];
 
     let metaData = {
-        community: 'steemitgame',
+        community: 'steemgg',
         tags: tags,
         app: `steemitgame.app/test`
     };
