@@ -146,7 +146,7 @@
     },
     computed: {
       thumbnail () {
-        return 'http://ipfs.io/ipfs/' + this.game.coverImage.hash
+        return process.env.IPFS_SERVER_URL + this.game.coverImage.hash
       },
 
       votes () {

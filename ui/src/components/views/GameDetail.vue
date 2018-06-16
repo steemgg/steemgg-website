@@ -334,7 +334,7 @@
           gameService.getById(this.id).then(response => {
             this.game = response
             if (this.game.status === 1 || this.$store.getters.isAuditor || (this.$store.state.loggedIn && this.$store.getters.user.account === this.game.account)) {
-              this.gameUrl = 'https://ipfs.io/ipfs/' + this.game.gameUrl.hash
+              this.gameUrl = process.env.IPFS_SERVER_URL + this.game.gameUrl.hash
               console.log('mounted successfully', this.game)
               this.showApprove = this.$store.getters.isAuditor && this.game && this.game.status === 0
               this.refreshSteemitMetaData()

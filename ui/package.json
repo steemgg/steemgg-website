@@ -5,14 +5,14 @@
   "author": "bizheng@gmail.com",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "dev": "webpack-dev-server --inline --progress --config build/webpack.local.conf.js",
     "start": "npm run dev",
     "unit": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "test": "npm run unit",
     "lint": "eslint --ext .js,.vue src test/unit/specs",
     "build-prod": "node build/build.js",
     "build-staging": "node build/build-staging.js",
-    "build-dev": "node build/build-remote-dev.js"
+    "build-dev": "node build/build-dev.js"
   },
   "dependencies": {
     "@xkeshi/vue-countdown": "^0.6.0",
