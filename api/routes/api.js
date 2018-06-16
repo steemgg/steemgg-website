@@ -33,6 +33,9 @@ module.exports = function(app) {
   app.put('/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.updateGame);
   app.delete('/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.deleteGame);
   app.post('/v1/audit/:id', [morkSessionMiddleware, userMiddleware], api.auditGame);
+  app.get('/v1/auditor', [morkSessionMiddleware, userMiddleware], api.listAuditor);
+  app.delete('/v1/auditor/:account', [morkSessionMiddleware, userMiddleware], api.unsetAuditor);
+  app.put('/v1/auditor/:account', [morkSessionMiddleware, userMiddleware], api.setAuditor);
   app.post('/v1/comment/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.commentGame);
   app.post('/v1/vote/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.voteGame);
   app.post('/v1/report/:id', [morkSessionMiddleware, userMiddleware], api.reportGame);
