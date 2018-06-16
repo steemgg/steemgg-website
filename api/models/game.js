@@ -15,8 +15,14 @@ exports.deleteGame = async function(params) {
     return rows;
 }
 
-exports.updateGame = async function(params) {
+exports.updateGameSelf = async function(params) {
     let rows = await db.execute(db.WRITE, 'update games set ? where id= ? and userid= ?', params);
+    this.clearCache();
+    return rows;
+}
+
+exports.updateGame = async function(params) {
+    let rows = await db.execute(db.WRITE, 'update games set ? where id= ?', params);
     this.clearCache();
     return rows;
 }

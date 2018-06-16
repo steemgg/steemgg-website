@@ -6,6 +6,7 @@ import axios from 'axios'
 import steemApi from './steemAPI'
 import Promise from 'bluebird'
 var axiosInstance = axios.create({
+  withCredentials: true,
   baseURL: process.env.API_SERVER_URL,
   timeout: 20000
 })
