@@ -482,7 +482,7 @@
             if (this.$store.getters.isAdmin || game.account === this.$store.getters.user.account) {
               this.game = game
               this.$refs.coverImageDropzone.dropzone.emit('addedfile', this.game.coverImage)
-              this.$refs.coverImageDropzone.dropzone.options.thumbnail.call(this.$refs.coverImageDropzone, this.game.coverImage, 'http://gateway.ipfs.io/ipfs/' + game.coverImage.hash)
+              this.$refs.coverImageDropzone.dropzone.options.thumbnail.call(this.$refs.coverImageDropzone, this.game.coverImage, process.env.IPFS_SERVER_URL + game.coverImage.hash)
               this.$refs.coverImageDropzone.dropzone.emit('complete', this.game.coverImage)
               this.$refs.coverImageDropzone.dropzone.files.push(this.game.coverImage)
               this.fileList = [this.game.gameUrl]
