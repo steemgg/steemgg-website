@@ -48,7 +48,7 @@ var sess = {
   store: new redisStore({ host: config.get('steemit.redis.host'), port: config.get('steemit.redis.port'), client: redis.instance.client, ttl: config.get('steemit.app.sessionTime') }),
   cookie: {
       path     : '/',
-      domain   : '.steemitgame.com'
+      domain   : config.get('steemit.app.domain')
   },
   resave: false,
   saveUninitialized: false
