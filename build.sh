@@ -38,7 +38,8 @@ elif [[ $TRAVIS_BRANCH == 'master' ]]; then
 else
     echo 'helloworld'
 fi
-if [[ $TRAVIS_TAG =~ ^v* ]]; then
+if [[ $TRAVIS_TAG =~'^v*$' ]]; then
+    echo 'build release code'
     cd ui
     npm install
     cd node_modules/webpack/node_modules
