@@ -29,7 +29,7 @@ script:
 - ./build.sh
 stages:
   - name: deploy
-    if: tag =~ ^v1*
+    if: tag =~ ^v*
     before_deploy:
     - git config --local user.name "bonjovis"
     - git config --local user.email "bonjovis1985@gmail.com"
