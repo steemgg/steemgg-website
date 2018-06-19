@@ -85,6 +85,18 @@ export default class GameService {
     })
   }
 
+  recommend (gameId) {
+    return axiosInstance.put(`v1/game/${gameId}`, {
+      recommend: 1
+    })
+  }
+
+  undoRecommend (gameId) {
+    return axiosInstance.post(`v1/game/${gameId}`, {
+      recommend: 0
+    })
+  }
+
   createActivity (gameId, activity) {
     let clonnedActivity = Object.assign({}, activity)
     clonnedActivity.gameid = gameId
