@@ -5,7 +5,8 @@ npm install
 cd node_modules/webpack/node_modules
 npm install uglifyjs-webpack-plugin@1.1.8
 cd ../../../
-if [[ $TRAVIS_BRANCH == 'develop' ]]
+echo $TRAVIS_BRANCH
+if [[ $TRAVIS_BRANCH == 'develop' ]] then
     npm run build-dev
     cd ../
     #tar -cvf  ui-prod.tar.gz ui/dist/
@@ -19,7 +20,6 @@ if [[ $TRAVIS_BRANCH == 'develop' ]]
     git push --force --quiet "https://${GH_TOKEN}@github.com/steemgg/ui-dev.git"
     cd ../
     rm -rf ui/dist/
-    cd ui
 else
     npm run build-staging
     cd ../
