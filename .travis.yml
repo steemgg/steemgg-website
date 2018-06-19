@@ -29,21 +29,8 @@ notifications:
     - 195643+bobdos@users.noreply.github.com
     on_success: always
     on_failure: always
-    #jobs:
-    #  include:
-    #    if: branch = master
-    #    script:
-    #    - ./build-staging.sh
-    #jobs:
-    #  include:
-    #    if: branch = develop
-    #    script:
-    #    - ./build-dev.sh
-    #jobs:
-    #  include:
-    #    if: tag IS present
-    #    script:
-    #    - ./build-prod.sh
+script:
+    - ./build.sh
 before_deploy:
 - git config --local user.name "bonjovis"
 - git config --local user.email "bonjovis1985@gmail.com"
