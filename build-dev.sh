@@ -12,5 +12,5 @@ cd ui-dev
 git config user.name "bonjovis"
 git config user.email "bonjovis1985@gmail.com"
 git add .
-git commit -a -m "commit"
+git commit -a -m "commit1"
 git push --force --quiet "https://${GH_TOKEN}@github.com/steemgg/ui-dev.git"
