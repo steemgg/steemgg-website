@@ -42,4 +42,3 @@ stages:
       skip_cleanup: true
       on:
         repo: steemgg/steemgg-website
-        branch: master
