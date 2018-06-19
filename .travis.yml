@@ -27,18 +27,3 @@ notifications:
     on_failure: always
 script:
 - ./build.sh
-before_deploy:
-- git config --local user.name "bonjovis"
-- git config --local user.email "bonjovis1985@gmail.com"
-- git tag "$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)"
-deploy:
-  provider: releases
-  api_key:
-    secure: V3lIvn9I1Dz1p7Z7V5jFIwhtUhhFleYaH4k+2MVqetLakHHwXVWBtcBfeCBdQjwY31mDKTbkRFZHarKvyAlUVYnMKQ9Fr/AI1Mp9kqqjhT0mcujjr+anLyDnB8oZFAZZbS0PvsvhBJKZEqsUwWn5uQLtuiv8W5lpV2AY33UNh0b3SLzlHaJyWNxGtHY/7aU2dMujeaBfBwiLbiRsg125ccMg/50WOKz3bFcAcw5bfdzPWEcbGtEP11uyio+1qI74dklILSf414IrC4RQTrdOVMRO2q652XkXxzSr3nhjQo/myJ6TTEUKlx3xGP5R+aT17xGykIkR30TD8CdEjWpobZ2LVtgidHAhsv0Rctefg7mA4bIjZPw8tg/A4H7bXOnfjKhbr9kZ+eOpnAgzWqId8ovRo1WLrbghvozHde/mAgotK0XbvO25UDihU5YuHAJ0I30edkrlQDkrPuUXvlrEl6mk8xuRqhynv9VwGjX80OICHwv1wPvzaWnsJJ0B1Kjv/VuYor02ztK1AFf9awdbJe2NSHVksr/KbV5dL/9bVSfWe05mRCvWQ478Y1qpcvrmeoZbKB4wqvKhTyjonqJy+jhh4kunepJOG55+cZMwXm2fPpaAsHzzKPnUzuiXTC7bKAVFykdsyldnjCb112+zvfC0ax53aS/14wGFGEgar/Y=
-  file:
-  - ui-prod.tar.gz
-  - ui-staging.tar.gz
-  skip_cleanup: true
-  on:
-    repo: steemgg/steemgg-website
-    branch: develop
