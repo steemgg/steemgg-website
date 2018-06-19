@@ -6,6 +6,7 @@ import axios from 'axios'
 import steemApi from './steemAPI'
 import Promise from 'bluebird'
 var axiosInstance = axios.create({
+  withCredentials: true,
   baseURL: process.env.API_SERVER_URL,
   timeout: 20000
 })
@@ -292,6 +293,10 @@ export default class GameService {
   }
 
   fetchUser () {
-    axiosInstance.get('/v1/me')
+    return axiosInstance.get('/v1/me')
+  }
+
+  logout () {
+    return axiosInstance.get('v1/logout')
   }
 }

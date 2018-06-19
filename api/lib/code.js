@@ -7,6 +7,8 @@ const CODE = {
     NEED_LOGIN_ERROR: {RESCODE:100,DESC:'must connect steemit'},
     CLEAR_SESSION_ERROR: {RESCODE:101,DESC:'clear session failed'},
     PERMISSION_DENIED_ERROR: {RESCODE:102,DESC:'permission denied'},
+    UNSET_AUDITOR_ERROR: {RESCODE:103,DESC:'unset auditor failed'},
+    SET_AUDITOR_ERROR: {RESCODE:104,DESC:'set auditor failed'},
 
     //steem
     STEEMIT_API_ERROR: {RESCODE:200,DESC:'call steemit api failed'},

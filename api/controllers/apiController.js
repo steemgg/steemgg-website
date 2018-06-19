@@ -13,8 +13,6 @@ import user from '../models/user';
 import steem from '../models/steem';
 import game from '../models/game';
 import querystring from 'querystring';
-import {createPermlink} from '../vendor/steemitHelpers';
-import {createCommentPermlink} from '../vendor/steemitHelpers';
 import {SDKError} from '../errors/SDKError';
 import {DBError} from '../errors/DBError';
 
@@ -103,7 +101,7 @@ exports.postGame = async function(req, res, next) {
             return res.status(400).json({ resultCode: CODE.POST_INTERVAL_ERROR.RESCODE, err: CODE.POST_INTERVAL_ERROR.DESC, ttl:postTTL });
         }
         let author = req.session.user.account;
-        let permLink = await createPermlink(data.activityTitle, author, '', '');
+        let permLink = steem.createPermlink(data.activityTitle, author);
         let tags = data.tags;
         if(!tags.includes('steemgg') || tags.indexOf('steemgg')>5){
             tags.unshift('steemgg');
@@ -163,7 +161,7 @@ exports.commentGame = async function(req, res, next) {
         }
         let post = req.body;
         let author = req.session.user.account;
-        let permlink = createCommentPermlink(req.params.author,req.params.permlink);
+        let permlink = steem.createCommentPermlink(req.params.author,req.params.permlink);
         await steem.comment(req.session.accessToken, req.params.author,req.params.permlink, author, post.content, permlink);
         await user.setInterval('comment:interval:'+userInfo.account, config.get('steemit.app.commentInterval'));
         return res.status(200).json({content:post.content, author:author, permlink:permlink});
@@ -186,14 +184,14 @@ exports.getGameDetail = async function(req, res, next) {
         if(dbRes[0]['status']!=1) {
             if (typeof req.session.user == 'undefined') {
                 return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
-                let user = req.session.user;
-                if (user.role == 1 || user.role == 2 || creator === user.account) {
+                let userInfo = req.session.user;
+                if (userInfo.role == 1 || userInfo.role == 2 || creator === userInfo.account) {
                     keys['status'] = status;
                 }
             } else {
-                let user = req.session.user;
-                if (typeof user.account !== dbRes[0]['account']) {
-                    if( user.role == 0 ) {
+                let userInfo = req.session.user;
+                if (typeof userInfo.account !== dbRes[0]['account']) {
+                    if( userInfo.role == 0 ) {
                         return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
                     }
                 }
@@ -226,7 +224,16 @@ exports.updateGame = async function(req, res, next) {
     try{
         let unix = Math.round(+new Date()/1000);
         let data = req.body;
-        let dbRes = await game.updateGame([{ title:data.title,coverImage:data.coverImage,description:data.description,category:data.category,gameUrl:data.gameUrl,lastModified:unix,width:data.width,height:data.height }, req.params.id, req.session.user.userid]);
+        let dbRes = null;
+        data.lastModified = unix;
+        if(typeof data.recommend !== 'undefined' || typeof data.status !== 'undefined' || typeof data.payout !== 'undefined' || typeof data.vote !== 'undefined' ) {
+            if (req.session.user.role != 2){
+                return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
+            }
+            dbRes = await game.updateGame([data, req.params.id, req.session.user.userid]);
+        } else {
+            dbRes = await game.updateGameSelf([data, req.params.id, req.session.user.userid]);
+        }
         if (dbRes.changedRows == 1){
             return res.status(200).send();
         } else {
@@ -279,8 +286,8 @@ exports.listGame = async function(req, res, next) {
         let gameQuery = '';
         keys['status'] = 1;
         if (typeof req.session.user !== 'undefined') {
-            let user = req.session.user;
-            if (user.role == 1 || user.role == 2 || creator === user.account) {
+            let userInfo = req.session.user;
+            if (userInfo.role == 1 || userInfo.role == 2 || creator === userInfo.account) {
                 keys['status'] = status;
             }
         }
@@ -363,7 +370,7 @@ exports.auditGame = async function(req, res, next) {
         if(typeof data.status === 'undefined' ) {
             return res.status(400).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
         }
-        let permlink = createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
+        let permlink = steem.createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
         let parentAuthor = dbRes[0].account;
         let parentPermlink = dbRes[0].permlink;
         await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, data.comment, permlink);
@@ -409,7 +416,7 @@ exports.reportGame = async function(req, res, next) {
         if(typeof dbRes[0] === 'undefined') {
             return res.status(404).json({ resultCode: CODE.NOFOUND_ACTIVITY_ERROR.RESCODE, err: CODE.NOFOUND_ACTIVITY_ERROR.DESC });
         }
-        let permlink = createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
+        let permlink = steem.createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
         let parentAuthor = dbRes[0].account;
         let parentPermlink = dbRes[0].permlink;
         await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, data.comment, permlink);
@@ -442,6 +449,73 @@ exports.logout = async function(req, res, next) {
             }
         });
         res.status(200).send();
+    } catch(err){
+        console.error(err);
+        if (err instanceof DBError) {
+            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
+        } else if (err instanceof SDKError) {
+            return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
+        } else {
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
+        }
+    }
+};
+exports.listAuditor = async function(req, res, next) {
+    try {
+        let userInfo = req.session.user;
+        if ( userInfo.role != 2) {
+            return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
+        }
+        let dbRes = await user.getAuditor();
+        return res.status(200).json({ auditors:dbRes });
+    } catch(err){
+        console.error(err);
+        if (err instanceof DBError) {
+            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
+        } else if (err instanceof SDKError) {
+            return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
+        } else {
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
+        }
+    }
+};
+
+exports.unsetAuditor = async function(req, res, next) {
+    try {
+        let userInfo = req.session.user;
+        if ( userInfo.role != 2) {
+            return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
+        }
+        let dbRes = await user.updateAuditor([{'role':0}, req.params.account]);
+        if (dbRes.changedRows == 1){
+            return res.status(200).send();
+        } else {
+            return res.status(400).json({ resultCode: CODE.UNSET_AUDITOR_ERROR.RESCODE, err: CODE.UNSET_AUDITOR_ERROR.DESC });
+        }
+    } catch(err){
+        console.error(err);
+        if (err instanceof DBError) {
+            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
+        } else if (err instanceof SDKError) {
+            return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
+        } else {
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
+        }
+    }
+};
+
+exports.setAuditor = async function(req, res, next) {
+    try {
+        let userInfo = req.session.user;
+        if ( userInfo.role != 2) {
+            return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
+        }
+        let dbRes = await user.updateAuditor([{'role':1}, req.params.account]);
+        if (dbRes.changedRows == 1){
+            return res.status(200).send();
+        } else {
+            return res.status(400).json({ resultCode: CODE.SET_AUDITOR_ERROR.RESCODE, err: CODE.SET_AUDITOR_ERROR.DESC });
+        }
     } catch(err){
         console.error(err);
         if (err instanceof DBError) {

@@ -6,8 +6,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
-var config = require('config');
-var db = require('./api/lib/db');
+var config = require('config'); var db = require('./api/lib/db');
 var redis = require('./api/lib/redis');
 var sc2NewApi = require('./api/lib/sc2');
 var redisStore = require('connect-redis')(session);
@@ -38,9 +37,19 @@ sc2NewApi.Initialize({
     secret: config.get('steemit.sc.secret')
 });
 
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
 var sess = {
   secret: config.get('steemit.app.secret'),
   store: new redisStore({ host: config.get('steemit.redis.host'), port: config.get('steemit.redis.port'), client: redis.instance.client, ttl: config.get('steemit.app.sessionTime') }),
+  cookie: {
+      path     : '/',
+      domain   : config.get('steemit.app.domain')
+  },
   resave: false,
   saveUninitialized: false
 }
@@ -50,13 +59,6 @@ if (app.get('env') === 'production') {
 }
 
 app.use(session(sess))
-
-//app.use(favicon(__dirname + '/public/favicon.ico'));
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
 var routes = require('./api/routes/api'); //importing route
 routes(app);

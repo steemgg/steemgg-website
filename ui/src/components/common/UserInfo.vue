@@ -20,12 +20,12 @@
   </div>
 </template>
 <script>
-  import axios from 'axios'
   import Avatar from '../shared/Avatar'
-  import ElButton from '../../../node_modules/element-ui/packages/button/src/button'
+  import GameService from '../../service/game.service'
+  const gameService = new GameService()
+
   export default {
     components: {
-      ElButton,
       Avatar
     },
     name: 'UserInfo',
@@ -44,7 +44,7 @@
           this.loggedIn = false
         } else {
           this.loading = true
-          axios.get('v1/logout').then(response => {
+          gameService.logout().then(response => {
             this.$message.success('log out successfully')
             this.$store.commit('deleteUser')
           }).finally(() => {
@@ -60,7 +60,7 @@
       },
       login () {
         this.loginInfoVisible = false
-        window.location.href = 'https://v2.steemconnect.com/oauth2/authorize?client_id=steemitgame.app&redirect_uri=' + encodeURIComponent(window.location.protocol + '//' + window.location.host + '/callback') + '&scope=login,vote,comment,delete_comment,comment_options,custom_json,claim_reward_balance&response_type=code&state=' + window.location.href
+        window.location.href = 'https://v2.steemconnect.com/oauth2/authorize?client_id=' + process.env.APP_ID + '&redirect_uri=' + encodeURIComponent(process.env.API_SERVER_URL + 'callback') + '&scope=login,vote,comment,delete_comment,comment_options,custom_json,claim_reward_balance&response_type=code&state=' + window.location.href
       }
     },
     mounted () {
@@ -76,7 +76,7 @@
         this.loggedIn = true
       } else {
         this.loading = true
-        axios.get('v1/me').then(response => {
+        gameService.fetchUser().then(response => {
           console.log('user logged in')
           this.$store.commit('setUser', response.data)
           this.loggedIn = true

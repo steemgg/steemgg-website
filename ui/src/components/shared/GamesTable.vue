@@ -3,7 +3,10 @@
     <el-table :data="items" style="width: 100%" :stripe=true v-loading="loading" :empty-text="'None'">
       <el-table-column prop="id" label="ID" width="100">
       </el-table-column>
-      <el-table-column prop="title" label="Name" width="150">
+      <el-table-column label="Name" width="150">
+        <template slot-scope="scope">
+          <el-button @click="viewDetails(scope.$index)" type="text" size="small">{{scope.row.title}}</el-button>
+        </template>
       </el-table-column>
       <el-table-column prop="category" label="Category" width="120">
       </el-table-column>
@@ -25,12 +28,12 @@
         </template>
       </el-table-column>
       <!--<el-table-column fixed="right" label="Operations" width="180">-->
-      <el-table-column label="Operations" width="250">
+      <el-table-column label="Operations" fixed="right">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.status == 0" @click="openDialog(scope.$index, 'Approve')" type="primary" round size="small" ng-if="type == 'audit' ">Approve</el-button>
-          <el-button v-if="scope.row.status == 1" @click="openDialog(scope.$index, 'Deny Game')" type="primary" round size="small" ng-if="type == 'report'">Deny Game</el-button>
-          <el-button v-if="scope.row.report == 1" @click="openDialog(scope.$index, 'Dismiss Report')" type="primary" round size="small" ng-if="type == 'report'">Dismiss Report</el-button>
-          <el-button @click="viewDetails(scope.$index)" type="text" size="small">Detail</el-button>
+          <el-button v-if="scope.row.status == 0" @click="openDialog(scope.$index, 'Approve')" type="success"  size="mini" ng-if="type == 'audit' ">Approve</el-button>
+          <div class="gameActionButton" v-if="scope.row.status == 1"><el-button  @click="openDialog(scope.$index, 'Deny Game')" type="danger"  size="mini" ng-if="type == 'report'">Deny Game</el-button></div>
+          <div class="gameActionButton" v-if="scope.row.report == 1"><el-button @click="openDialog(scope.$index, 'Dismiss Report')" type="primary"  size="mini" ng-if="type == 'report'">Dismiss Report</el-button></div>
+          <!--<el-button @click="viewDetails(scope.$index)" type="text" size="small">Detail</el-button>-->
         </template>
       </el-table-column>
     </el-table>
@@ -168,3 +171,8 @@
     }
   }
 </script>
+<style scoped>
+  .gameActionButton {
+    margin-top: 5px;
+  }
+</style>

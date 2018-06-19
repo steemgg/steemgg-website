@@ -1,14 +1,16 @@
 'use strict';
 
 import sc2 from '../lib/sc2';
-import steemitHelpers from '../vendor/steemitHelpers';
+import base58 from 'bs58';
+import getSlug from 'speakingurl';
+import secureRandom from 'secure-random';
 
 exports.comment = function(accessToken, parentAuthor, parentPermlink, author, content, permlink) {
     let operations = [];
     let metaData = {
-        community: 'steemitgame',
-        tags: ['steemitgame'],
-        app: `steemitgame.app/test`
+        community: 'steemgg',
+        tags: ['steemgg'],
+        app: `steemgg.app/test`
     };
     let commentOp = [
         'comment',
@@ -31,7 +33,7 @@ exports.post = function(accessToken, author, title, content, reward, tags, perml
     let extensions = [[0, {
         beneficiaries: [
             {
-                account: 'steemitgame.dev',
+                account: 'steemgg',
                 weight: 2500
             }
         ]
@@ -40,7 +42,7 @@ exports.post = function(accessToken, author, title, content, reward, tags, perml
     let operations = [];
 
     let metaData = {
-        community: 'steemitgame',
+        community: 'steemgg',
         tags: tags,
         app: `steemitgame.app/test`
     };
@@ -113,4 +115,34 @@ exports.refreshToken = async function(refreshToken) {
 exports.vote = async function(accessToken, voter, author, permlink, weight) {
     let result = await sc2.instance.vote(accessToken, voter, author, permlink, weight);
     return result;
+}
+exports.createPermlink = function(title, author) {
+    let permlink;
+    let prefix;
+    let s = slug(title);
+    if (s === '') {
+        s = base58.encode(secureRandom.randomBuffer(4));
+    }
+    prefix = `${base58.encode(secureRandom.randomBuffer(4))}-`;
+    permlink = prefix + s;
+    return checkPermLinkLength(permlink);
+}
+exports.createCommentPermlink = function(parentAuthor, parentPermlink) {
+    let permlink;
+    const timeStr = new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '');
+    const newParentPermlink = parentPermlink.replace(/(-\d{8}t\d{9}z)/g, '');
+    permlink = `re-${parentAuthor}-${newParentPermlink}-${timeStr}`;
+    return checkPermLinkLength(permlink);
+};
+
+function checkPermLinkLength(permlink) {
+  if (permlink.length > 255) {
+    permlink = permlink.substring(permlink.length - 255, permlink.length);
+  }
+  permlink = permlink.toLowerCase().replace(/[^a-z0-9-]+/g, '');
+  return permlink;
+}
+
+function slug(text) {
+  return getSlug(text.replace(/[<>]/g, ''), { truncate: 128 });
 }

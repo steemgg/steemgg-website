@@ -83,8 +83,6 @@
 <style scoped>
   .listContainer {
     margin: 20px;
-    height: 800px;
-    width: 90%;
     overflow: scroll;
   }
   .audit-table {
