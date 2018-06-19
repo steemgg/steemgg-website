@@ -90,7 +90,7 @@
       border-bottom: 5px solid darkseagreen;
       display: flex;
       font-size: 20px;
-      font-weight: bold;
+      font-family: 'Kaushan Script', cursive;
       .list-name {
         width: 66%;
         display: flex;
