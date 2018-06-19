@@ -5,10 +5,10 @@
         <!--<avatar :accountName="comment.author"></avatar>-->
       <!--</el-col>-->
       <!--<el-col :xs="16" :sm="16" :md="22" :lg="22" :xl="22">-->
-      <el-col :span="2">
+      <el-col :xs="3" :sm="2" :md="1" :lg="1" :xl="1">
         <avatar :accountName="comment.author"></avatar>
-      </el-col>
-      <el-col :span="22">
+      </el-col >
+      <el-col :xs="21" :sm="22" :md="22" :lg="22" :xl="22">
         <div class="commentWrapper">
           <div class="commentAuthor">
             <span class="author">{{comment.author}}</span>

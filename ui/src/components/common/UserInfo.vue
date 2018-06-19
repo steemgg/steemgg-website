@@ -11,7 +11,7 @@
       :visible.sync="loginInfoVisible"
       width="30%">
       <span class="login-tip">You will be redirected to SteemConnect to authenticate to the Steem blockchain. SteemConnect is developed and maintained by Steemit, Inc. and Busy.org.
-SteemGG.com will never access your private keys.</span>
+        Steemgg.com will never access your private keys.By clicking 'Login with SteemConnect', I agree to steemgg's <span class="policyLink" @click="goto('termsOfService')">Terms of Service</span>, <span class="policyLink" @click="goto('privacy')" tag="a">Privacy Policy</span> and <span class="policyLink" @click="goto('cookiePolicy')" tag="a">Cookie Policy</span>.</span>
       <span slot="footer" class="dialog-footer">
     <el-button @click="loginInfoVisible = false">Close</el-button>
     <el-button type="primary" @click="login">Login with SteemConnect</el-button>
@@ -51,6 +51,12 @@ SteemGG.com will never access your private keys.</span>
             this.loading = false
           })
         }
+      },
+      goto (name) {
+        this.loginInfoVisible = false
+        this.$router.push({
+          name: name
+        })
       },
       login () {
         this.loginInfoVisible = false
@@ -113,5 +119,15 @@ SteemGG.com will never access your private keys.</span>
       cursor: pointer;
     }
   }
-
+  .policyLink {
+    color: #007bff;
+    &:hover {
+      color: #0056b3;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  }
+  .login-tip {
+    display: inline;
+  }
 </style>
