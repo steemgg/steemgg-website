@@ -30,6 +30,7 @@ jobs:
     if: branch = develop
     script:
     - ./build-dev.sh
+  include:
     if: branch = master
     script:
     - ./build-staging.sh
