@@ -47,7 +47,7 @@ if [[ $TRAVIS_TAG =~ [v*] ]]; then
     cd ../../../
     npm run build-prod
     cd ../
-    tar -cvf  release_$TRAVIS_TAG.tar.gz ui/dist/
+    tar -cvf  ui.tar.gz ui/dist/
     git clone https://github.com/steemgg/ui-prod.git
     cp -rf  ui/dist/* ui-prod
     cd ui-prod
