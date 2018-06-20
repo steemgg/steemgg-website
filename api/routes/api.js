@@ -19,7 +19,7 @@ module.exports = function(app) {
       res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
 
       if (req.method == 'OPTIONS') {
-          res.send(200);
+          res.sendStatus(200);
       }
       else {
           next();
