@@ -86,7 +86,7 @@ exports.postGame = async function(req, res, next) {
         let data = req.body;
         let userInfo = req.session.user;
         let dbRes = await game.getGameById(data.gameid);
-        if(typeof dbRes[0] === 'undefined') {
+       if(typeof dbRes[0] === 'undefined') {
             return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
         }
         if(userInfo.account != dbRes[0]['account'] || data.gameid != dbRes[0]['id']) {
@@ -109,7 +109,10 @@ exports.postGame = async function(req, res, next) {
         for(let i=tags.length;i>5;i--) {
             tags.pop();
         }
-        let result = await steem.post(req.session.accessToken, author, data.activityTitle, data.activityDescription, data.reward, tags,permLink);
+        let content = data.activityDescription + '\n\n' +
+                    '---\n' +
+                    'Posted on [steemgg - The World\'s 1st Blockchain HTML5 Game Platform](https://steemgg.com/#/game/play/'+data.gameid+')\n';
+        let result = await steem.post(req.session.accessToken, author, data.activityTitle, content, data.reward, tags,permLink);
         let unix = Math.round(+new Date()/1000);
         let activity = {userid:req.session.user.userid, account:req.session.user.account,gameid: data.gameid,lastModified: unix, permlink:permLink };
         await game.addActivity(activity);
