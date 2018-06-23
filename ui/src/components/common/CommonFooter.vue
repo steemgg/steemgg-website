@@ -1,5 +1,6 @@
 <template>
   <div class="common-footer" >
+    <span class="copyright">© 2018 - present steemgg All rights reserved</span>
       <ul class="social-icons1 agileinfo">
         <li><a href="https://www.facebook.com/Steemgg-241891609891471" target="_blank"><i class="fa fa-facebook"></i></a></li>
         <li><a href="https://twitter.com/steemgg" target="_blank"><i class="fa fa-twitter"></i></a></li>
@@ -10,6 +11,7 @@
     <div class="policy-link">
       <router-link :to="{name: 'cookiePolicy'}" tag="a">Cookie Policy</router-link> |
       <router-link :to="{name: 'termsOfService'}" tag="a">Terms of Service</router-link>
+
     </div>
   </div>
 </template>
@@ -37,7 +39,12 @@
     /*left: 20px;*/
     z-index: 10001;
     display: flex;
-
+    .copyright {
+      color: white;
+      font-size: 12px;
+      line-height: 60px;
+      margin-left: 10px;
+    }
     .policy-link {
       color: white;
       display: flex;
