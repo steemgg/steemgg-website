@@ -112,8 +112,8 @@
   .cookieAlert {
     position: fixed;
     bottom: 70px;
-    width: calc(100% - 100px);
-    margin-left: 30px;
+    width: 1160px;
+    /*margin-left: 30px;*/
     height: 50px;
     z-index:10000;
     font-size: 14px;

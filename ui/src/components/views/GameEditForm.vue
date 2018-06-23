@@ -46,7 +46,7 @@
                     <div class="game-resource-upload-wrapper">
                       <el-upload
                         class="game-resource-upload"
-                        action="/v1/upload"
+                        :action="uploadTarget"
                         :on-remove="onFileRemoved"
                         :file-list="fileList"
                         :limit="1"
@@ -198,6 +198,7 @@
         actionText: 'Create',
         postingWaitTime: -1,
         copyRightClaim: false,
+        uploadTarget: process.env.API_SERVER_URL + '/v1/upload',
         game: {
           title: '',
           description: '',
@@ -255,7 +256,7 @@
           ]
         },
         dropzoneOptions: {
-          url: '/v1/upload',
+          url: process.env.API_SERVER_URL + '/v1/upload',
           maxFilesize: 4,
           maxFiles: 1,
           thumbnailWidth: 330,

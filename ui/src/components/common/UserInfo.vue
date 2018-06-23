@@ -1,5 +1,5 @@
 <template>
-  <div class='userInfoContainer' v-loading='loading'>
+  <div class='userInfoContainer'>
     <span v-if='$store.state.loggedIn'>
       <avatar :accountName='accountName'></avatar> <span class='user-name'>{{accountName}}</span>
       <router-link class="fa fa-cog fa-2x fa-fw profile" :to="{name: 'userProfile'}" tag="i" title="Profile"></router-link>
