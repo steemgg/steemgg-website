@@ -12,7 +12,7 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/v1/**': {
-        target: 'http://dev.steemitgame.com',
+        target: 'https://api-dev.steemgg.com/',
         secure: false,
         changeOrigin: true,
         onProxyReq: function(proxyReq, req, res) {

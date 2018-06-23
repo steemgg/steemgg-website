@@ -85,6 +85,18 @@ export default class GameService {
     })
   }
 
+  recommend (gameId) {
+    return axiosInstance.put(`v1/game/${gameId}`, {
+      recommend: 1
+    })
+  }
+
+  undoRecommend (gameId) {
+    return axiosInstance.post(`v1/game/${gameId}`, {
+      recommend: 0
+    })
+  }
+
   createActivity (gameId, activity) {
     let clonnedActivity = Object.assign({}, activity)
     clonnedActivity.gameid = gameId
@@ -292,10 +304,24 @@ export default class GameService {
     return clonnedGame
   }
 
+  // TODO: the following methods should be moved to a different service
   fetchUser () {
     return axiosInstance.get('/v1/me')
   }
 
+  getAuditors () {
+    return axiosInstance.get(`v1/auditor`, {}).then(response => {
+      return response.data
+    })
+  }
+
+  addAuditor (userId) {
+    return axiosInstance.put(`v1/auditor/${userId}`, {})
+  }
+
+  deleteAuditor (userId) {
+    return axiosInstance.delete(`v1/auditor/${userId}`, {})
+  }
   logout () {
     return axiosInstance.get('v1/logout')
   }
