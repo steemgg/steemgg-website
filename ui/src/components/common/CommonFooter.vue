@@ -31,10 +31,10 @@
   .common-footer {
     background: #0c0d0d;
     height: 60px;
-    width: calc(100% - 40px);
+    width: 1160px;
     position: fixed;
     bottom: 0px;
-    left: 20px;
+    /*left: 20px;*/
     z-index: 10001;
     display: flex;
 

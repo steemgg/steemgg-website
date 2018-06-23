@@ -304,10 +304,28 @@ export default class GameService {
     return clonnedGame
   }
 
+  // TODO: the following methods should be moved to a different service
   fetchUser () {
     return axiosInstance.get('/v1/me')
   }
 
+  getAuditors () {
+    return axiosInstance.get(`v1/auditor`, {}).then(response => {
+      return response.data
+    })
+  }
+
+  addAuditor (userId) {
+    return axiosInstance.put(`v1/auditor/${userId}`, {}).then(response => {
+      return response.data
+    })
+  }
+
+  deleteAuditor (userId) {
+    return axiosInstance.delete(`v1/auditor/${userId}`, {}).then(response => {
+      return response.data
+    })
+  }
   logout () {
     return axiosInstance.get('v1/logout')
   }
