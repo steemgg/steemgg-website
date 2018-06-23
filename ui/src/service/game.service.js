@@ -316,15 +316,11 @@ export default class GameService {
   }
 
   addAuditor (userId) {
-    return axiosInstance.put(`v1/auditor/${userId}`, {}).then(response => {
-      return response.data
-    })
+    return axiosInstance.put(`v1/auditor/${userId}`, {})
   }
 
   deleteAuditor (userId) {
-    return axiosInstance.delete(`v1/auditor/${userId}`, {}).then(response => {
-      return response.data
-    })
+    return axiosInstance.delete(`v1/auditor/${userId}`, {})
   }
   logout () {
     return axiosInstance.get('v1/logout')
