@@ -27,13 +27,12 @@
           <comment-popover :comments="scope.row.auditComments"></comment-popover>
         </template>
       </el-table-column>
-      <!--<el-table-column fixed="right" label="Operations" width="180">-->
       <el-table-column label="Operations" fixed="right">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.status == 0" @click="openDialog(scope.$index, 'Approve')" type="success"  size="mini" ng-if="type == 'audit' ">Approve</el-button>
-          <div class="gameActionButton" v-if="scope.row.status == 1"><el-button  @click="openDialog(scope.$index, 'Deny Game')" type="danger"  size="mini" ng-if="type == 'report'">Deny Game</el-button></div>
-          <div class="gameActionButton" v-if="scope.row.report == 1"><el-button @click="openDialog(scope.$index, 'Dismiss Report')" type="primary"  size="mini" ng-if="type == 'report'">Dismiss Report</el-button></div>
-          <!--<el-button @click="viewDetails(scope.$index)" type="text" size="small">Detail</el-button>-->
+          <el-button v-if="scope.row.status == 0 && type == 'audit'" @click="openDialog(scope.$index, 'Approve')" type="success"  size="mini">Approve</el-button>
+          <div class="gameActionButton" v-if="scope.row.status == 1"><el-button  @click="openDialog(scope.$index, 'Deny Game')" type="danger"  size="mini" v-if="type == 'report' || type == 'live'">Deny Game</el-button></div>
+          <div class="gameActionButton" v-if="scope.row.report == 1"><el-button @click="openDialog(scope.$index, 'Dismiss Report')" type="primary"  size="mini" v-if="type == 'report'">Dismiss Report</el-button></div>
+          <div class="gameActionButton" v-if="scope.row.status == 1 && type === 'recommended'"><el-button  @click="removeGameFromRecomended(scope.$index)" type="danger" size="mini" v-if="type == 'recommended'">Remove</el-button></div>
         </template>
       </el-table-column>
     </el-table>
@@ -101,9 +100,9 @@
         } else {
           if (this.actionTitle === 'Approve') {
             this.approve()
-          } else if (this.actionTitle === 'Deny') {
+          } else if (this.actionTitle === 'Deny Game') {
             this.deny()
-          } else if (this.actionTitle === 'Clear') {
+          } else if (this.actionTitle === 'Dismiss Report') {
             this.clear()
           }
           this.form.comment = ''
@@ -154,6 +153,19 @@
           this.$message.error('undo report action failed.')
         }).finally(() => {
           this.form.comment = ''
+          this.loading = false
+        })
+      },
+      removeGameFromRecomended () {
+        this.loading = true
+        gameService.undoRecommend(this.items[this.activeIndex].id).then(() => {
+          this.$message.success('Game is removed from recommended list.')
+          this.items.splice(this.activeIndex, 1)
+          this.$emit('gameUndoRecommended')
+        }).catch(error => {
+          console.log(error)
+          this.$message.error('remove game from recommended list action failed.')
+        }).finally(() => {
           this.loading = false
         })
       },

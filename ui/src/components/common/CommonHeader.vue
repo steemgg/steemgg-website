@@ -15,6 +15,9 @@
           <li class="nav-item" v-if="$store.getters.user.role >= 1">
             <router-link class="nav-link" :to="{name: 'auditGame'}" tag="a"><i class="fa fa-eye fa-2x" title="Audit Game"></i><span class="actionText">Audit Game</span></router-link>
           </li>
+          <li class="nav-item" v-if="$store.getters.user.role == 2">
+            <router-link class="nav-link" :to="{name: 'assignAuditor'}" tag="a"><i class="fa fa-eye fa-2x" title="Assign Auditor"></i><span class="actionText">Assign Auditor</span></router-link>
+          </li>
         </ul>
         <!--<form class="form-inline mt-2 mt-md-0">-->
           <!--<input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">-->

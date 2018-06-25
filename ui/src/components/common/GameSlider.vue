@@ -1,18 +1,13 @@
 <template>
   <div class="swiper-container">
-    <swiper :options="swiperOption" ref="mySwiper">
-      <swiper-slide><img class="slider-image" src="../../assets/images/1.jpeg"/></swiper-slide>
-      <swiper-slide><img class="slider-image" src="../../assets/images/2.jpeg"/></swiper-slide>
-      <swiper-slide><img class="slider-image" src="../../assets/images/3.jpeg"/></swiper-slide>
-      <swiper-slide><img class="slider-image" src="../../assets/images/4.jpeg"/></swiper-slide>
-      <swiper-slide><img class="slider-image" src="../../assets/images/3.jpg"/></swiper-slide>
+    <swiper :options="swiperOption" ref="swiper">
+      <swiper-slide><img class="slider-image" src="https://ui-resource.steemgg.com/image/cover/cover-1.gif"/></swiper-slide>
+      <swiper-slide><img class="slider-image" src="https://ui-resource.steemgg.com/image/cover/cover-2.gif"/></swiper-slide>
+      <swiper-slide><img class="slider-image" src="https://ui-resource.steemgg.com/image/cover/cover-3.gif"/></swiper-slide>
+      <swiper-slide><img class="slider-image" src="https://ui-resource.steemgg.com/image/cover/cover-4.gif"/></swiper-slide>
+      <swiper-slide><img class="slider-image" src="https://ui-resource.steemgg.com/image/cover/cover-5.gif"/></swiper-slide>
       <div class="swiper-pagination" slot="pagination"></div>
     </swiper>
-    <div class="slider-text">
-      <h3>
-        GET <span>PAID</span> BY PLAYING <span>GAMES</span>
-      </h3>
-    </div>
   </div>
 </template>
 
@@ -34,18 +29,12 @@
         }
       }
     },
-    // you can find current swiper instance object like this, while the notNextTick property value must be true
-    // 如果你需要得到当前的swiper对象来做一些事情，你可以像下面这样定义一个方法属性来获取当前的swiper对象，同时notNextTick必须为true
-    computed: {
-      swiper () {
-        return this.$refs.mySwiper.swiper
-      }
+    // you can find current swiper instance object like this, while the notNextTick property value must be truecomputed: {
+    swiper () {
+      return this.$refs.mySwiper.swiper
     },
     mounted () {
-      // you can use current swiper instance object to do something(swiper methods)
-      // 然后你就可以使用当前上下文内的swiper对象去做你想做的事了
-      console.log('this is current swiper instance object', this.swiper)
-      this.swiper.slideTo(3, 1000, false)
+//      this.swiper.slideTo(3, 1000, false)
     }
   }
 </script>

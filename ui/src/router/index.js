@@ -6,6 +6,7 @@ import GameAudit from '../components/views/GameAudit.vue'
 import GameBrowser from '../components/views/GameBrowser.vue'
 import GameDetail from '../components/views/GameDetail.vue'
 import UserSummary from '../components/views/UserSummary.vue'
+import AssignAuditor from '../components/views/AssignAuditor.vue'
 import Privacy from '../components/views/Privacy.vue'
 import CookiePolicy from '../components/views/CookiePolicy.vue'
 import TermOfService from '../components/views/TermOfService.vue'
@@ -69,6 +70,18 @@ export default new Router({
       component: GameAudit,
       beforeEnter: (to, from, next) => {
         if (store.state.user.role < 1) {
+          next(false)
+        } else {
+          next()
+        }
+      }
+    },
+    {
+      path: '/game/assignAuditor',
+      name: 'assignAuditor',
+      component: AssignAuditor,
+      beforeEnter: (to, from, next) => {
+        if (store.state.user.role < 2) {
           next(false)
         } else {
           next()

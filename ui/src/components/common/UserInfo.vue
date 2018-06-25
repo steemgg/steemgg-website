@@ -1,5 +1,5 @@
 <template>
-  <div class='userInfoContainer' v-loading='loading'>
+  <div class='userInfoContainer'>
     <span v-if='$store.state.loggedIn'>
       <avatar :accountName='accountName'></avatar> <span class='user-name'>{{accountName}}</span>
       <router-link class="fa fa-cog fa-2x fa-fw profile" :to="{name: 'userProfile'}" tag="i" title="Profile"></router-link>
@@ -60,7 +60,7 @@
       },
       login () {
         this.loginInfoVisible = false
-        window.location.href = 'https://v2.steemconnect.com/oauth2/authorize?client_id=' + process.env.APP_ID + '&redirect_uri=' + encodeURIComponent(process.env.API_SERVER_URL + 'callback') + '&scope=login,vote,comment,delete_comment,comment_options,custom_json,claim_reward_balance&response_type=code&state=' + window.location.href
+        window.location.href = 'https://v2.steemconnect.com/oauth2/authorize?client_id=' + process.env.APP_ID + '&redirect_uri=' + encodeURIComponent((process.env.API_SERVER_URL.endsWith('/') ? process.env.API_SERVER_URL.slice(0, -1) : process.env.API_SERVER_URL) + '/callback') + '&scope=login,vote,comment,delete_comment,comment_options,custom_json,claim_reward_balance&response_type=code&state=' + window.location.href
       }
     },
     mounted () {
