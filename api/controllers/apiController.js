@@ -187,13 +187,9 @@ exports.getGameDetail = async function(req, res, next) {
         if(dbRes[0]['status']!=1) {
             if (typeof req.session.user == 'undefined') {
                 return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
-                let userInfo = req.session.user;
-                if (userInfo.role == 1 || userInfo.role == 2 || creator === userInfo.account) {
-                    keys['status'] = status;
-                }
             } else {
                 let userInfo = req.session.user;
-                if (typeof userInfo.account !== dbRes[0]['account']) {
+                if (userInfo.account !== dbRes[0]['account']) {
                     if( userInfo.role == 0 ) {
                         return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
                     }
