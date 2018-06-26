@@ -83,7 +83,7 @@
                 </div>
                 <div v-for="activity in game.activities" class="activityInfo">
                   <span class="activityLink">
-                    <a :href="'https://steemit.com/@' + activity.account + '/' + activity.permlink" target="_blank">{{activity.account + "/" + activity.permlink}}</a>
+                    <a :href="'https://steemit.com/@' + activity.account + '/' + activity.permlink" target="_blank">{{activity.activityTitle}}</a>
                   </span>
                   <span class="postCreationDate">{{getLastModifiedString(activity.lastModified)}}</span>
                 </div>
