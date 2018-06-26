@@ -46,6 +46,7 @@
                     <div class="game-resource-upload-wrapper">
                       <el-upload
                         class="game-resource-upload"
+                        with-credentials="true"
                         :action="uploadTarget"
                         :on-remove="onFileRemoved"
                         :file-list="fileList"

@@ -76,7 +76,7 @@ exports.getGameById = async function(gameId) {
 }
 
 exports.getActivitiesById = async function(gameId) {
-    let rows = await db.execute(db.READ, 'select id,gameid,account,userid,permlink,vote,payout,status,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from activities where gameid=?', gameId);
+    let rows = await db.execute(db.READ, 'select id,gameid,account,userid,permlink,title,vote,payout,status,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from activities where gameid=? order by lastModified desc', gameId);
     return rows;
 }
 
@@ -86,13 +86,13 @@ exports.addActivity = async function(activity) {
 }
 
 exports.getRecentlyActivity = async function(gameId) {
-    let rows = await db.execute(db.READ, 'select id,gameid,account,userid,permlink,vote,payout,status,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from activities where gameid=? order by lastModified desc limit 1', gameId);
+    let rows = await db.execute(db.READ, 'select id,gameid,account,userid,permlink,title,vote,payout,status,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from activities where gameid=? order by lastModified desc limit 1', gameId);
     return rows;
 }
 
 exports.getPayoutActivities = async function() {
     let time = Math.floor(new Date() / 1000) - 86400*7;
-    let rows = await db.execute(db.READ, 'select id,gameid,account,userid,permlink,vote,payout,status,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from activities where lastModified<? and status=0  order by lastModified desc',time);
+    let rows = await db.execute(db.READ, 'select id,gameid,account,userid,permlink,title,vote,payout,status,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from activities where lastModified<? and status=0  order by lastModified desc',time);
     return rows;
 }
 
