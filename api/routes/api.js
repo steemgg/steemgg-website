@@ -15,7 +15,7 @@ module.exports = function(app) {
       if(allowedOrigins.indexOf(origin) > -1){
           res.setHeader('Access-Control-Allow-Origin', origin);
       }
-      res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+      res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Cache-Control, Content-Type, Accept, Cookie');
       res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
 
       if (req.method == 'OPTIONS') {
@@ -43,22 +43,6 @@ module.exports = function(app) {
   app.get('/v1/logout', api.logout);
   app.get('/callback', callback.auth);
 };
-
-function morkMiddleware (req, res, next) {
-    if (process.env.NODE_ENV === 'development' && typeof req.cookies['at'] !== 'undefined') {
-        fs.readFile( config.get('steemit.app.rooturl') + '/' + req.cookies['at'] +'.json', 'utf8', function (err, result) {
-            if (err) {
-                console.log({resCode:CODE.TEST_DATA_ERROR.RESCODE, err:CODE.TEST_DATA_ERROR.DESC});
-                next();
-            } else {
-                req.session.user = JSON.parse(result);
-                res.status(200).json(JSON.parse(result));
-            }
-        });
-        return;
-    }
-    next();
-}
 
 function morkSessionMiddleware (req, res, next) {
     if (process.env.NODE_ENV === 'development' && typeof req.cookies['at'] !== 'undefined') {
