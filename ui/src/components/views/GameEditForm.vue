@@ -260,6 +260,7 @@
           maxFiles: 1,
           thumbnailWidth: 330,
           addRemoveLinks: true,
+          withCredentials: true,
           acceptedFiles: 'image/*',
           dictDefaultMessage: "<i class='fa fa-cloud-upload'></i>UPLOAD Cover Image"
         },
