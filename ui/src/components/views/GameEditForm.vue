@@ -46,7 +46,7 @@
                     <div class="game-resource-upload-wrapper">
                       <el-upload
                         class="game-resource-upload"
-                        with-credentials="true"
+                        :with-credentials="true"
                         :action="uploadTarget"
                         :on-remove="onFileRemoved"
                         :file-list="fileList"
@@ -83,7 +83,7 @@
                 </div>
                 <div v-for="activity in game.activities" class="activityInfo">
                   <span class="activityLink">
-                    <a :href="'https://steemit.com/@' + activity.account + '/' + activity.permlink" target="_blank">{{activity.account + "/" + activity.permlink}}</a>
+                    <a :href="'https://steemit.com/@' + activity.account + '/' + activity.permlink" target="_blank">{{activity.activityTitle}}</a>
                   </span>
                   <span class="postCreationDate">{{getLastModifiedString(activity.lastModified)}}</span>
                 </div>
