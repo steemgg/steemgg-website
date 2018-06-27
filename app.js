@@ -6,7 +6,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
-var config = require('config'); var db = require('./api/lib/db');
+var config = require('config');
+var db = require('./api/lib/db');
 var redis = require('./api/lib/redis');
 var sc2NewApi = require('./api/lib/sc2');
 var redisStore = require('connect-redis')(session);
@@ -56,6 +57,9 @@ var sess = {
 
 if (app.get('env') === 'production') {
   app.set('trust proxy', 1) // trust first proxy
+} else {
+    var easyMonitor = require('easy-monitor');
+    easyMonitor('Mercury');
 }
 
 app.use(session(sess))

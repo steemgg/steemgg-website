@@ -114,7 +114,7 @@ exports.postGame = async function(req, res, next) {
                     'Posted on [steemgg - The World\'s 1st Blockchain HTML5 Game Platform](https://steemgg.com/#/game/play/'+data.gameid+')\n';
         let result = await steem.post(req.session.accessToken, author, data.activityTitle, content, data.reward, tags,permLink);
         let unix = Math.round(+new Date()/1000);
-        let activity = {userid:req.session.user.userid, account:req.session.user.account,gameid: data.gameid,lastModified: unix, permlink:permLink,title:data.activityTitle };
+        let activity = {userid:req.session.user.userid, account:req.session.user.account,gameid: data.gameid,lastModified: unix, permlink:permLink,activityTitle:data.activityTitle };
         await game.addActivity(activity);
         await game.updateActivityCount([data.gameid,req.session.user.userid]);
         let iso = new Date(unix*1000).toISOString();
