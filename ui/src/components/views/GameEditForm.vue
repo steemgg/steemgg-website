@@ -17,7 +17,7 @@
                   </el-form-item>
                   <el-form-item label='Game description' prop="description">
                     <!--<el-input v-model='game.description' type="textarea" :rows="2" placeholder="Please input description of your game"></el-input>-->
-                    <mavon-editor language="en" :subfield="false" v-model='game.description'></mavon-editor>
+                    <mavon-editor language="en" :subfield="false" v-model='game.description' :toolbars="descriptionEditorToolbar"></mavon-editor>
                   </el-form-item>
                   <el-form-item label='Cover image' prop="coverImage">
                     <vue-dropzone ref="coverImageDropzone" @vdropzone-success="onImageUploaded" @vdropzone-removed-file="onImageRemoved" @vdropzone-error="onImageUploadFail" id="dropzone" :options="dropzoneOptions"></vue-dropzone>
@@ -58,7 +58,7 @@
                         :on-error="onFileUploadFail"
                         list-type="text">
                         <el-button size="small" type="primary" :disabled="!$store.state.loggedIn">Click to upload</el-button>
-                        <div slot="tip" class="el-upload__tip">Only accept zip file, max file size 10MB</div>
+                        <div slot="tip" class="el-upload__tip upload_tip">Only accept .zip file (max size 10MB), which should contain all of your game's files and assets. There must be an index.html file in the root folder.</div>
                       </el-upload>
                     </div>
                   </el-form-item>
@@ -219,6 +219,30 @@
           tags: []
         },
         fileList: [],
+        descriptionEditorToolbar: {
+          bold: true, // 粗体
+          italic: true, // 斜体
+          header: true, // 标题
+          underline: true, // 下划线
+          strikethrough: true, // 中划线
+          quote: true, // 引用
+          ol: true, // 有序列表
+          ul: true, // 无序列表
+          link: true, // 链接
+          fullscreen: true, // 全屏编辑
+          help: true, // 帮助
+          /* 1.3.5 */
+          undo: true, // 上一步
+          redo: true, // 下一步
+//          trash: true, // 清空
+          /* 2.1.8 */
+          alignleft: true, // 左对齐
+          aligncenter: true, // 居中
+          alignright: true, // 右对齐
+          /* 2.2.1 */
+          subfield: true, // 单双栏模式
+          preview: true
+        },
         rules: {
           title: [
             { required: true, message: 'Please input the game title', trigger: 'blur' },
@@ -622,6 +646,9 @@
         .postingIntervalMessage {
           margin-bottom: 10px;
         }
+      }
+      .upload_tip {
+        line-height: 20px;
       }
     }
   }
