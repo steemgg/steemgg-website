@@ -5,6 +5,7 @@ import CODE from '../lib/code';
 import user from '../models/user';
 import steem from '../models/steem';
 import api from '../controllers/apiController';
+import admin from '../controllers/adminController';
 import callback from '../controllers/callbackController';
 
 module.exports = function(app) {
@@ -25,23 +26,25 @@ module.exports = function(app) {
           next();
       }
   });
-  app.post('/v1/upload', [morkSessionMiddleware, userMiddleware], api.upload);
-  app.get('/v1/game', [morkSessionMiddleware], api.listGame);
-  app.post('/v1/game', [morkSessionMiddleware, userMiddleware], api.addGame);
-  app.post('/v1/post', [morkSessionMiddleware, userMiddleware], api.postGame);
-  app.get('/v1/game/:id', [], api.getGameDetail);
-  app.put('/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.updateGame);
-  app.delete('/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.deleteGame);
-  app.post('/v1/audit/:id', [morkSessionMiddleware, userMiddleware], api.auditGame);
-  app.get('/v1/auditor', [morkSessionMiddleware, userMiddleware], api.listAuditor);
-  app.delete('/v1/auditor/:account', [morkSessionMiddleware, userMiddleware], api.unsetAuditor);
-  app.put('/v1/auditor/:account', [morkSessionMiddleware, userMiddleware], api.setAuditor);
-  app.post('/v1/comment/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.commentGame);
-  app.post('/v1/vote/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.voteGame);
-  app.post('/v1/report/:id', [morkSessionMiddleware, userMiddleware], api.reportGame);
-  app.get('/v1/me', [morkSessionMiddleware, userMiddleware], api.me);
-  app.get('/v1/logout', api.logout);
+  app.post('/api/v1/upload', [morkSessionMiddleware, userMiddleware], api.upload);
+  app.get('/api/v1/game', [morkSessionMiddleware], api.listGame);
+  app.post('/api/v1/game', [morkSessionMiddleware, userMiddleware], api.addGame);
+  app.post('/api/v1/post', [morkSessionMiddleware, userMiddleware], api.postGame);
+  app.get('/api/v1/game/:id', [], api.getGameDetail);
+  app.put('/api/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.updateGame);
+  app.delete('/api/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.deleteGame);
+  app.post('/api/v1/comment/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.commentGame);
+  app.post('/api/v1/vote/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.voteGame);
+  app.post('/api/v1/report/:id', [morkSessionMiddleware, userMiddleware], api.reportGame);
+  app.get('/api/v1/me', [morkSessionMiddleware, userMiddleware], api.me);
+  app.get('/api/v1/logout', api.logout);
   app.get('/callback', callback.auth);
+
+  app.post('/api/v1/audit/:id', [morkSessionMiddleware, userMiddleware], admin.auditGame);
+  app.get('/api/v1/auditor', [morkSessionMiddleware, userMiddleware], admin.listAuditor);
+  app.delete('/api/v1/auditor/:account', [morkSessionMiddleware, userMiddleware], admin.unsetAuditor);
+  app.put('/api/v1/auditor/:account', [morkSessionMiddleware, userMiddleware], admin.setAuditor);
+  app.put('/api/v1/recommend/:id', [morkSessionMiddleware, userMiddleware], admin.recommendGame);
 };
 
 function morkSessionMiddleware (req, res, next) {
