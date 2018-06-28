@@ -199,7 +199,7 @@
         actionText: 'Create',
         postingWaitTime: -1,
         copyRightClaim: false,
-        uploadTarget: (process.env.API_SERVER_URL.endsWith('/') ? process.env.API_SERVER_URL.slice(0, -1) : process.env.API_SERVER_URL) + '/v1/upload',
+        uploadTarget: (process.env.API_SERVER_URL.endsWith('/') ? process.env.API_SERVER_URL.slice(0, -1) : process.env.API_SERVER_URL) + '/api/v1/upload',
         game: {
           title: '',
           description: '',
@@ -281,7 +281,7 @@
           ]
         },
         dropzoneOptions: {
-          url: (process.env.API_SERVER_URL.endsWith('/') ? process.env.API_SERVER_URL.slice(0, -1) : process.env.API_SERVER_URL + '/v1/upload') + '/v1/upload',
+          url: (process.env.API_SERVER_URL.endsWith('/') ? process.env.API_SERVER_URL.slice(0, -1) : process.env.API_SERVER_URL + '/api/v1/upload') + '/api/v1/upload',
           maxFilesize: 4,
           maxFiles: 1,
           thumbnailWidth: 330,

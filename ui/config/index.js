@@ -11,7 +11,7 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      '/v1/**': {
+      '/api/v1/**': {
         target: 'https://api-dev.steemgg.com/',
         secure: false,
         changeOrigin: true,
