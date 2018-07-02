@@ -5,11 +5,11 @@ import base58 from 'bs58';
 import getSlug from 'speakingurl';
 import secureRandom from 'secure-random';
 
-exports.comment = function(accessToken, parentAuthor, parentPermlink, author, content, permlink) {
+exports.comment = function(accessToken, parentAuthor, parentPermlink, author, content, permlink, tag) {
     let operations = [];
     let metaData = {
-        community: 'steemgg',
-        tags: ['steemgg'],
+        community: tag,
+        tags: [tag],
         app: `steemgg.app/test`
     };
     let commentOp = [
@@ -29,7 +29,7 @@ exports.comment = function(accessToken, parentAuthor, parentPermlink, author, co
     return result;
 }
 
-exports.post = function(accessToken, author, title, content, reward, tags, permlink){
+exports.post = function(accessToken, author, title, content, reward, tags, permlink, tag){
     let extensions = [[0, {
         beneficiaries: [
             {
@@ -42,16 +42,16 @@ exports.post = function(accessToken, author, title, content, reward, tags, perml
     let operations = [];
 
     let metaData = {
-        community: 'steemgg',
+        community: tag,
         tags: tags,
-        app: `steemitgame.app/test`
+        app: `steemgg.app/test`
     };
 
     let commentOp = [
         'comment',
         {
             parent_author: "",
-            parent_permlink: "steemgg",
+            parent_permlink: tag,
             author: author,
             permlink,
             title: title,
