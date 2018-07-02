@@ -102,9 +102,10 @@ exports.postGame = async function(req, res, next) {
         }
         let author = req.session.user.account;
         let permLink = steem.createPermlink(data.activityTitle, author);
+        let tag = config.get('steemit.sc.tag')
         let tags = data.tags;
-        if(!tags.includes('steemgg') || tags.indexOf('steemgg')>5){
-            tags.unshift('steemgg');
+        if(!tags.includes(tag) || tags.indexOf(tag)>5){
+            tags.unshift(tag);
         }
         for(let i=tags.length;i>5;i--) {
             tags.pop();
@@ -112,7 +113,7 @@ exports.postGame = async function(req, res, next) {
         let content = data.activityDescription + '\n\n' +
                     '---\n' +
                     'Posted on [steemgg - The World\'s 1st Blockchain HTML5 Game Platform](https://steemgg.com/#/game/play/'+data.gameid+')\n';
-        let result = await steem.post(req.session.accessToken, author, data.activityTitle, content, data.reward, tags,permLink);
+        let result = await steem.post(req.session.accessToken, author, data.activityTitle, content, data.reward, tags,permLink, tag);
         let unix = Math.round(+new Date()/1000);
         let activity = {userid:req.session.user.userid, account:req.session.user.account,gameid: data.gameid,lastModified: unix, permlink:permLink,activityTitle:data.activityTitle };
         await game.addActivity(activity);
@@ -165,7 +166,8 @@ exports.commentGame = async function(req, res, next) {
         let post = req.body;
         let author = req.session.user.account;
         let permlink = steem.createCommentPermlink(req.params.author,req.params.permlink);
-        await steem.comment(req.session.accessToken, req.params.author,req.params.permlink, author, post.content, permlink);
+        let tag = config.get('steemit.sc.tag')
+        await steem.comment(req.session.accessToken, req.params.author,req.params.permlink, author, post.content, permlink, tag);
         await user.setInterval('comment:interval:'+userInfo.account, config.get('steemit.app.commentInterval'));
         return res.status(200).json({content:post.content, author:author, permlink:permlink});
     } catch(err) {
@@ -379,7 +381,8 @@ exports.reportGame = async function(req, res, next) {
         let permlink = steem.createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
         let parentAuthor = dbRes[0].account;
         let parentPermlink = dbRes[0].permlink;
-        await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, data.comment, permlink);
+        let tag = config.get('steemit.sc.tag')
+        await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, data.comment, permlink, tag);
         await user.setInterval('comment:interval:'+author, config.get('steemit.app.commentInterval'));
         let unix = Math.round(+new Date()/1000);
         let report = { userid:req.session.user.userid, account:req.session.user.account,gameid: req.params.id,lastModified: unix, permlink:permlink,comment:data.comment };
