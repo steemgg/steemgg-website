@@ -1,5 +1,5 @@
-# steemitgame-website
-The Official Web Site of steemitgame
+# steemgg-website
+The Official Web Site of [steemgg](https://steemgg.com)
 
 [![Build Status](https://travis-ci.org/steemgg/steemgg-website.svg?branch=develop)](https://travis-ci.org/steemgg/steemitgame-website)
 
@@ -9,7 +9,7 @@ The Official Web Site of steemitgame
 cd to the /ui directory  
 1. `npm install`  
 2. `npm run start`  
-3. visit http://localost:8080
+3. visit http://localhost:8080
 
 # How to run the backend
 
