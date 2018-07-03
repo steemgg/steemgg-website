@@ -21,7 +21,7 @@ Pre-requisite: Install and set up [docker](https://docs.docker.com/engine/instal
 # get source code
 git clone https://github.com/steemgg/steemgg-website.git
 # enter docker-compose folder
-cd docker
+cd steemgg-website/docker
 # start server
 docker-compose up -d
 ```
