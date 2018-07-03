@@ -15,7 +15,7 @@ cd to the /ui directory
 
 #### Using Docker Compose
 
-Pre-requisite: Install and set up [docker](https://docs.docker.com/engine/installation/) on your machine.
+Pre-requisite: Install and set up [docker](https://docs.docker.com/engine/installation/) and [docker-compose](https://docs.docker.com/compose/install/) on your machine.
 
 ```bash
 # get source code
