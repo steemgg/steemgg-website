@@ -108,7 +108,7 @@
                     <el-input :disabled="useGameInfoAsPost" v-model='activity.activityDescription' type="textarea" :rows="2" placeholder="This will be posted to steemit, game description will be used if empty"></el-input>
                   </el-form-item>
                   <el-form-item label='Tags'>
-                    <input-tag :on-change='onTagChange' :tags='activity.tags' limit="4" placeholder="Use 'Enter', 'comma' or 'tab' to separate tags"></input-tag>
+                    <input-tag :on-change='onTagChange' :tags.sync='activity.tags' limit="4" placeholder="Use 'Enter', 'comma' or 'tab' to separate tags"></input-tag>
                   </el-form-item>
                   <el-form-item label="reward">
                     <el-select v-model="activity.reward" placeholder="请选择">
@@ -391,6 +391,7 @@
       submitActivity (isNew) {
         if (this.game.id) {
           let post = Object.assign({}, this.activity)
+          debugger;
           if (this.useGameInfoAsPost) {
             post.activityTitle = this.game.title
             post.activityDescription = this.game.description
