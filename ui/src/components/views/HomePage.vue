@@ -19,7 +19,7 @@
           <div class="list-title-wrapper" ><span class="list-name">New Games</span><span class="view-more"><router-link :to="{ name: 'browseGame', params: {}}" tag="span">Show More...</router-link></span></div>
           <game-list :queryParameter="newGameParam"></game-list>
         </div>
-        <div v-if="$store.getters.showCookieAlert" class="cookieAlert">
+        <div v-if="$store.getters.showCookieAlert" class="cookieAlert componentDynamicWidth">
           <span>This website uses cookies to ensure you get the best experience on our website. <router-link class="cookieLink" :to="{name: 'cookiePolicy'}" tag="a">Learn more</router-link></span><span class="cookieDismiss" @click="dismissCookieAlert">Got it</span>
         </div>
       </el-main>
@@ -112,7 +112,7 @@
   .cookieAlert {
     position: fixed;
     bottom: 70px;
-    width: 1160px;
+    /*width: 1160px;*/
     /*margin-left: 30px;*/
     height: 50px;
     z-index:10000;

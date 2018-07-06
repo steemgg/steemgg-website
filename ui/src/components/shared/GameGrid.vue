@@ -64,9 +64,9 @@
   .game-info-view {
     width: 300px;
     height: 200px;
-    margin: 10px;
+    margin: 5px;
     float: left;
-    border: 10px solid #fff;
+    border: 5px solid #fff;
     overflow: hidden;
     position: relative;
     text-align: center;

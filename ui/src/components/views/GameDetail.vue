@@ -511,7 +511,7 @@
   .authorInfo {
     display: flex;
     .accountName {
-      margin-left: 20px;
+      margin-left: 10px;
       line-height: 36px;
     }
   }

@@ -1,5 +1,5 @@
 <template>
-  <div class="common-footer" >
+  <div class="common-footer componentDynamicWidth" >
     <span class="copyright">© 2018 - present steemgg All rights reserved</span>
       <ul class="social-icons1 agileinfo">
         <li><a href="https://www.facebook.com/Steemgg-241891609891471" target="_blank"><i class="fa fa-facebook"></i></a></li>
@@ -33,7 +33,7 @@
   .common-footer {
     background: #0c0d0d;
     height: 60px;
-    width: 1160px;
+    /*width: 1160px;*/
     position: fixed;
     bottom: 0px;
     /*left: 20px;*/
@@ -61,6 +61,27 @@
       }
     }
   }
+
+  /*@media (min-width: 0px) {*/
+    /*.common-footer {*/
+      /*width: 310px;*/
+    /*}*/
+  /*}*/
+  /*@media (min-width: 660px) {*/
+    /*.common-footer {*/
+      /*width: 620px;*/
+    /*}*/
+  /*}*/
+  /*@media (min-width: 970px) {*/
+    /*.common-footer {*/
+      /*width: 930px;*/
+    /*}*/
+  /*}*/
+  /*@media (min-width: 1280px) {*/
+    /*.common-footer {*/
+      /*width: 1240px;*/
+    /*}*/
+  /*}*/
 
   .common-footer ul.social-icons1 {
     list-style: none;

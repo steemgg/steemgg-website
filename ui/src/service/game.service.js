@@ -180,7 +180,8 @@ export default class GameService {
         console.log('get data for content: ' + activity.permlink, response)
         result.totalPayout += response.totalPayout
         if (response.tags.length > 0) {
-          result.tags = result.tags.concat(response.tags)
+          // result.tags = result.tags.concat(response.tags)
+          result.tags = [...new Set([...result.tags, ...response.tags])]
         }
         if (response.activeVotes.length > 0) {
           result.activeVotes = result.activeVotes.concat(response.activeVotes)
