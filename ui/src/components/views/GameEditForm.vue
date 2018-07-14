@@ -391,7 +391,6 @@
       submitActivity (isNew) {
         if (this.game.id) {
           let post = Object.assign({}, this.activity)
-          debugger;
           if (this.useGameInfoAsPost) {
             post.activityTitle = this.game.title
             post.activityDescription = this.game.description
