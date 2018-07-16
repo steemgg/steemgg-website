@@ -17,7 +17,7 @@
                   </el-form-item>
                   <el-form-item label='Game description' prop="description">
                     <!--<el-input v-model='game.description' type="textarea" :rows="2" placeholder="Please input description of your game"></el-input>-->
-                    <mavon-editor language="en" :subfield="false" v-model='game.description'></mavon-editor>
+                    <mavon-editor language="en" :subfield="false" v-model='game.description' :toolbars="descriptionEditorToolbar"></mavon-editor>
                   </el-form-item>
                   <el-form-item label='Cover image' prop="coverImage">
                     <vue-dropzone ref="coverImageDropzone" @vdropzone-success="onImageUploaded" @vdropzone-removed-file="onImageRemoved" @vdropzone-error="onImageUploadFail" id="dropzone" :options="dropzoneOptions"></vue-dropzone>
@@ -46,7 +46,7 @@
                     <div class="game-resource-upload-wrapper">
                       <el-upload
                         class="game-resource-upload"
-                        with-credentials="true"
+                        :with-credentials="true"
                         :action="uploadTarget"
                         :on-remove="onFileRemoved"
                         :file-list="fileList"
@@ -58,7 +58,7 @@
                         :on-error="onFileUploadFail"
                         list-type="text">
                         <el-button size="small" type="primary" :disabled="!$store.state.loggedIn">Click to upload</el-button>
-                        <div slot="tip" class="el-upload__tip">Only accept zip file, max file size 10MB</div>
+                        <div slot="tip" class="el-upload__tip upload_tip">Only accept .zip file (max size 10MB), which should contain all of your game's files and assets. There must be an index.html file in the root folder.</div>
                       </el-upload>
                     </div>
                   </el-form-item>
@@ -83,7 +83,7 @@
                 </div>
                 <div v-for="activity in game.activities" class="activityInfo">
                   <span class="activityLink">
-                    <a :href="'https://steemit.com/@' + activity.account + '/' + activity.permlink" target="_blank">{{activity.account + "/" + activity.permlink}}</a>
+                    <a :href="'https://steemit.com/@' + activity.account + '/' + activity.permlink" target="_blank">{{activity.activityTitle}}</a>
                   </span>
                   <span class="postCreationDate">{{getLastModifiedString(activity.lastModified)}}</span>
                 </div>
@@ -108,7 +108,7 @@
                     <el-input :disabled="useGameInfoAsPost" v-model='activity.activityDescription' type="textarea" :rows="2" placeholder="This will be posted to steemit, game description will be used if empty"></el-input>
                   </el-form-item>
                   <el-form-item label='Tags'>
-                    <input-tag :on-change='onTagChange' :tags='activity.tags' limit="4" placeholder="Use 'Enter', 'comma' or 'tab' to separate tags"></input-tag>
+                    <input-tag :on-change='onTagChange' :tags.sync='activity.tags' limit="4" placeholder="Use 'Enter', 'comma' or 'tab' to separate tags"></input-tag>
                   </el-form-item>
                   <el-form-item label="reward">
                     <el-select v-model="activity.reward" placeholder="请选择">
@@ -199,7 +199,7 @@
         actionText: 'Create',
         postingWaitTime: -1,
         copyRightClaim: false,
-        uploadTarget: (process.env.API_SERVER_URL.endsWith('/') ? process.env.API_SERVER_URL.slice(0, -1) : process.env.API_SERVER_URL) + '/v1/upload',
+        uploadTarget: (process.env.API_SERVER_URL.endsWith('/') ? process.env.API_SERVER_URL.slice(0, -1) : process.env.API_SERVER_URL) + '/api/v1/upload',
         game: {
           title: '',
           description: '',
@@ -219,6 +219,30 @@
           tags: []
         },
         fileList: [],
+        descriptionEditorToolbar: {
+          bold: true, // 粗体
+          italic: true, // 斜体
+          header: true, // 标题
+          underline: true, // 下划线
+          strikethrough: true, // 中划线
+          quote: true, // 引用
+          ol: true, // 有序列表
+          ul: true, // 无序列表
+          link: true, // 链接
+          fullscreen: true, // 全屏编辑
+          help: true, // 帮助
+          /* 1.3.5 */
+          undo: true, // 上一步
+          redo: true, // 下一步
+//          trash: true, // 清空
+          /* 2.1.8 */
+          alignleft: true, // 左对齐
+          aligncenter: true, // 居中
+          alignright: true, // 右对齐
+          /* 2.2.1 */
+          subfield: true, // 单双栏模式
+          preview: true
+        },
         rules: {
           title: [
             { required: true, message: 'Please input the game title', trigger: 'blur' },
@@ -257,7 +281,7 @@
           ]
         },
         dropzoneOptions: {
-          url: (process.env.API_SERVER_URL.endsWith('/') ? process.env.API_SERVER_URL.slice(0, -1) : process.env.API_SERVER_URL + '/v1/upload') + '/v1/upload',
+          url: (process.env.API_SERVER_URL.endsWith('/') ? process.env.API_SERVER_URL.slice(0, -1) : process.env.API_SERVER_URL + '/api/v1/upload') + '/api/v1/upload',
           maxFilesize: 4,
           maxFiles: 1,
           thumbnailWidth: 330,
@@ -622,6 +646,9 @@
         .postingIntervalMessage {
           margin-bottom: 10px;
         }
+      }
+      .upload_tip {
+        line-height: 20px;
       }
     }
   }

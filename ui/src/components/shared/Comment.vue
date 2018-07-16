@@ -5,10 +5,10 @@
         <!--<avatar :accountName="comment.author"></avatar>-->
       <!--</el-col>-->
       <!--<el-col :xs="16" :sm="16" :md="22" :lg="22" :xl="22">-->
-      <el-col :xs="3" :sm="2" :md="1" :lg="1" :xl="1">
+      <el-col :xs="3" :sm="3" :md="2" :lg="1" :xl="1" class="avatar-placeholder">
         <avatar :accountName="comment.author"></avatar>
       </el-col >
-      <el-col :xs="21" :sm="22" :md="22" :lg="22" :xl="22">
+      <el-col :xs="21" :sm="21" :md="22" :lg="22" :xl="22">
         <div class="commentWrapper">
           <div class="commentAuthor">
             <span class="author">{{comment.author}}</span>
@@ -20,9 +20,22 @@
           <div class="metadata">
             <span class="votes">
               <el-tooltip class="item" effect="dark" content="Vote" placement="top">
-                <i v-if="!alreadyVoted" class="fa fa-thumbs-o-up" aria-hidden="true" @click="voteUp" v-loading="voting"></i>
-                <i v-if="alreadyVoted" class="fa fa-thumbs-up" aria-hidden="true" @click="voteUp"></i>
+                <i v-if="alreadyVoted" class="fa fa-thumbs-up" aria-hidden="true" @click="alreadyVotedMessage"></i>
               </el-tooltip>
+              <el-popover
+                placement="top"
+                width="200"
+                trigger="click"
+                v-model="votingWeightVisible">
+                <div class="block" >
+                  <vue-slider v-model="defaultVotingWeight" :show="votingWeightVisible" :min="1" :max="100"></vue-slider>
+                  <div>
+                    <el-button @click="voteUp" type="success" size="mini">Confirm</el-button>
+                    <el-button @click="votingWeightVisible = false" size="mini">Cancel</el-button>
+                  </div>
+                </div>
+                <i v-if="!alreadyVoted" class="fa fa-thumbs-o-up" aria-hidden="true" slot="reference" v-loading="voting"></i>
+              </el-popover>
               {{votesCount}}
             </span>
             <span class="award">${{payout}}</span>
@@ -51,11 +64,13 @@
   import Avatar from './Avatar'
   import GameService from '../../service/game.service'
   import moment from 'moment'
+  import vueSlider from 'vue-slider-component'
 
   const gameService = new GameService()
   export default {
     components: {
-      Avatar
+      Avatar,
+      vueSlider
     },
     props: ['comment'],
     name: 'Comment',
@@ -66,16 +81,19 @@
         replyContent: '',
         replying: false,
         voting: false,
-        alreadyVoted: false
+        alreadyVoted: false,
+        votingWeightVisible: false,
+        defaultVotingWeight: 100
       }
     },
     methods: {
       voteUp () {
+        this.votingWeightVisible = false
         if (this.$store.state.loggedIn) {
           if (this.alreadyVoted === false) {
             if (this.voting === false) {
               this.voting = true
-              gameService.vote(this.comment.author, this.comment.permlink, 5000).then(response => {
+              gameService.vote(this.comment.author, this.comment.permlink, this.defaultVotingWeight * 100).then(response => {
                 this.votesCount++
                 this.alreadyVoted = true
                 this.$message.success('Vote Successfully.')
@@ -83,7 +101,7 @@
                 if (error.response.data.resultCode === 402) {
                   this.$message.error('You just voted, please wait for a while.')
                 } else {
-                  this.$message.error('Vote Failed.')
+                  this.$message.error('Vote Failed. Please try again later.')
                 }
                 console.log('Vote comment failed', error.response)
               }).finally(() => {
@@ -91,14 +109,17 @@
               })
             }
           } else {
-            this.$message({
-              message: 'You have already voted this game.',
-              type: 'warning'
-            })
+            this.alreadyVotedMessage()
           }
         } else {
           this.$message.warning('Please log in first to vote.')
         }
+      },
+      alreadyVotedMessage () {
+        this.$message({
+          message: 'You have already voted this game.',
+          type: 'warning'
+        })
       },
       canVote () {
         // user has login
@@ -178,11 +199,15 @@
   }
 </script>
 <style lang="scss">
+  .avatar-placeholder {
+    width: 50px;
+  }
   .commentWrapper {
     min-width: 600px;
     & > div {
       display: flex;
     }
+
 
     .commentAuthor {
       .author {

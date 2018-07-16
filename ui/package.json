@@ -34,6 +34,7 @@
     "vue-infinite-scroll": "^2.0.2",
     "vue-input-tag": "1.0.3",
     "vue-router": "^3.0.1",
+    "vue-slider-component": "^2.7.4",
     "vue2-dropzone": "^3.0.3",
     "vuex": "^3.0.1",
     "vuex-persistedstate": "^2.5.2"

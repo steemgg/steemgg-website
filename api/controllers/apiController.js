@@ -102,9 +102,10 @@ exports.postGame = async function(req, res, next) {
         }
         let author = req.session.user.account;
         let permLink = steem.createPermlink(data.activityTitle, author);
+        let tag = config.get('steemit.sc.tag')
         let tags = data.tags;
-        if(!tags.includes('steemgg') || tags.indexOf('steemgg')>5){
-            tags.unshift('steemgg');
+        if(!tags.includes(tag) || tags.indexOf(tag)>5){
+            tags.unshift(tag);
         }
         for(let i=tags.length;i>5;i--) {
             tags.pop();
@@ -112,9 +113,9 @@ exports.postGame = async function(req, res, next) {
         let content = data.activityDescription + '\n\n' +
                     '---\n' +
                     'Posted on [steemgg - The World\'s 1st Blockchain HTML5 Game Platform](https://steemgg.com/#/game/play/'+data.gameid+')\n';
-        let result = await steem.post(req.session.accessToken, author, data.activityTitle, content, data.reward, tags,permLink);
+        let result = await steem.post(req.session.accessToken, author, data.activityTitle, content, data.reward, tags,permLink, tag);
         let unix = Math.round(+new Date()/1000);
-        let activity = {userid:req.session.user.userid, account:req.session.user.account,gameid: data.gameid,lastModified: unix, permlink:permLink,title:data.activityTitle };
+        let activity = {userid:req.session.user.userid, account:req.session.user.account,gameid: data.gameid,lastModified: unix, permlink:permLink,activityTitle:data.activityTitle };
         await game.addActivity(activity);
         await game.updateActivityCount([data.gameid,req.session.user.userid]);
         let iso = new Date(unix*1000).toISOString();
@@ -165,7 +166,8 @@ exports.commentGame = async function(req, res, next) {
         let post = req.body;
         let author = req.session.user.account;
         let permlink = steem.createCommentPermlink(req.params.author,req.params.permlink);
-        await steem.comment(req.session.accessToken, req.params.author,req.params.permlink, author, post.content, permlink);
+        let tag = config.get('steemit.sc.tag')
+        await steem.comment(req.session.accessToken, req.params.author,req.params.permlink, author, post.content, permlink, tag);
         await user.setInterval('comment:interval:'+userInfo.account, config.get('steemit.app.commentInterval'));
         return res.status(200).json({content:post.content, author:author, permlink:permlink});
     } catch(err) {
@@ -187,13 +189,9 @@ exports.getGameDetail = async function(req, res, next) {
         if(dbRes[0]['status']!=1) {
             if (typeof req.session.user == 'undefined') {
                 return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
-                let userInfo = req.session.user;
-                if (userInfo.role == 1 || userInfo.role == 2 || creator === userInfo.account) {
-                    keys['status'] = status;
-                }
             } else {
                 let userInfo = req.session.user;
-                if (typeof userInfo.account !== dbRes[0]['account']) {
+                if (userInfo.account !== dbRes[0]['account']) {
                     if( userInfo.role == 0 ) {
                         return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
                     }
@@ -227,16 +225,15 @@ exports.updateGame = async function(req, res, next) {
     try{
         let unix = Math.round(+new Date()/1000);
         let data = req.body;
+        let updateCloumns = ['title','coverImage','description','category','version','gameUrl','width','height'];
         let dbRes = null;
-        data.lastModified = unix;
-        if(typeof data.recommend !== 'undefined' || typeof data.status !== 'undefined' || typeof data.payout !== 'undefined' || typeof data.vote !== 'undefined' ) {
-            if (req.session.user.role != 2){
-                return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
+        for(let attributename in data){
+            if(updateCloumns.indexOf(attributename)<0) {
+                delete data[attributename];
             }
-            dbRes = await game.updateGame([data, req.params.id, req.session.user.userid]);
-        } else {
-            dbRes = await game.updateGameSelf([data, req.params.id, req.session.user.userid]);
         }
+        data.lastModified = unix;
+        dbRes = await game.updateGameSelf([data, req.params.id, req.session.user.userid]);
         if (dbRes.changedRows == 1){
             return res.status(200).send();
         } else {
@@ -356,44 +353,6 @@ exports.voteGame = async function(req, res, next) {
     }
 }
 
-exports.auditGame = async function(req, res, next) {
-    try {
-        let data = req.body;
-        if (req.session.user.role === 0){
-            return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
-        }
-        let dbRes = await game.getRecentlyActivity(req.params.id);
-        if(typeof dbRes[0] === 'undefined') {
-            return res.status(404).json({ resultCode: CODE.NOFOUND_ACTIVITY_ERROR.RESCODE, err: CODE.NOFOUND_ACTIVITY_ERROR.DESC });
-        }
-        let author = req.session.user.account;
-        if(await user.getInterval('comment:interval:'+author)){
-            return res.status(400).json({ resultCode: CODE.COMMENT_INTERVAL_ERROR.RESCODE, err: CODE.COMMENT_INTERVAL_ERROR.DESC });
-        }
-        if(typeof data.status === 'undefined' ) {
-            return res.status(400).json({ resultCode: CODE.PARAMS_ERROR.RESCODE, err: CODE.PARAMS_ERROR.DESC });
-        }
-        let permlink = steem.createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
-        let parentAuthor = dbRes[0].account;
-        let parentPermlink = dbRes[0].permlink;
-        await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, data.comment, permlink);
-        await user.setInterval('comment:interval:'+author, config.get('steemit.app.commentInterval'));
-        let unix = Math.round(+new Date()/1000);
-        let audit = { userid:req.session.user.userid, account:req.session.user.account,gameid: req.params.id,lastModified: unix, permlink:permlink,comment:data.comment, type:1 };
-        dbRes = await game.auditGame(audit, data.status);
-        return res.status(200).json({comment:data.comment, parentAuthor:parentAuthor, parentPermlink:parentPermlink, author:author,permlink:permlink});
-    } catch(err){
-        console.error(err);
-        if (err instanceof DBError) {
-            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
-        } else if (err instanceof SDKError) {
-            return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
-        } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
-        }
-    }
-}
-
 exports.reportGame = async function(req, res, next) {
     try {
         let data = req.body;
@@ -422,7 +381,8 @@ exports.reportGame = async function(req, res, next) {
         let permlink = steem.createCommentPermlink(dbRes[0].account,dbRes[0].permlink);
         let parentAuthor = dbRes[0].account;
         let parentPermlink = dbRes[0].permlink;
-        await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, data.comment, permlink);
+        let tag = config.get('steemit.sc.tag')
+        await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, data.comment, permlink, tag);
         await user.setInterval('comment:interval:'+author, config.get('steemit.app.commentInterval'));
         let unix = Math.round(+new Date()/1000);
         let report = { userid:req.session.user.userid, account:req.session.user.account,gameid: req.params.id,lastModified: unix, permlink:permlink,comment:data.comment };
@@ -452,73 +412,6 @@ exports.logout = async function(req, res, next) {
             }
         });
         res.status(200).send();
-    } catch(err){
-        console.error(err);
-        if (err instanceof DBError) {
-            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
-        } else if (err instanceof SDKError) {
-            return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
-        } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
-        }
-    }
-};
-exports.listAuditor = async function(req, res, next) {
-    try {
-        let userInfo = req.session.user;
-        if ( userInfo.role != 2) {
-            return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
-        }
-        let dbRes = await user.getAuditor();
-        return res.status(200).json({ auditors:dbRes });
-    } catch(err){
-        console.error(err);
-        if (err instanceof DBError) {
-            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
-        } else if (err instanceof SDKError) {
-            return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
-        } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
-        }
-    }
-};
-
-exports.unsetAuditor = async function(req, res, next) {
-    try {
-        let userInfo = req.session.user;
-        if ( userInfo.role != 2) {
-            return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
-        }
-        let dbRes = await user.updateAuditor([{'role':0}, req.params.account]);
-        if (dbRes.changedRows == 1){
-            return res.status(200).send();
-        } else {
-            return res.status(400).json({ resultCode: CODE.UNSET_AUDITOR_ERROR.RESCODE, err: CODE.UNSET_AUDITOR_ERROR.DESC });
-        }
-    } catch(err){
-        console.error(err);
-        if (err instanceof DBError) {
-            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
-        } else if (err instanceof SDKError) {
-            return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
-        } else {
-            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
-        }
-    }
-};
-
-exports.setAuditor = async function(req, res, next) {
-    try {
-        let userInfo = req.session.user;
-        if ( userInfo.role != 2) {
-            return res.status(401).json({ resultCode: CODE.PERMISSION_DENIED_ERROR.RESCODE, err: CODE.PERMISSION_DENIED_ERROR.DESC });
-        }
-        let dbRes = await user.updateAuditor([{'role':1}, req.params.account]);
-        if (dbRes.changedRows == 1){
-            return res.status(200).send();
-        } else {
-            return res.status(400).json({ resultCode: CODE.SET_AUDITOR_ERROR.RESCODE, err: CODE.SET_AUDITOR_ERROR.DESC });
-        }
     } catch(err){
         console.error(err);
         if (err instanceof DBError) {

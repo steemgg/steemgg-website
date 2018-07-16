@@ -46,8 +46,28 @@
     width:100%;
     height:100%;
   }
+
+  @media (min-width: 0px) {
+    .swiper-container {
+      height: 200px;
+    }
+  }
+  @media (min-width: 660px) {
+    .swiper-container {
+      height: 300px;
+    }
+  }
+  @media (min-width: 970px) {
+    .swiper-container {
+      height: 400px;
+    }
+  }
+  @media (min-width: 1280px) {
+    .swiper-container {
+      height: 500px;
+    }
+  }
   .swiper-container {
-    height: 500px;
     position: relative;
   }
   .slider-text {

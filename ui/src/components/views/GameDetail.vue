@@ -29,9 +29,25 @@
                   <span class="totalPayout">${{metadata.totalPayout}}</span>
                   <span class="activeVotes">
                     <el-tooltip class="item" effect="dark" content="Vote" placement="top">
-                      <i v-if="!alreadyVoted" class="fa fa-thumbs-o-up" aria-hidden="true" @click="voteUp" v-loading="voting"></i>
-                      <i v-if="alreadyVoted" class="fa fa-thumbs-up" aria-hidden="true" @click="voteUp"></i>
+                      <i v-if="alreadyVoted" class="fa fa-thumbs-up" aria-hidden="true" @click="alreadyVotedMessage"></i>
                     </el-tooltip>
+
+                    <el-popover
+                      placement="top"
+                      width="200"
+                      trigger="click"
+                      v-model="votingWeightVisible">
+                      <!--@show="onVotingPopoverDisplay"-->
+                      <div class="block" >
+                        <!--<el-slider v-model="defaultVotingWeight" :min="1"></el-slider>-->
+                        <vue-slider ref="votingSlider" v-model="defaultVotingWeight" :show="votingWeightVisible" :min="1" :max="100"></vue-slider>
+                        <div>
+                          <el-button @click="voteUp" type="success" size="mini">Confirm</el-button>
+                          <el-button @click="votingWeightVisible = false" size="mini">Cancel</el-button>
+                        </div>
+                      </div>
+                      <i v-if="!alreadyVoted" class="fa fa-thumbs-o-up" aria-hidden="true" slot="reference" v-loading="voting"></i>
+                    </el-popover>
                      {{votes}}
                   </span>
                   <span class="report" @click="openDialog">
@@ -124,6 +140,7 @@
   import Comment from '../shared/Comment'
   import moment from 'moment'
   import marked from 'marked'
+  import vueSlider from 'vue-slider-component'
   import GameService from '../../service/game.service'
   const gameService = new GameService()
 
@@ -133,7 +150,8 @@
       CommonHeader,
       CommonFooter,
       Avatar,
-      Comment
+      Comment,
+      vueSlider
     },
     data () {
       return {
@@ -155,6 +173,8 @@
         dialogFormVisible: false,
         approveDialogFormVisible: false,
         fullscreen: false,
+        defaultVotingWeight: 100,
+        votingWeightVisible: false,
 
         form: {
           comment: '',
@@ -202,6 +222,9 @@
       }
     },
     methods: {
+      // onVotingPopoverDisplay () {
+      //
+      // }
       openDialog () {
         this.dialogFormVisible = true
       },
@@ -248,10 +271,11 @@
         })
       },
       voteUp () {
+        this.votingWeightVisible = false
         if (this.$store.state.loggedIn) {
           if (this.alreadyVoted === false) {
             this.voting = true
-            gameService.vote(this.latestPost.account, this.latestPost.permlink, 5000).then(response => {
+            gameService.vote(this.latestPost.account, this.latestPost.permlink, this.defaultVotingWeight * 100).then(response => {
               this.$message('vote successfully')
               this.refreshSteemitMetaData()
             }).catch(error => {
@@ -261,10 +285,7 @@
               this.voting = false
             })
           } else {
-            this.$message({
-              message: 'You have already voted this game.',
-              type: 'warning'
-            })
+            this.alreadyVotedMessage()
           }
         } else {
           this.$message({
@@ -272,6 +293,12 @@
             type: 'warning'
           })
         }
+      },
+      alreadyVotedMessage () {
+        this.$message({
+          message: 'You have already voted this game.',
+          type: 'warning'
+        })
       },
       postComment () {
         if (this.gameComment.length > 0 && this.gameComment.length <= 5) {
@@ -511,7 +538,7 @@
   .authorInfo {
     display: flex;
     .accountName {
-      margin-left: 20px;
+      margin-left: 10px;
       line-height: 36px;
     }
   }

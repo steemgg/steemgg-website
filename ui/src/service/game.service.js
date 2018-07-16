@@ -13,44 +13,44 @@ var axiosInstance = axios.create({
 
 export default class GameService {
   create (game) {
-    return axiosInstance.post('/v1/game', this.convertGameToJson(game)).then(response => {
+    return axiosInstance.post('/api/v1/game', this.convertGameToJson(game)).then(response => {
       return this.convertJsonToGame(response.data)
     })
   }
 
   list () {
-    return axiosInstance.get('v1/game').then(response => {
+    return axiosInstance.get('/api/v1/game').then(response => {
       return this.handleResponse(response)
     })
   }
 
   delete (id) {
-    return axiosInstance.delete('/v1/game/' + id)
+    return axiosInstance.delete('/api/v1/game/' + id)
   }
 
   update (game) {
-    return axiosInstance.put('v1/game/' + game.id, this.convertGameToJson(game))
+    return axiosInstance.put('/api/v1/game/' + game.id, this.convertGameToJson(game))
   }
 
   getById (id) {
-    return axiosInstance.get('/v1/game/' + id).then(response => {
+    return axiosInstance.get('/api/v1/game/' + id).then(response => {
       return this.convertJsonToGame(response.data)
     })
   }
 
   getMyGames (userId) {
-    return axiosInstance.get('/v1/game?account=' + userId)
+    return axiosInstance.get('/api/v1/game?account=' + userId)
   }
 
   getTopRateGames () {
-    return axiosInstance.get('/v1/game?sort=rate_desc')
+    return axiosInstance.get('/api/v1/game?sort=rate_desc')
   }
 
   query (params) {
     if (params && params.limit == null) {
       params.limit = 1000
     }
-    return axiosInstance.get('v1/game', {
+    return axiosInstance.get('/api/v1/game', {
       params: params
     }).then(response => {
       return this.handleResponse(response)
@@ -58,41 +58,41 @@ export default class GameService {
   }
 
   approve (gameId, comment) {
-    return axiosInstance.post(`v1/audit/${gameId}`, {
+    return axiosInstance.post(`/api/v1/audit/${gameId}`, {
       status: 1,
       comment: comment
     })
   }
 
   deny (gameId, comment) {
-    return axiosInstance.post(`v1/audit/${gameId}`, {
+    return axiosInstance.post(`/api/v1/audit/${gameId}`, {
       status: 0,
       comment: comment
     })
   }
 
   report (gameId, comment) {
-    return axiosInstance.post(`v1/report/${gameId}`, {
+    return axiosInstance.post(`/api/v1/report/${gameId}`, {
       report: 1,
       comment: comment
     })
   }
 
   undoReport (gameId, comment) {
-    return axiosInstance.post(`v1/report/${gameId}`, {
+    return axiosInstance.post(`/api/v1/report/${gameId}`, {
       report: 0,
       comment: comment
     })
   }
 
   recommend (gameId) {
-    return axiosInstance.put(`v1/game/${gameId}`, {
+    return axiosInstance.put(`/api/v1/recommend/${gameId}`, {
       recommend: 1
     })
   }
 
   undoRecommend (gameId) {
-    return axiosInstance.post(`v1/game/${gameId}`, {
+    return axiosInstance.post(`/api/v1/recommend/${gameId}`, {
       recommend: 0
     })
   }
@@ -102,13 +102,13 @@ export default class GameService {
     clonnedActivity.gameid = gameId
     delete clonnedActivity.award
     delete clonnedActivity.permlink
-    return axiosInstance.post('v1/post', clonnedActivity).then(response => {
+    return axiosInstance.post('/api/v1/post', clonnedActivity).then(response => {
       return response.data
     })
   }
 
   updateActivity (gameId, activity) {
-    return axiosInstance.put('v1/post', {'gameId': gameId, 'activity': activity})
+    return axiosInstance.put('/api/v1/post', {'gameId': gameId, 'activity': activity})
   }
 
   getComments (category, author, permlink) {
@@ -120,13 +120,13 @@ export default class GameService {
 
   vote (author, permlink, weight) {
     // debugger
-    return axiosInstance.post(`v1/vote/${author}/${permlink}`, {weight: weight}).then(response => {
+    return axiosInstance.post(`/api/v1/vote/${author}/${permlink}`, {weight: weight}).then(response => {
       return response.data
     })
   }
 
   postComment (author, permlink, content) {
-    return axiosInstance.post(`v1/comment/${author}/${permlink}`, {content: content}).then(response => {
+    return axiosInstance.post(`/api/v1/comment/${author}/${permlink}`, {content: content}).then(response => {
       return response.data
     })
   }
@@ -180,7 +180,8 @@ export default class GameService {
         console.log('get data for content: ' + activity.permlink, response)
         result.totalPayout += response.totalPayout
         if (response.tags.length > 0) {
-          result.tags = result.tags.concat(response.tags)
+          // result.tags = result.tags.concat(response.tags)
+          result.tags = [...new Set([...result.tags, ...response.tags])]
         }
         if (response.activeVotes.length > 0) {
           result.activeVotes = result.activeVotes.concat(response.activeVotes)
@@ -306,23 +307,23 @@ export default class GameService {
 
   // TODO: the following methods should be moved to a different service
   fetchUser () {
-    return axiosInstance.get('/v1/me')
+    return axiosInstance.get('/api/v1/me')
   }
 
   getAuditors () {
-    return axiosInstance.get(`v1/auditor`, {}).then(response => {
+    return axiosInstance.get(`/api/v1/auditor`, {}).then(response => {
       return response.data
     })
   }
 
   addAuditor (userId) {
-    return axiosInstance.put(`v1/auditor/${userId}`, {})
+    return axiosInstance.put(`/api/v1/auditor/${userId}`, {})
   }
 
   deleteAuditor (userId) {
-    return axiosInstance.delete(`v1/auditor/${userId}`, {})
+    return axiosInstance.delete(`/api/v1/auditor/${userId}`, {})
   }
   logout () {
-    return axiosInstance.get('v1/logout')
+    return axiosInstance.get('/api/v1/logout')
   }
 }

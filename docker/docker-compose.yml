@@ -1,0 +1,71 @@
+version: "2.1"
+
+services:
+  node:
+    container_name: steemgg_api
+    build: 
+      context: ./
+      dockerfile: node/Dockerfile
+    volumes:
+    - ../../steemgg-website:/src
+    - /src/node_modules
+    hostname: api
+    links:
+    - db
+    - redis
+    - ipfs
+    networks:
+      static-network:
+        ipv4_address: 172.20.128.6
+    command: nodemon -L bin/www
+    tty: true
+  ipfs:
+    container_name: steemgg_ipfs
+    image: ipfs/go-ipfs:latest
+    ports:
+    - "8080:8080"
+    - "4001:4001"
+    - "5001:5001"
+    networks:
+      static-network:
+        ipv4_address: 172.20.128.5
+    tty: true
+  web-steem:
+    container_name: steemgg_web
+    build:
+      context: ./
+      dockerfile: nginx/Dockerfile-nginx
+    ports:
+    - "80:80"
+    volumes:
+    - ./nginx/steem.conf:/etc/nginx/conf.d/steem.conf
+    links:
+    - node
+    networks:
+      static-network:
+        ipv4_address: 172.20.128.4
+  db:
+    container_name: steemgg_db
+    image: percona:5.7.17
+    hostname: db
+    volumes:
+    - ../../steemgg-website/test/:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_ROOT_PASSWORD: 111111
+      MYSQL_DATABASE: steemgg
+    networks:
+      static-network:
+        ipv4_address: 172.20.128.2
+  redis:
+      container_name: steemgg_cache
+      image: redis:3.2.8
+      hostname: redis
+      networks:
+          static-network:
+              ipv4_address: 172.20.128.3
+networks:
+  static-network:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          ip_range: 172.28.5.0/24
