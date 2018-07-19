@@ -5,9 +5,16 @@ The Official Web Site of [steemgg](https://steemgg.com)
 [![Build Status](https://travis-ci.org/steemgg/steemgg-website.svg?branch=develop)](https://travis-ci.org/steemgg/steemitgame-website)
 
 # How to run the UI
-* cd to the /ui directory  
-* `npm install`  
-* `npm run start`  
+```bash
+# get source code
+$git clone https://github.com/steemgg/steemgg-website.git
+# cd to the ui folder  
+$cd steemgg-website/ui
+# install package dependencies
+$npm install 
+# start ui
+$npm run start 
+```
 * Visit http://localhost:8080 or http://127.0.0.1:8080
 
 # How to run the backend
@@ -18,11 +25,11 @@ The Official Web Site of [steemgg](https://steemgg.com)
 
 ```bash
 # get source code
-git clone https://github.com/steemgg/steemgg-website.git
+$git clone https://github.com/steemgg/steemgg-website.git
 # enter docker-compose folder
-cd steemgg-website/docker
+$cd steemgg-website/docker
 # start server
-docker-compose up -d
+$docker-compose up -d
 ```
 * Visit http://localhost/api/v1/game or http://127.0.0.1/api/v1/game
 
