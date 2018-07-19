@@ -41,3 +41,7 @@ $docker-compose up -d
 * Commit your changes: `git commit -am 'Add some feature' (or 'fix some bug')`
 * Push to the branch: `git push origin my-new-feature (or my-bug-fix)`
 * Submit a pull request
+
+#### License
+
+* MIT
