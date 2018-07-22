@@ -1,3 +1,5 @@
+![](https://github.com/steemgg/ui-resource/blob/master/image/steemgg-website-readme/i-love-coding.gif)
+
 # steemgg-website
 
 The Official Web Site of [steemgg](https://steemgg.com)
