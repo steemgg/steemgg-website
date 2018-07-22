@@ -4,8 +4,8 @@ const GAME_CATEGORY = [
     label: 'Action'
   },
   {
-    value: 'Platform',
-    label: 'Platform'
+    value: 'Platformer',
+    label: 'Platformer'
   },
   {
     value: 'Shooter',
