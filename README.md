@@ -49,7 +49,7 @@ $docker-compose up -d
 * MIT
 * YES, it's MIT. So you could use it for Free open source project or Commercial proprietary purpose.
 * We still encourage you to embrace open source, to make our community better.
-* If possible, we still wish you could keep beneficiaries to [@steemgg](https://steemit.com/@steemgg) no less than 2% in your project, to supoort both of us.
+* If possible, we still wish you could keep beneficiaries to [@steemgg](https://steemit.com/@steemgg) no less than 2% in your project, to suport both of us.
 ```javascript
     let extensions = [[0, {
         beneficiaries: [
