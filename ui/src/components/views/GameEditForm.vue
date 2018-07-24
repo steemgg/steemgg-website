@@ -19,9 +19,18 @@
                     <!--<el-input v-model='game.description' type="textarea" :rows="2" placeholder="Please input description of your game"></el-input>-->
                     <mavon-editor language="en" :subfield="false" v-model='game.description' :toolbars="descriptionEditorToolbar"></mavon-editor>
                   </el-form-item>
-                  <el-form-item label='Cover image' prop="coverImage">
-                    <vue-dropzone ref="coverImageDropzone" @vdropzone-success="onImageUploaded" @vdropzone-removed-file="onImageRemoved" @vdropzone-error="onImageUploadFail" id="dropzone" :options="dropzoneOptions"></vue-dropzone>
-                    <div slot="tip" class="el-upload__tip">jpg/png files with a size less than 500kb</div>
+                  <el-form-item label="Cover image" prop="coverImage">
+                    <el-tooltip content="Min: 300x200px; Max: 1200x800px." placement="top" effect="light">
+                      <vue-dropzone
+                        ref="coverImageDropzone"
+                        @vdropzone-success="onImageUploaded"
+                        @vdropzone-removed-file="onImageRemoved"
+                        @vdropzone-error="onImageUploadFail"
+                        id="dropzone"
+                        :options="dropzoneOptions">
+                    </vue-dropzone>
+                    </el-tooltip>
+                    <div><i class="fa fa-info-circle" aria-hidden="true"></i> To get the best result, we suggest the image ratios to be 3:2.</div>
                   </el-form-item>
                   <el-form-item label='Game width' prop="width">
                     <el-tooltip content="Min: 300px; Max: 3000px" placement="top" effect="light">
@@ -177,6 +186,12 @@
   import VueCountdown from '@xkeshi/vue-countdown'
   const gameService = new GameService()
 
+  const gameImageDimention = {
+    minWidth: 300,
+    maxWidth: 1200,
+    minHeight: 200,
+    maxHeight: 800
+  }
   export default {
     components: {
       CommonHeader,
@@ -252,14 +267,6 @@
             { required: true, message: 'Please input game description', trigger: 'blur' },
             { max: 3000, message: 'Description max 3000 characters', trigger: 'blur' }
           ],
-//          width: [
-//            { required: true, message: 'Please input game width', trigger: 'blur' },
-//            { type: 'number', message: 'Width must be a number'}
-//          ],
-//          height: [
-//            { required: true, message: 'Please input game height', trigger: 'blur' },
-//            { type: 'number', message: 'Height must be a number'}
-//          ],
           category: [
             { required: true, message: 'Please select game type', trigger: 'change' }
           ],
@@ -288,7 +295,34 @@
           addRemoveLinks: true,
           withCredentials: true,
           acceptedFiles: 'image/*',
-          dictDefaultMessage: "<i class='fa fa-cloud-upload'></i>UPLOAD Cover Image"
+          dictDefaultMessage: "<i class='fa fa-cloud-upload'></i> Upload a cover image for the game, max file size is 4MB",
+          init: function () {
+            // Register for the thumbnail callback.
+            // When the thumbnail is created the image dimensions are set.
+            this.on('thumbnail', function (file) {
+              debugger
+              // Do the dimension checks you want to do
+              if (file.width < gameImageDimention.minWidth || file.width > gameImageDimention.maxWidth || file.height < gameImageDimention.minHeight || file.height > gameImageDimention.maxHeight) {
+                // file.invalidDimention = true
+                file.rejectDimensions && file.rejectDimensions()
+              } else {
+                file.acceptDimensions && file.acceptDimensions()
+              }
+            })
+          },
+
+          // Instead of directly accepting / rejecting the file, setup two
+          // functions on the file that can be called later to accept / reject
+          // the file.
+          accept: function (file, done) {
+            file.acceptDimensions = done
+            file.rejectDimensions = function () {
+              done('Invalid image dimension.')
+            }
+            // Of course you could also just put the `done` function in the file
+            // and call it either with or without error in the `thumbnail` event
+            // callback, but I think that this is cleaner.
+          }
         },
         gameTypeOptions: GAME_CATEGORY
       }
@@ -496,12 +530,16 @@
       },
       onImageUploadFail (file) {
         console.log('image upload fail')
-        this.$message.error('Fail to upload the image, please try it later.')
+        if (file.accepted) {
+          this.$message.error('Oops.. Fail to upload the image, please try it later.')
+          this.$refs.coverImageDropzone.dropzone.removeFile(file)
+        }
       },
       onImageRemoved (file, error, xhr) {
         console.log('image removed', file)
         this.game.coverImage = null
       },
+
       initData () {
         if (this.id != null) {
           gameService.getById(this.id).then(game => {
