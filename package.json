@@ -8,6 +8,7 @@
   "private": true,
   "scripts": {
     "test": "mocha --timeout 20000",
+    "start": "node bin/www",
     "start-prod": "NODE_ENV=production node bin/www",
     "start-staging": "NODE_ENV=staging node bin/www",
     "start-dev": "NODE_ENV=dev nodemon -L bin/www"
