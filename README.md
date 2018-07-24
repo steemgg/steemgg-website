@@ -6,6 +6,15 @@ The Official Web Site of [steemgg](https://steemgg.com)
 
 [![Build Status](https://travis-ci.org/steemgg/steemgg-website.svg?branch=develop)](https://travis-ci.org/steemgg/steemitgame-website)
 
+# Technology Stack
+
+* Programming Language: [Javascript](https://en.wikipedia.org/wiki/JavaScript)
+* Backend: [Node.js](https://nodejs.org)
+* Frontend: [Vue.js](https://vuejs.org)
+* Database: [Redis](https://redis.io)/[MySQL](https://www.mysql.com)
+* Blockchain: [STEEM](https://steem.io)
+* CDN: [IPFS](https://ipfs.io)
+
 # How to run the UI
 ```bash
 # get source code
