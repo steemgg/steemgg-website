@@ -3,6 +3,7 @@
 import user from '../models/user';
 import steem from '../models/steem';
 import game from '../models/game';
+import config from 'config';
 import querystring from 'querystring';
 import CODE from '../lib/code';
 import {SDKError} from '../errors/SDKError';
