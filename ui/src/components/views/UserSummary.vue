@@ -33,7 +33,17 @@
           <user-game-table :items="reportedGames" v-if="reportedGames.length > 0"></user-game-table>
           <span v-if="reportedGames.length == 0"  class="emptyMessage">No reported game right now.</span>
         </el-tab-pane>
-        <el-tab-pane label="Rewards" name="awards">Total rewards: {{totalPayout}}</el-tab-pane>
+        <el-tab-pane label="Rewards" name="awards">
+          <div class="rewardDetail">
+            Total rewards: {{totalPayout}}
+          </div>
+          <div class="blocktradeLabel">
+            <h2>Trade your reward Now</h2>
+          </div>
+          <div class="blocktrade">
+            <iframe class="blocktrades" src="https://widget.blocktrades.us?affiliate_id=9c246782-6e0f-44f7-977d-e0f8c365b8d5&show_powered_by_blocktrades=false" height="600" width="90%" style="border: none;">Can't load Exchange widget.</iframe>
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </div>
     <common-footer></common-footer>
@@ -165,8 +175,15 @@
     }
   }
 
+  .rewardDetail {
+    font-size: 20px;
+  }
   .emptyMessage {
     font-weight: bold;
     font-size: 20px;
+  }
+  .blocktrade {
+    padding-top: 20px;
+    border: 1px solid black;
   }
 </style>
