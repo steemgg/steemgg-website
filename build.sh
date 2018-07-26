@@ -56,4 +56,6 @@ if [[ $TRAVIS_TAG =~ [v*] ]]; then
     git add .
     git commit -a -m "commit"
     git push --force --quiet "https://${GH_TOKEN}@github.com/steemgg/ui-prod.git"
+    cd ../
+    rm -rf ui/dist/
 fi

@@ -57,10 +57,11 @@ var sess = {
 
 if (app.get('env') === 'production') {
   app.set('trust proxy', 1) // trust first proxy
-} else {
+} else if(app.get('env') === 'dev') {
     var easyMonitor = require('easy-monitor');
     easyMonitor('Mercury');
 }
+
 
 app.use(session(sess))
 
