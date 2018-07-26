@@ -156,9 +156,9 @@
           this.loading = false
         })
       },
-      removeGameFromRecomended () {
+      removeGameFromRecomended (index) {
         this.loading = true
-        gameService.undoRecommend(this.items[this.activeIndex].id).then(() => {
+        gameService.undoRecommend(this.items[index].id).then(() => {
           this.$message.success('Game is removed from recommended list.')
           this.items.splice(this.activeIndex, 1)
           this.$emit('gameUndoRecommended')
