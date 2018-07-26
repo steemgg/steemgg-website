@@ -186,7 +186,8 @@
     computed: {
       compiledDescription () {
         if (this.game.description) {
-          return marked(this.game.description, {sanitize: true})
+          let markup = marked(this.game.description, {sanitize: true})
+          return markup.replace(/\n/g, '<br />')
         } else {
           return ''
         }
@@ -420,7 +421,6 @@
   }
 
   .description {
-    display: flex;
     margin: 20px;
   }
   .gamePlayer {
