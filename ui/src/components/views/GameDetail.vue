@@ -346,7 +346,10 @@
         if (this.game && this.game.activities && this.game.activities.length > 0) {
           this.loadingComment = true
           gameService.fetchAllSteemitComments(this.game).then(response => {
-            this.comments = response.reduce((acc, currentValue) => { return acc.concat(currentValue) }, [])
+            this.comments = response.reduce((acc, currentValue) => { return acc.concat(currentValue) }, []).sort((a, b) => {
+              // sort the comments based on the reverse of id
+              return b.id - a.id
+            })
           }).catch(error => {
             console.log('loading comment fail', error.reponse)
             this.$message.error('Fail to load comment')
