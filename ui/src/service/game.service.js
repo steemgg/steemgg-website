@@ -92,7 +92,7 @@ export default class GameService {
   }
 
   undoRecommend (gameId) {
-    return axiosInstance.post(`/api/v1/recommend/${gameId}`, {
+    return axiosInstance.put(`/api/v1/recommend/${gameId}`, {
       recommend: 0
     })
   }
