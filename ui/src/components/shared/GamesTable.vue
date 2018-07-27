@@ -24,7 +24,7 @@
       </el-table-column>
       <el-table-column label="Audit History" width="150">
         <template slot-scope="scope">
-          <comment-popover :comments="scope.row.auditComments"></comment-popover>
+          <comment-popover :comments="scope.row.commentHistory"></comment-popover>
         </template>
       </el-table-column>
       <el-table-column label="Operations" fixed="right">
@@ -156,9 +156,9 @@
           this.loading = false
         })
       },
-      removeGameFromRecomended () {
+      removeGameFromRecomended (index) {
         this.loading = true
-        gameService.undoRecommend(this.items[this.activeIndex].id).then(() => {
+        gameService.undoRecommend(this.items[index].id).then(() => {
           this.$message.success('Game is removed from recommended list.')
           this.items.splice(this.activeIndex, 1)
           this.$emit('gameUndoRecommended')

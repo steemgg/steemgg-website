@@ -92,7 +92,7 @@ export default class GameService {
   }
 
   undoRecommend (gameId) {
-    return axiosInstance.post(`/api/v1/recommend/${gameId}`, {
+    return axiosInstance.put(`/api/v1/recommend/${gameId}`, {
       recommend: 0
     })
   }
@@ -290,6 +290,22 @@ export default class GameService {
     if (gameJson.activities == null) {
       gameJson.activities = []
     }
+    let commentHistory = []
+    if (gameJson.auditComments) {
+      commentHistory = commentHistory.concat(gameJson.auditComments)
+    }
+    if (gameJson.reportComments) {
+      commentHistory = commentHistory.concat(gameJson.reportComments)
+    }
+    gameJson.commentHistory = commentHistory.sort((a,b) => {
+      if (a.lastModified > b.lastModified) {
+        return -1
+      } else if (a.lastModified === b.lastModified) {
+        return 0
+      } if (a.lastModified < b.lastModified) {
+        return 1
+      }
+    })
     return gameJson
   }
 
@@ -302,6 +318,7 @@ export default class GameService {
       clonnedGame.gameUrl = JSON.stringify(game.gameUrl)
     }
     delete clonnedGame.activities
+    delete clonnedGame.commentHistory
     return clonnedGame
   }
 
