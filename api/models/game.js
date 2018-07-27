@@ -12,24 +12,28 @@ exports.addGame = async function(game) {
 exports.deleteGame = async function(params) {
     let rows = await db.execute(db.WRITE, 'update games set status = 3 where id= ? and userid= ?', params);
     this.clearCache();
+    this.clearGameCache(params[0]);
     return rows;
 }
 
 exports.updateGameSelf = async function(params) {
     let rows = await db.execute(db.WRITE, 'update games set ? where id= ? and userid= ?', params);
     this.clearCache();
+    this.clearGameCache(params[1]);
     return rows;
 }
 
 exports.updateGame = async function(params) {
     let rows = await db.execute(db.WRITE, 'update games set ? where id= ?', params);
     this.clearCache();
+    this.clearGameCache(params[1]);
     return rows;
 }
 
 exports.updateActivityCount = async function(params) {
     let rows = await db.execute(db.WRITE, 'update games set activities=activities+1 where id= ? and userid= ?', params);
     this.clearCache();
+    this.clearGameCache(params[0]);
     return rows;
 }
 
@@ -38,6 +42,7 @@ exports.auditGame = async function(params, status) {
     rows = await db.execute(db.WRITE, 'update comments set status = 1 and type = 0 where gameid= ?', params.gameid);
     rows = await db.execute(db.WRITE, 'update games set status=?, report=0  where id= ?', [status,params.gameid]);
     this.clearCache();
+    this.clearGameCache(params.gameid);
     return rows;
 }
 
@@ -45,6 +50,7 @@ exports.reportGame = async function(params) {
     let rows = await db.execute(db.WRITE, 'INSERT INTO comments SET ?', params);
     rows = await db.execute(db.WRITE, 'update games set report=1 where id= ?', params.gameid);
     this.clearCache();
+    this.clearGameCache(params.gameid);
     return rows;
 }
 
@@ -62,6 +68,7 @@ exports.unreportGame = async function(gameId) {
     await db.execute(db.WRITE, 'update comments set status = 1 and type = 0 where gameid= ?', gameId);
     let rows = await db.execute(db.WRITE, 'update games set report=0 where id= ?', gameId);
     this.clearCache();
+    this.clearGameCache(gameId);
     return rows;
 }
 
@@ -71,11 +78,19 @@ exports.auditComments = async function(params) {
 }
 
 exports.getGameById = async function(gameId) {
-    let rows = await db.execute(db.READ, 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend,activities,width,height from games where id=?', gameId);
+    let key = 'game:id:'+gameId;
+    let rows = await redis.instance.get(key);
+    if(rows) {
+        return JSON.parse(rows);
+    }
+    rows = await db.execute(db.READ, 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend,activities,width,height from games where id=?', gameId);
+    if(typeof rows[0] !== 'undefined') {
+        await redis.instance.set(key, JSON.stringify(rows));
+    }
     return rows;
 }
 
-exports.getActivitiesById = async function(gameId) {
+exports.getActivitiesByGameId = async function(gameId) {
     let rows = await db.execute(db.READ, 'select id,gameid,account,userid,permlink,activityTitle,vote,payout,status,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from activities where gameid=? order by lastModified desc', gameId);
     return rows;
 }
@@ -168,5 +183,10 @@ exports.clearCache = async function() {
         await redis.instance.del(ck);
         await redis.instance.hdel(gameCountKey,ck);
     }
+}
+
+exports.clearGameCache = async function(gameId) {
+    let key = 'game:id:'+gameId;
+    await redis.instance.del(key);
 }
 
