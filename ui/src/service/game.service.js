@@ -297,7 +297,7 @@ export default class GameService {
     if (gameJson.reportComments) {
       commentHistory = commentHistory.concat(gameJson.reportComments)
     }
-    gameJson.commentHistory = commentHistory.sort((a,b) => {
+    gameJson.commentHistory = commentHistory.sort((a, b) => {
       if (a.lastModified > b.lastModified) {
         return -1
       } else if (a.lastModified === b.lastModified) {
