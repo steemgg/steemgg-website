@@ -198,7 +198,7 @@ exports.getGameDetail = async function(req, res, next) {
                 }
             }
         }
-        let steemitRes = await game.getActivitiesById(req.params.id);
+        let steemitRes = await game.getActivitiesByGameId(req.params.id);
         if(steemitRes.length>0){
             dbRes[0]['activities'] = steemitRes;
         }

@@ -203,7 +203,7 @@ describe('DB', function() {
             let activity = {userid:testUserId, account:testAccount, gameid:testGameId, lastModified:unix, permlink:'activity'};
             try{
                 await game.addActivity(activity);
-                let dbRes = await game.getActivitiesById(testGameId);
+                let dbRes = await game.getActivitiesByGameId(testGameId);
                 assert.equal(dbRes[0].permlink, 'activity');
             } catch (err) {
                 assert.fail('test failed');
