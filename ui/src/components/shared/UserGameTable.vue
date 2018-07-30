@@ -24,7 +24,7 @@
       </el-table-column>
       <el-table-column label="Audit History" width="150">
         <template slot-scope="scope">
-          <comment-popover :comments="scope.row.auditComments"></comment-popover>
+          <comment-popover :comments="scope.row.commentHistory"></comment-popover>
         </template>
       </el-table-column>
       <el-table-column label="Operations" fixed="right">

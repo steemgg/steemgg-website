@@ -4,7 +4,6 @@
       <common-header></common-header>
     </el-header>
     <div class="markdown-body term">
-      <p>Please read and accept the Terms of Service. You must scroll to the bottom to proceed.</p>
 
       <h1 id="termsofservice">Terms of Service</h1>
 
@@ -16,7 +15,7 @@
 
       <h2 id="1privacypolicy">1. Privacy Policy</h2>
 
-      <p>Please refer to our Privacy Policy <a href="https://steemgg.com/privacy">https://steemgg.com/privacy</a> for information about how we collect, use and disclose information about you. </p>
+      <p>Please refer to our Privacy Policy <a href="https://steemgg.com/#/privacy">https://steemgg.com/#/privacy</a> for information about how we collect, use and disclose information about you. </p>
 
       <h2 id="2eligibility">2. Eligibility</h2>
 

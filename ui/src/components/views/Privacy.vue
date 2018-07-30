@@ -4,7 +4,6 @@
       <common-header></common-header>
     </el-header>
     <div class="markdown-body privacy">
-      <p>Please read and accept the Privacy Policy Aggreement. You must scroll to the bottom to proceed.</p>
 
       <h1 id="privacypolicy">Privacy Policy</h1>
 
@@ -55,7 +54,7 @@
       <h2 id="informationcollectedfromcookies">Information Collected from Cookies</h2>
 
       <ol>
-        <li>We may receive information from cookies, which are pieces of data your browser stores and sends back to us when making requests. We use this information to improve your experience, understand user activity, and improve the quality of our Services. For example, we store and retrieve information about your preferred language and other settings. On how you can disable cookies, please see “Your Choices” below. For more information about cookies read our cookie policy section <a href="https://steemgg.com/cookies">https://steemgg.com/cookies</a> </li>
+        <li>We may receive information from cookies, which are pieces of data your browser stores and sends back to us when making requests. We use this information to improve your experience, understand user activity, and improve the quality of our Services. For example, we store and retrieve information about your preferred language and other settings. On how you can disable cookies, please see “Your Choices” below. For more information about cookies read our cookie policy section <a href="https://steemgg.com/#/cookies">https://steemgg.com/cookies</a> </li>
       </ol>
 
       <h2 id="locationinformation">Location Information</h2>
@@ -173,7 +172,7 @@
       <h2 id="cookies">Cookies</h2>
 
       <ol>
-        <li>Most web browsers are set to accept cookies by default. If you prefer, you can usually choose to set your browser to remove or reject first- and third-party cookies. Please note that if you choose to remove or reject cookies, this could affect the availability and functionality of our Services. For more information about cookies read our cookie policy section <a href="https://steemgg.com/cookies">https://steemgg.com/cookies</a> </li>
+        <li>Most web browsers are set to accept cookies by default. If you prefer, you can usually choose to set your browser to remove or reject first- and third-party cookies. Please note that if you choose to remove or reject cookies, this could affect the availability and functionality of our Services. For more information about cookies read our cookie policy section <a href="https://steemgg.com/#/cookies">https://steemgg.com/cookies</a> </li>
       </ol>
 
       <h2 id="thirdpartyadvertisingandanalytics">Third-Party Advertising and Analytics</h2>
