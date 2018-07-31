@@ -78,7 +78,7 @@
                   <div class="commentAction">
                     <div class="commentActionTitle">Comments</div>
                     <div class="commentActionText">
-                      <el-input placeholder="Leave a comment" v-model="gameComment" :disabled="posting"></el-input>
+                      <el-input autosize type="textarea" placeholder="Leave a comment" v-model="gameComment" :disabled="posting"></el-input>
                     </div>
                     <div class="commentActionButton">
                       <el-button round @click="postComment" :loading="posting">Comment</el-button>

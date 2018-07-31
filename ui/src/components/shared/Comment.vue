@@ -44,7 +44,7 @@
             </span>
           </div>
           <div class="replyArea" v-if="leaveReply">
-            <el-input ref="replyInput" autofocus placeholder="say something..." v-model="replyContent" :disabled="replying"></el-input>
+            <el-input ref="replyInput" autofocus autosize type="textarea" placeholder="say something..." v-model="replyContent" :disabled="replying"></el-input>
             <div class="replyButtons">
               <el-button round @click="leaveReply = false;" :disabled="replying">Cancel</el-button>
               <el-button round @click="postReply" :loading="replying">Reply</el-button>
