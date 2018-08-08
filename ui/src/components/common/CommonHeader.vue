@@ -12,11 +12,14 @@
           <li class="nav-item">
             <a class="nav-link" @click="uploadGame"><i class="fa fa-cloud-upload fa-2x" ></i><span class="actionText">Upload Game</span></a>
           </li>
+          <li class="nav-item">
+            <router-link class="nav-link" :to="{ name: 'browseGame', params: {}}" tag="a"><i class="fa fa-list fa-2x" title="Browse Game"></i><span class="actionText">Browse Game</span></router-link>
+          </li>
           <li class="nav-item" v-if="$store.getters.user.role >= 1">
             <router-link class="nav-link" :to="{name: 'auditGame'}" tag="a"><i class="fa fa-eye fa-2x" title="Audit Game"></i><span class="actionText">Audit Game</span></router-link>
           </li>
           <li class="nav-item" v-if="$store.getters.user.role == 2">
-            <router-link class="nav-link" :to="{name: 'assignAuditor'}" tag="a"><i class="fa fa-eye fa-2x" title="Assign Auditor"></i><span class="actionText">Assign Auditor</span></router-link>
+            <router-link class="nav-link" :to="{name: 'assignAuditor'}" tag="a"><i class="fa fa-users fa-2x" title="Assign Auditor"></i><span class="actionText">Assign Auditor</span></router-link>
           </li>
         </ul>
         <!--<form class="form-inline mt-2 mt-md-0">-->
