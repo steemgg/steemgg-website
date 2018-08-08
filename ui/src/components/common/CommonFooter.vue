@@ -34,8 +34,8 @@
     background: #0c0d0d;
     height: 60px;
     /*width: 1160px;*/
-    position: fixed;
-    bottom: 0px;
+    /*position: fixed;*/
+    /*bottom: 0px;*/
     /*left: 20px;*/
     z-index: 10001;
     display: flex;

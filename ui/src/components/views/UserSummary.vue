@@ -152,7 +152,7 @@
   .userProfileContainer {
     padding: 0 20px;
     .userSummary {
-      padding: 10px 20px 60px 10px;
+      padding: 10px;
     }
   }
   .userInfo {
