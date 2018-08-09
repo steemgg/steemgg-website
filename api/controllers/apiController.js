@@ -38,7 +38,7 @@ exports.upload = function(req, res) {
     }).on('file', function(field, file) {
         if (uploadStatus) {
             let ipfs = ipfsAPI({host: config.get('steemit.ipfs.ip'), port: config.get('steemit.ipfs.port'), protocol: 'http'});
-            if(file.type == 'application/zip') {
+            if(file.type == 'application/zip' || file.type == 'application/x-zip-compressed') {
                 unzipFile(file.path, userid, function cb(unzips){
                     ipfs.util.addFromFs(config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[0].path, { recursive: true }, (err, result) => {
                         if (err) {
