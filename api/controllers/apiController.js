@@ -18,9 +18,10 @@ import {DBError} from '../errors/DBError';
 
 
 exports.upload = function(req, res) {
-    var userid = req.session.user.userid;
-    var uploadDir = config.get('steemit.app.uploadurl');
-    var form = new formidable.IncomingForm(),uploadStatus;
+    let userid = req.session.user.userid;
+    let uploadDir = config.get('steemit.app.uploadurl');
+    let form = new formidable.IncomingForm(),uploadStatus;
+    let zipMineTypes = ['zip', 'octet-stream','x-zip','x-zip-compressed','zip-compressed'];
     form.multiples = true;
     form.keepExtensions = true;
     form.uploadDir = uploadDir;
@@ -30,15 +31,16 @@ exports.upload = function(req, res) {
         let fileType = file.type.split('/').pop();
         if(fileType == 'jpg' || fileType == 'png' || fileType == 'jpeg' || fileType == 'gif' ){
             file.path = path.join(uploadDir, '/image/', `${new Date().getTime()}_${req.session.user.account}.${fileType}`)
-        } else if (fileType == 'zip' || fileType == 'x-zip-compressed' ) {
+        } else if (zipMineTypes.indexOf(fileType)>=0) {
             file.path = path.join(uploadDir, '/zip/', `${new Date().getTime()}_${req.session.user.account}.zip`)
         } else {
             uploadStatus = false;
         }
     }).on('file', function(field, file) {
         if (uploadStatus) {
+            let fileType = file.type.split('/').pop();
             let ipfs = ipfsAPI({host: config.get('steemit.ipfs.ip'), port: config.get('steemit.ipfs.port'), protocol: 'http'});
-            if(file.type == 'application/zip' || file.type == 'application/x-zip-compressed') {
+            if(zipMineTypes.indexOf(fileType)>=0) {
                 unzipFile(file.path, userid, function cb(unzips){
                     let isDirectory = false;
                     let uploadPath = config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[0].path;
