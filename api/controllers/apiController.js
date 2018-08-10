@@ -30,7 +30,7 @@ exports.upload = function(req, res) {
         let fileType = file.type.split('/').pop();
         if(fileType == 'jpg' || fileType == 'png' || fileType == 'jpeg' || fileType == 'gif' ){
             file.path = path.join(uploadDir, '/image/', `${new Date().getTime()}_${req.session.user.account}.${fileType}`)
-        } else if (fileType == 'zip') {
+        } else if (fileType == 'zip' || fileType == 'x-zip-compressed' ) {
             file.path = path.join(uploadDir, '/zip/', `${new Date().getTime()}_${req.session.user.account}.zip`)
         } else {
             uploadStatus = false;
