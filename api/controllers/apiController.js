@@ -29,18 +29,37 @@ exports.upload = function(req, res) {
     form.on('fileBegin', function (name, file) {
         let fileType = file.type.split('/').pop();
         if(fileType == 'jpg' || fileType == 'png' || fileType == 'jpeg' || fileType == 'gif' ){
-            file.path = path.join(uploadDir, '/image/', `${new Date().getTime()}.${fileType}`)
+            file.path = path.join(uploadDir, '/image/', `${new Date().getTime()}_${req.session.user.account}.${fileType}`)
         } else if (fileType == 'zip') {
-            file.path = path.join(uploadDir, '/zip/', `${new Date().getTime()}.zip`)
+            file.path = path.join(uploadDir, '/zip/', `${new Date().getTime()}_${req.session.user.account}.zip`)
         } else {
             uploadStatus = false;
         }
     }).on('file', function(field, file) {
         if (uploadStatus) {
             let ipfs = ipfsAPI({host: config.get('steemit.ipfs.ip'), port: config.get('steemit.ipfs.port'), protocol: 'http'});
-            if(file.type == 'application/zip') {
+            if(file.type == 'application/zip' || file.type == 'application/x-zip-compressed') {
                 unzipFile(file.path, userid, function cb(unzips){
-                    ipfs.util.addFromFs(config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[0].path, { recursive: true }, (err, result) => {
+                    let isDirectory = false;
+                    let uploadPath = config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[0].path;
+                    for(let i=unzips.length-1;i>=0;i--) {
+                        if(unzips[i].path == "index.html") {
+                            isDirectory = true;
+                        }
+                    }
+                    if (isDirectory == true) {
+                        let tmpPath = config.get('steemit.app.gameurl')+"/"+userid+"/"+new Date().getTime()+"/";
+                        !fs.existsSync(tmpPath) && fs.mkdirSync(tmpPath);
+                        for(let i=0;i<unzips.length;i++) {
+                            if(unzips[i].type == "directory") {
+                                !fs.existsSync(tmpPath+unzips[i].path) && fs.mkdirSync(tmpPath+unzips[i].path);
+                            } else if (unzips[i].type == "file") {
+                                fs.renameSync(config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[i].path,tmpPath+unzips[i].path);
+                            }
+                        }
+                        uploadPath = tmpPath;
+                    }
+                    ipfs.util.addFromFs(uploadPath, { recursive: true }, (err, result) => {
                         if (err) {
                             console.error(err);
                             return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC });
