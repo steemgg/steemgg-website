@@ -63,6 +63,22 @@ SteemConnect.prototype.revokeToken = async function revokeToken(accessToken) {
     return  await this.send('oauth2/token/revoke', 'POST', { token: accessToken }, accessToken);
 };
 
+SteemConnect.prototype.claimRewardBalance = async function claimRewardBalance(
+    accessToken,
+    account,
+    rewardSteem,
+    rewardSbd,
+    rewardVests
+) {
+    const params = {
+        account,
+        reward_steem: rewardSteem,
+        reward_sbd: rewardSbd,
+        reward_vests: rewardVests,
+    };
+    return await this.broadcast(accessToken, [['claim_reward_balance', params]]);
+};
+
 SteemConnect.prototype.getToken = async function(code){
     return  await this.send('oauth2/token', 'POST', {
         response_type: "refresh",

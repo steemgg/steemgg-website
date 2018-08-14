@@ -419,6 +419,26 @@ exports.reportGame = async function(req, res, next) {
     }
 }
 
+exports.claimReward = async function(req, res) {
+    try {
+        let rewardSteem = (typeof req.query.rewardSteem !== 'undefined') ? req.query.rewardSteem : '0.000 STEEM';
+        let rewardSbd = (typeof req.query.rewardSbd !== 'undefined') ? req.query.rewardSbd : '0.000 SBD';
+        let rewardVest = (typeof req.query.rewardVest !== 'undefined') ? req.query.rewardVest : '0.000000 VESTS';
+        let userInfo = req.session.user;
+        console.log(userInfo,req.session.accessToken);
+        let result = await steem.claimRewardBalance(req.session.accessToken, userInfo.account, rewardSteem, rewardSbd, rewardVest);
+        return res.status(200).json(result);
+    } catch(err) {
+        if (err instanceof DBError) {
+            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
+        } else if (err instanceof SDKError) {
+            return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
+        } else {
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
+        }
+    }
+};
+
 exports.logout = async function(req, res, next) {
     try{
         if (process.env.NODE_ENV !== 'development'){
