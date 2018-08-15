@@ -20,17 +20,17 @@
         <el-tab-pane label="Live Games" name="liveGames">
           <div class="gameContainer">
             <span v-if="approvedGames.length == 0" class="emptyMessage">No live game right now.</span>
-            <user-game-table v-if="approvedGames.length > 0" :items="approvedGames"></user-game-table>
+            <user-game-table v-if="approvedGames.length > 0" :items="approvedGames" @game-deleted="onGameDeleted" allow-delete="true"></user-game-table>
           </div>
         </el-tab-pane>
         <el-tab-pane label="Pending Games" name="pendingGames">
           <div class="gameContainer">
             <span v-if="pendingGames.length == 0" class="emptyMessage">No pending game right now.</span>
-            <user-game-table v-if="pendingGames.length > 0" :items="pendingGames"></user-game-table>
+            <user-game-table v-if="pendingGames.length > 0" :items="pendingGames" @game-deleted="onGameDeleted" allow-delete="true"></user-game-table>
           </div>
         </el-tab-pane>
         <el-tab-pane label="Reported Games" name="reportedGames">
-          <user-game-table :items="reportedGames" v-if="reportedGames.length > 0"></user-game-table>
+          <user-game-table :items="reportedGames" v-if="reportedGames.length > 0" @game-deleted="onGameDeleted"></user-game-table>
           <span v-if="reportedGames.length == 0"  class="emptyMessage">No reported game right now.</span>
         </el-tab-pane>
         <el-tab-pane label="Rewards" name="awards">
@@ -119,19 +119,25 @@
         }
       },
       fetchUserGames () {
-        console.log(1)
+        gameService.query({status: 1, creator: this.$store.getters.user.account, includeComment: true}).then(response => {
+          this.approvedGames = response.items
+          this.calculateTotalPayout(this.approvedGames)
+        })
         gameService.query({status: 1, creator: this.$store.getters.user.account, includeComment: true}).then(response => {
           this.approvedGames = response.items
           this.calculateTotalPayout(this.approvedGames)
         })
         gameService.query({status: 0, creator: this.$store.getters.user.account, includeComment: true}).then(response => {
           this.pendingGames = response.items
-          this.calculateTotalPayout(this.pendingGames)
+          // this.calculateTotalPayout(this.pendingGames)
         })
         gameService.query({report: 1, creator: this.$store.getters.user.account, includeComment: true}).then(response => {
           this.reportedGames = response.items
-          this.calculateTotalPayout(this.reportedGames)
+          // this.calculateTotalPayout(this.reportedGames)
         })
+      },
+      onGameDeleted (id) {
+        console.log(`Game ${id} is deleted`)
       },
       calculateTotalPayout (gameList) {
         gameList.forEach(game => {
