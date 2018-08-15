@@ -6,7 +6,7 @@
       <!--</el-col>-->
       <!--<el-col :xs="16" :sm="16" :md="22" :lg="22" :xl="22">-->
       <el-col :xs="3" :sm="3" :md="2" :lg="1" :xl="1" class="avatar-placeholder">
-        <avatar :accountName="comment.author"></avatar>
+        <avatar :account="comment.author"></avatar>
       </el-col >
       <el-col :xs="21" :sm="21" :md="22" :lg="22" :xl="22">
         <div class="commentWrapper">
