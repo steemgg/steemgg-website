@@ -20,7 +20,7 @@
                     <mavon-editor language="en" :subfield="false" v-model='game.description' :toolbars="descriptionEditorToolbar"></mavon-editor>
                   </el-form-item>
                   <el-form-item label="Cover image" prop="coverImage">
-                    <el-tooltip content="Min: 300x200px; Max: 1200x800px." placement="top" effect="light">
+                    <el-tooltip content="Image dimension must be: width:300px Height:200px" placement="top" effect="light">
                       <vue-dropzone
                         ref="coverImageDropzone"
                         @vdropzone-success="onImageUploaded"
@@ -186,11 +186,13 @@
   import VueCountdown from '@xkeshi/vue-countdown'
   const gameService = new GameService()
 
-  const gameImageDimention = {
-    minWidth: 300,
-    maxWidth: 1200,
-    minHeight: 200,
-    maxHeight: 800
+  const gameImageDimension = {
+    // minWidth: 300,
+    // maxWidth: 1200,
+    // minHeight: 200,
+    // maxHeight: 800
+    width: 300,
+    height: 200
   }
   export default {
     components: {
@@ -302,7 +304,7 @@
             this.on('thumbnail', function (file) {
               debugger
               // Do the dimension checks you want to do
-              if (file.width < gameImageDimention.minWidth || file.width > gameImageDimention.maxWidth || file.height < gameImageDimention.minHeight || file.height > gameImageDimention.maxHeight) {
+              if (file.width !== gameImageDimension.width || file.height !== gameImageDimension.height) {
                 // file.invalidDimention = true
                 file.rejectDimensions && file.rejectDimensions()
               } else {
