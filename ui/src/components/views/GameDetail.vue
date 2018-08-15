@@ -209,9 +209,9 @@
       },
       alreadyVoted () {
         let voted = false
-        if (this.latestPost != null && this.metadata.activeVotes != null) {
-          for (let i = 0; i < this.metadata.activeVotes.length; i++) {
-            if (this.metadata.activeVotes[i].voter === this.$store.state.user.account) {
+        if (this.latestPost != null && this.metadata.latestVotes != null) {
+          for (let i = 0; i < this.metadata.latestVotes.length; i++) {
+            if (this.metadata.latestVotes[i].voter === this.$store.state.user.account) {
               voted = true
               break
             }

@@ -167,6 +167,7 @@ export default class GameService {
     let result = {
       totalPayout: 0,
       activeVotes: [],
+      latestVotes: [],
       tags: []
     }
     for (let i = 0; i < game.activities.length; i++) {
@@ -179,6 +180,9 @@ export default class GameService {
       // promises.push(this.getContentData('steemitgame.test', activity.permlink).then(response => {
         console.log('get data for content: ' + activity.permlink, response)
         result.totalPayout += response.totalPayout
+        if (i === 0 && response.activeVotes.length > 0) {
+          result.latestVotes = response.activeVotes
+        }
         if (response.tags.length > 0) {
           // result.tags = result.tags.concat(response.tags)
           result.tags = [...new Set([...result.tags, ...response.tags])]
