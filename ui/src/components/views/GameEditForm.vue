@@ -60,6 +60,7 @@
                         :on-remove="onFileRemoved"
                         :file-list="fileList"
                         :limit="1"
+                        :ref="gameFileUpload"
                         accept="application/zip"
                         :on-success="onFileUploaded"
                         :before-upload="beforeFileUpload"
@@ -67,7 +68,7 @@
                         :on-error="onFileUploadFail"
                         list-type="text">
                         <el-button size="small" type="primary" :disabled="!$store.state.loggedIn">Click to upload</el-button>
-                        <div slot="tip" class="el-upload__tip upload_tip">Only accept .zip file (max size 10MB), which should contain all of your game's files and assets. There must be an index.html file in the root folder.</div>
+                        <div slot="tip" class="el-upload__tip upload_tip">Only accept .zip file (max size 20MB), which should contain all of your game's files and assets. There must be an index.html file in the root folder.</div>
                       </el-upload>
                     </div>
                   </el-form-item>
@@ -194,6 +195,10 @@
     width: 300,
     height: 200
   }
+  // max file size is 20MB
+  const gameFileConfig = {
+    size: 20 * 1024 * 1024
+  }
   export default {
     components: {
       CommonHeader,
@@ -302,7 +307,6 @@
             // Register for the thumbnail callback.
             // When the thumbnail is created the image dimensions are set.
             this.on('thumbnail', function (file) {
-              debugger
               // Do the dimension checks you want to do
               if (file.width !== gameImageDimension.width || file.height !== gameImageDimension.height) {
                 // file.invalidDimention = true
@@ -516,9 +520,15 @@
       },
       beforeFileUpload (file) {
         console.log(file)
+        debugger
+        if (file.size > gameFileConfig.size) {
+          this.$message.error('The max file size is 20MB.')
+          return false
+        }
       },
       onFileExceedMax (file) {
-        this.$message.info('Please remove the current file first')
+        // this.$refs.gameFileUpload.clearFiles()
+        this.$message.warning('Please remove the current file first')
       },
       onFileUploadFail (error, file) {
         console.log('Fail to upload game file', error)
