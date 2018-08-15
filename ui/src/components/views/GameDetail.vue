@@ -366,6 +366,9 @@
             this.game = response
             if (this.game.status === 1 || this.$store.getters.isAuditor || (this.$store.state.loggedIn && this.$store.getters.user.account === this.game.account)) {
               this.gameUrl = process.env.IPFS_SERVER_URL + this.game.gameUrl.hash
+              if (this.$store.state.loggedIn) {
+                this.gameUrl = this.gameUrl + '?account=' + encodeURIComponent(this.$store.getters.user.account)
+              }
               console.log('mounted successfully', this.game)
               this.showApprove = this.$store.getters.isAuditor && this.game && this.game.status === 0
               this.refreshSteemitMetaData()
