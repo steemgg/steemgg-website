@@ -41,21 +41,35 @@ exports.upload = function(req, res) {
             let fileType = file.type.split('/').pop();
             let ipfs = ipfsAPI({host: config.get('steemit.ipfs.ip'), port: config.get('steemit.ipfs.port'), protocol: 'http'});
             if(zipMineTypes.indexOf(fileType)>=0) {
-                unzipFile(file.path, userid, function cb(unzips){
+                unzipFile(file.path, userid, function cb(err,unzips){
+                    if (err) {
+                        console.error(err);
+                        return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
+                    }
                     let isDirectory = false;
                     let uploadPath = config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[0].path;
                     for(let i=unzips.length-1;i>=0;i--) {
                         if(unzips[i].path == "index.html") {
                             isDirectory = true;
                         }
+                        if(/\//.test(unzips[i].path)){
+                            let directorys = unzips[i].path.split(/\//);
+                            let rootPath = directorys.slice(0, 1);
+                            uploadPath = config.get('steemit.app.gameurl')+"/"+userid+"/"+rootPath;
+                        }
                     }
                     if (isDirectory == true) {
                         let tmpPath = config.get('steemit.app.gameurl')+"/"+userid+"/"+new Date().getTime()+"/";
                         !fs.existsSync(tmpPath) && fs.mkdirSync(tmpPath);
                         for(let i=0;i<unzips.length;i++) {
-                            if(unzips[i].type == "directory") {
-                                !fs.existsSync(tmpPath+unzips[i].path) && fs.mkdirSync(tmpPath+unzips[i].path);
-                            } else if (unzips[i].type == "file") {
+                            if (unzips[i].type == "file") {
+                                if(/\//.test(unzips[i].path)){
+                                    let directorys = unzips[i].path.split(/\//);
+                                    for(let j=1; j<directorys.length; j++) {
+                                        let segment = directorys.slice(0, j).join('/');
+                                        !fs.existsSync(tmpPath+segment) && fs.mkdirSync(tmpPath+segment);
+                                    }
+                                }
                                 fs.renameSync(config.get('steemit.app.gameurl')+"/"+userid+"/"+unzips[i].path,tmpPath+unzips[i].path);
                             }
                         }
@@ -64,7 +78,7 @@ exports.upload = function(req, res) {
                     ipfs.util.addFromFs(uploadPath, { recursive: true }, (err, result) => {
                         if (err) {
                             console.error(err);
-                            return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC });
+                            return res.status(500).json({ resultCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC });
                         }
                         let data = result.slice(-1);
                         return res.status(200).json(result.slice(-1));
@@ -74,7 +88,7 @@ exports.upload = function(req, res) {
                 ipfs.util.addFromFs(file.path, { recursive: true }, (err, result) => {
                     if (err) {
                         console.error(err);
-                        return res.status(500).json({ resCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC + err });
+                        return res.status(500).json({ resultCode:CODE.IPFS_ERROR.RESCODE, err: CODE.IPFS_ERROR.DESC + err });
                     }
                     return res.status(200).json(result);
                 })
@@ -351,6 +365,7 @@ exports.listGame = async function(req, res, next) {
 
 exports.voteGame = async function(req, res, next) {
     try{
+        console.log(req.session.accessToken)
         let data = req.body;
         let voter = req.session.user.account;
         if(await user.getInterval('vote:interval:'+voter)){
@@ -421,6 +436,26 @@ exports.reportGame = async function(req, res, next) {
     }
 }
 
+exports.claimReward = async function(req, res) {
+    try {
+        let rewardSteem = (typeof req.query.rewardSteem !== 'undefined') ? req.query.rewardSteem : '0.000 STEEM';
+        let rewardSbd = (typeof req.query.rewardSbd !== 'undefined') ? req.query.rewardSbd : '0.000 SBD';
+        let rewardVest = (typeof req.query.rewardVest !== 'undefined') ? req.query.rewardVest : '0.000000 VESTS';
+        let userInfo = req.session.user;
+        console.log(userInfo,req.session.accessToken);
+        let result = await steem.claimRewardBalance(req.session.accessToken, userInfo.account, rewardSteem, rewardSbd, rewardVest);
+        return res.status(200).json(result);
+    } catch(err) {
+        if (err instanceof DBError) {
+            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
+        } else if (err instanceof SDKError) {
+            return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
+        } else {
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
+        }
+    }
+};
+
 exports.logout = async function(req, res, next) {
     try{
         if (process.env.NODE_ENV !== 'development'){
@@ -449,7 +484,9 @@ function unzipFile(file, userid, cb) {
     var ret = decompress(file, config.get('steemit.app.gameurl')+"/"+userid,{
         filter: file => path.extname(file.path) !== '.exe'
     }).then(files => {
-        cb(files);
+        cb('',files);
+    }).catch(function (error) {
+        cb(error);
     });
 }
 

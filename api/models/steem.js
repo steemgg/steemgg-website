@@ -44,7 +44,7 @@ exports.post = function(accessToken, author, title, content, reward, tags, perml
     let metaData = {
         community: tag,
         tags: tags,
-        app: `steemgg.app/test`
+        app: `steemgg.app`
     };
 
     let commentOp = [
@@ -116,6 +116,12 @@ exports.vote = async function(accessToken, voter, author, permlink, weight) {
     let result = await sc2.instance.vote(accessToken, voter, author, permlink, weight);
     return result;
 }
+
+exports.claimRewardBalance = async function(accessToken, account, rewardSteem, rewardSbd, rewardVests) {
+    let result = await sc2.instance.claimRewardBalance(accessToken, account, rewardSteem, rewardSbd, rewardVests);
+    return result;
+}
+
 exports.createPermlink = function(title, author) {
     let permlink;
     let prefix;
@@ -127,6 +133,7 @@ exports.createPermlink = function(title, author) {
     permlink = prefix + s;
     return checkPermLinkLength(permlink);
 }
+
 exports.createCommentPermlink = function(parentAuthor, parentPermlink) {
     let permlink;
     const timeStr = new Date().toISOString().replace(/[^a-zA-Z0-9]+/g, '');
