@@ -145,7 +145,10 @@ exports.postGame = async function(req, res, next) {
         for(let i=tags.length;i>5;i--) {
             tags.pop();
         }
-        let content = data.activityDescription + '\n\n' +
+        let coverImage = JSON.parse(dbRes[0]['coverImage']);
+        let content = '[<img src="https://ipfs.io/ipfs/'+coverImage.hash+'" />](https://steemgg.com/#/game/play/'+data.gameid+')  \n\n' +
+                    '['+dbRes[0]['title']+'](https://steemgg.com/#/game/play/'+data.gameid+')' +  '\n\n' +
+                    data.activityDescription + '\n\n' +
                     '---\n' +
                     'Posted on [steemgg - The World\'s 1st Blockchain HTML5 Game Platform](https://steemgg.com/#/game/play/'+data.gameid+')\n';
         let result = await steem.post(req.session.accessToken, author, data.activityTitle, content, data.reward, tags,permLink, tag);
