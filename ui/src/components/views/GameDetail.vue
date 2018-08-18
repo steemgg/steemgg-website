@@ -26,7 +26,7 @@
                 </div>
                 <div class="gameMetadata">
                   <span class="modifiedTime">Added on {{postedTime}}</span>
-                  <span class="totalPayout">${{metadata.totalPayout}}</span>
+                  <span class="totalPayout">${{metadata.totalPayout.toFixed(3)}}</span>
                   <span class="activeVotes">
                     <el-tooltip class="item" effect="dark" content="Vote" placement="top">
                       <i v-if="alreadyVoted" class="fa fa-thumbs-up" aria-hidden="true" @click="alreadyVotedMessage"></i>
