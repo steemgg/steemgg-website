@@ -30,6 +30,7 @@ module.exports = function(app) {
   app.get('/api/v1/game', [morkSessionMiddleware], api.listGame);
   app.post('/api/v1/game', [morkSessionMiddleware, userMiddleware], api.addGame);
   app.post('/api/v1/post', [morkSessionMiddleware, userMiddleware], api.postGame);
+  app.get('/api/v1/claimReward', [morkSessionMiddleware, userMiddleware], api.claimReward);
   app.get('/api/v1/game/:id', [], api.getGameDetail);
   app.put('/api/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.updateGame);
   app.delete('/api/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.deleteGame);
