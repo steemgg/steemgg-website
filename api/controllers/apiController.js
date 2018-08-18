@@ -25,9 +25,12 @@ exports.upload = function(req, res) {
     form.multiples = true;
     form.keepExtensions = true;
     form.uploadDir = uploadDir;
+    form.maxFileSize = config.get('steemit.app.maxUploadSize') * 1024 * 1024;
 
     uploadStatus = true;
-    form.on('fileBegin', function (name, file) {
+    form.on('error', function(err) {
+        return res.status(500).json({ resCode:CODE.FILE_MAX_SIZE_ERROR.RESCODE, err: CODE.FILE_MAX_SIZE_ERROR.DESC });
+    }).on('fileBegin', function (name, file) {
         let fileType = file.type.split('/').pop();
         if(fileType == 'jpg' || fileType == 'png' || fileType == 'jpeg' || fileType == 'gif' ){
             file.path = path.join(uploadDir, '/image/', `${new Date().getTime()}_${req.session.user.account}.${fileType}`)
