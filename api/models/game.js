@@ -159,9 +159,9 @@ exports.gameList = async function(params) {
             gameQuery =  gameQuery + ' and ' + k + '=\'' +params[k] +'\'';
         }
     }
-    let sortArr = params['sort'].split("_");
-    let sql = 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend,activities,width,height from games where 1=1 ' + gameQuery + ' order by ? ? limit ?,?';
-    let rows = await db.execute(db.READ, sql, [sortArr[0], sortArr[1], params['offset'], params['pageSize']]);
+    gameQuery = gameQuery + 'order by ' + params['sort'].replace("_", " ");
+    let sql = 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend,activities,width,height from games where 1=1 ' + gameQuery + ' limit ?,?';
+    let rows = await db.execute(db.READ, sql, [params['offset'], params['pageSize']]);
     if(Object.keys(rows).length>0) {
         let data = {};
         data[key] = 1;
