@@ -6,7 +6,7 @@
         <!--<site-navigation></site-navigation>-->
       <!--</el-aside>-->
       <el-main>
-        <game-slider></game-slider>
+        <!--<game-slider></game-slider>-->
         <div class="game-list">
           <div class="list-title-wrapper" ><span class="list-name">Popular Games</span><span class="view-more"><router-link :to="{ name: 'browseGame', params: {}}" tag="span" >Show More...</router-link></span></div>
           <game-list :queryParameter="popularParam"></game-list>
@@ -111,7 +111,7 @@
   }
   .cookieAlert {
     position: fixed;
-    bottom: 70px;
+    bottom: 10px;
     /*width: 1160px;*/
     /*margin-left: 30px;*/
     height: 50px;

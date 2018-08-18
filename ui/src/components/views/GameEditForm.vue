@@ -20,7 +20,7 @@
                     <mavon-editor language="en" :subfield="false" v-model='game.description' :toolbars="descriptionEditorToolbar"></mavon-editor>
                   </el-form-item>
                   <el-form-item label="Cover image" prop="coverImage">
-                    <el-tooltip content="Min: 300x200px; Max: 1200x800px." placement="top" effect="light">
+                    <el-tooltip content="Image dimension must be: width:300px Height:200px" placement="top" effect="light">
                       <vue-dropzone
                         ref="coverImageDropzone"
                         @vdropzone-success="onImageUploaded"
@@ -60,6 +60,7 @@
                         :on-remove="onFileRemoved"
                         :file-list="fileList"
                         :limit="1"
+                        :ref="gameFileUpload"
                         accept="application/zip"
                         :on-success="onFileUploaded"
                         :before-upload="beforeFileUpload"
@@ -67,7 +68,7 @@
                         :on-error="onFileUploadFail"
                         list-type="text">
                         <el-button size="small" type="primary" :disabled="!$store.state.loggedIn">Click to upload</el-button>
-                        <div slot="tip" class="el-upload__tip upload_tip">Only accept .zip file (max size 10MB), which should contain all of your game's files and assets. There must be an index.html file in the root folder.</div>
+                        <div slot="tip" class="el-upload__tip upload_tip">Only accept .zip file (max size 20MB), which should contain all of your game's files and assets. There must be an index.html file in the root folder.</div>
                       </el-upload>
                     </div>
                   </el-form-item>
@@ -186,11 +187,17 @@
   import VueCountdown from '@xkeshi/vue-countdown'
   const gameService = new GameService()
 
-  const gameImageDimention = {
-    minWidth: 300,
-    maxWidth: 1200,
-    minHeight: 200,
-    maxHeight: 800
+  const gameImageDimension = {
+    // minWidth: 300,
+    // maxWidth: 1200,
+    // minHeight: 200,
+    // maxHeight: 800
+    width: 300,
+    height: 200
+  }
+  // max file size is 20MB
+  const gameFileConfig = {
+    size: 20 * 1024 * 1024
   }
   export default {
     components: {
@@ -300,9 +307,8 @@
             // Register for the thumbnail callback.
             // When the thumbnail is created the image dimensions are set.
             this.on('thumbnail', function (file) {
-              debugger
               // Do the dimension checks you want to do
-              if (file.width < gameImageDimention.minWidth || file.width > gameImageDimention.maxWidth || file.height < gameImageDimention.minHeight || file.height > gameImageDimention.maxHeight) {
+              if (file.width !== gameImageDimension.width || file.height !== gameImageDimension.height) {
                 // file.invalidDimention = true
                 file.rejectDimensions && file.rejectDimensions()
               } else {
@@ -514,9 +520,15 @@
       },
       beforeFileUpload (file) {
         console.log(file)
+        debugger
+        if (file.size > gameFileConfig.size) {
+          this.$message.error('The max file size is 20MB.')
+          return false
+        }
       },
       onFileExceedMax (file) {
-        this.$message.info('Please remove the current file first')
+        // this.$refs.gameFileUpload.clearFiles()
+        this.$message.warning('Please remove the current file first')
       },
       onFileUploadFail (error, file) {
         console.log('Fail to upload game file', error)

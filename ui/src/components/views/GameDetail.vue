@@ -78,7 +78,7 @@
                   <div class="commentAction">
                     <div class="commentActionTitle">Comments</div>
                     <div class="commentActionText">
-                      <el-input placeholder="Leave a comment" v-model="gameComment" :disabled="posting"></el-input>
+                      <el-input autosize type="textarea" placeholder="Leave a comment" v-model="gameComment" :disabled="posting"></el-input>
                     </div>
                     <div class="commentActionButton">
                       <el-button round @click="postComment" :loading="posting">Comment</el-button>
@@ -209,9 +209,9 @@
       },
       alreadyVoted () {
         let voted = false
-        if (this.latestPost != null && this.metadata.activeVotes != null) {
-          for (let i = 0; i < this.metadata.activeVotes.length; i++) {
-            if (this.metadata.activeVotes[i].voter === this.$store.state.user.account) {
+        if (this.latestPost != null && this.metadata.latestVotes != null) {
+          for (let i = 0; i < this.metadata.latestVotes.length; i++) {
+            if (this.metadata.latestVotes[i].voter === this.$store.state.user.account) {
               voted = true
               break
             }
@@ -366,6 +366,9 @@
             this.game = response
             if (this.game.status === 1 || this.$store.getters.isAuditor || (this.$store.state.loggedIn && this.$store.getters.user.account === this.game.account)) {
               this.gameUrl = process.env.IPFS_SERVER_URL + this.game.gameUrl.hash
+              if (this.$store.state.loggedIn) {
+                this.gameUrl = this.gameUrl + '?account=' + encodeURIComponent(this.$store.getters.user.account)
+              }
               console.log('mounted successfully', this.game)
               this.showApprove = this.$store.getters.isAuditor && this.game && this.game.status === 0
               this.refreshSteemitMetaData()

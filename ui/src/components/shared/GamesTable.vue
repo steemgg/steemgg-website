@@ -32,7 +32,7 @@
           <el-button v-if="scope.row.status == 0 && type == 'audit'" @click="openDialog(scope.$index, 'Approve')" type="success"  size="mini">Approve</el-button>
           <div class="gameActionButton" v-if="scope.row.status == 1"><el-button  @click="openDialog(scope.$index, 'Deny Game')" type="danger"  size="mini" v-if="type == 'report' || type == 'live'">Deny Game</el-button></div>
           <div class="gameActionButton" v-if="scope.row.report == 1"><el-button @click="openDialog(scope.$index, 'Dismiss Report')" type="primary"  size="mini" v-if="type == 'report'">Dismiss Report</el-button></div>
-          <div class="gameActionButton" v-if="scope.row.status == 1 && type === 'recommended'"><el-button  @click="removeGameFromRecomended(scope.$index)" type="danger" size="mini" v-if="type == 'recommended'">Remove</el-button></div>
+          <div class="gameActionButton" v-if="scope.row.status == 1 && type == 'recommended'"><el-button  @click="removeGameFromRecomended(scope.$index)" type="danger" size="mini" v-if="type == 'recommended'">Remove</el-button></div>
         </template>
       </el-table-column>
     </el-table>

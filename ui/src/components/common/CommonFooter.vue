@@ -9,9 +9,9 @@
         <!--<li><a href="#"><i class="fa fa-google-plus"></i></a></li>-->
       </ul>
     <div class="policy-link">
+      <router-link :to="{name: 'privacy'}" tag="a">Privacy Policy</router-link> |
       <router-link :to="{name: 'cookiePolicy'}" tag="a">Cookie Policy</router-link> |
       <router-link :to="{name: 'termsOfService'}" tag="a">Terms of Service</router-link>
-
     </div>
   </div>
 </template>
@@ -34,8 +34,8 @@
     background: #0c0d0d;
     height: 60px;
     /*width: 1160px;*/
-    position: fixed;
-    bottom: 0px;
+    /*position: fixed;*/
+    /*bottom: 0px;*/
     /*left: 20px;*/
     z-index: 10001;
     display: flex;
