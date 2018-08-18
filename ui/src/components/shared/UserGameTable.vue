@@ -30,6 +30,7 @@
       <el-table-column label="Operations" fixed="right">
         <template slot-scope="scope">
           <el-button @click="editGame(scope.row.id)" type="success" size="mini" >Edit</el-button>
+          <el-button v-if="allowDelete" @click="deleteGame(scope.$index, scope.row.id, scope.row.title)" type="danger" size="mini" >Delete</el-button>
           <!--<el-button v-if="scope.row.status == 1" @click="playGame(scope.row.id)" type="success" size="mini">Play</el-button>-->
           <!--<el-button v-if="scope.row.status == 0" @click="playGame(scope.row.id)" type="success" size="mini">Preview</el-button>-->
         </template>
@@ -42,13 +43,15 @@
   //  import { Table, TableColumn } from 'element-ui'
   import moment from 'moment'
   import CommentPopover from './CommentPopover.vue'
+  import GameService from '../../service/game.service'
+  const gameService = new GameService()
 
   export default {
 
     components: {
       CommentPopover
     },
-    props: ['items'],
+    props: ['items', 'allowDelete'],
     name: 'UserGameTable',
     data () {
       return {
@@ -73,6 +76,26 @@
           params: {
             id: id
           }
+        })
+      },
+      deleteGame (index, id, title) {
+        this.$confirm(`Are you sure you want to delete game '${title}'?`, 'Delete', {
+          confirmButtonText: 'Yes',
+          cancelButtonText: 'Cancel',
+          type: 'warning'
+        }).then(() => {
+          this.loading = true
+          gameService.delete(id).then(() => {
+            this.items.splice(index, 1)
+            this.$emit('game-deleted', id)
+            this.loading = false
+            this.$message.success(`Game '${title}' has been deleted.`)
+          }).catch(error => {
+            this.loading = false
+            console.log(`Delete game ${id} failed: `, error)
+            this.$message.error('Fail to delete the game, please make sure the game exist or try again later.')
+          })
+        }).catch(() => {
         })
       },
       transformTime (time) {

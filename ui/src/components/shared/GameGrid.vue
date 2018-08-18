@@ -31,6 +31,7 @@
 </template>
 
 <script>
+  import moment from 'moment'
   export default {
     components: {
     },
@@ -47,7 +48,14 @@
     },
     computed: {
       thumbnail () {
-        return process.env.IPFS_SERVER_URL + this.game.coverImage.hash
+        // if the game is modified in the last 12 hours, use our own ipfs server
+        // else, use the public IPFS server
+        let gap = moment().diff(moment(this.game.lastModified), 'hours')
+        if (gap > 12) {
+          return 'https://ipfs.io/ipfs/' + this.game.coverImage.hash
+        } else {
+          return process.env.IPFS_SERVER_URL + this.game.coverImage.hash
+        }
       }
     },
     mounted () {

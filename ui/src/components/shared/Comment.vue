@@ -6,7 +6,7 @@
       <!--</el-col>-->
       <!--<el-col :xs="16" :sm="16" :md="22" :lg="22" :xl="22">-->
       <el-col :xs="3" :sm="3" :md="2" :lg="1" :xl="1" class="avatar-placeholder">
-        <avatar :accountName="comment.author"></avatar>
+        <avatar :account="comment.author"></avatar>
       </el-col >
       <el-col :xs="21" :sm="21" :md="22" :lg="22" :xl="22">
         <div class="commentWrapper">
@@ -44,7 +44,7 @@
             </span>
           </div>
           <div class="replyArea" v-if="leaveReply">
-            <el-input ref="replyInput" autofocus placeholder="say something..." v-model="replyContent" :disabled="replying"></el-input>
+            <el-input ref="replyInput" autofocus autosize type="textarea" placeholder="say something..." v-model="replyContent" :disabled="replying"></el-input>
             <div class="replyButtons">
               <el-button round @click="leaveReply = false;" :disabled="replying">Cancel</el-button>
               <el-button round @click="postReply" :loading="replying">Reply</el-button>

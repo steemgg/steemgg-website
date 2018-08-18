@@ -1,7 +1,7 @@
 <template>
   <div class='userInfoContainer'>
     <span v-if='$store.state.loggedIn'>
-      <avatar :accountName='accountName'></avatar> <span class='user-name'>{{accountName}}</span>
+      <avatar :account='accountName'></avatar> <span class='user-name'>{{accountName}}</span>
       <router-link class="fa fa-cog fa-2x fa-fw profile" :to="{name: 'userProfile'}" tag="i" title="Profile"></router-link>
       <el-button class='logout'  @click='logout'>Log out</el-button>
     </span>
