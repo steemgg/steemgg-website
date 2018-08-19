@@ -26,7 +26,7 @@
                 </div>
                 <div class="gameMetadata">
                   <span class="modifiedTime">Added on {{postedTime}}</span>
-                  <span class="totalPayout">${{metadata.totalPayout.toFixed(3)}}</span>
+                  <span class="totalPayout">${{totalPayout}}</span>
                   <span class="activeVotes">
                     <el-tooltip class="item" effect="dark" content="Vote" placement="top">
                       <i v-if="alreadyVoted" class="fa fa-thumbs-up" aria-hidden="true" @click="alreadyVotedMessage"></i>
@@ -175,6 +175,7 @@
         fullscreen: false,
         defaultVotingWeight: 100,
         votingWeightVisible: false,
+        totalPayout: 0.000,
 
         form: {
           comment: '',
@@ -220,9 +221,6 @@
       }
     },
     methods: {
-      // onVotingPopoverDisplay () {
-      //
-      // }
       openDialog () {
         this.dialogFormVisible = true
       },
@@ -337,6 +335,7 @@
           gameService.fetchSteemitMetadata(this.game).then(response => {
             console.log('get steem data', response)
             this.metadata = response
+            this.totalPayout = this.metadata.totalPayout.toFixed(3)
           }).catch(error => {
             console.log('fail to get steem data', error.response)
           })
