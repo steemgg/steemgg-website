@@ -192,9 +192,6 @@
           return ''
         }
       },
-//      thumbnail () {
-//        return 'http://ipfs.io/ipfs/' + this.game.coverImage.hash
-//      },
       postedTime () {
         return moment(this.game.lastModified).fromNow()
       },
@@ -317,6 +314,8 @@
               body: this.gameComment,
               last_update: moment().toISOString()
             })
+            this.gameComment = ''
+            this.$message.success('Comment added successfully.')
           }).catch(error => {
             if (error.response.data.resultCode === 402) {
               this.$message.error('You just added comment, please wait for a while.')

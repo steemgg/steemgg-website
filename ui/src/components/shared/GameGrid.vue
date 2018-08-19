@@ -38,6 +38,7 @@
 
 <script>
   import moment from 'moment'
+  const PUBLIC_IPFS_SERVER_URL = 'http://ipfs.io/ipfs/'
   export default {
     components: {
     },
@@ -58,7 +59,7 @@
         // else, use the public IPFS server
         let gap = moment().diff(moment(this.game.lastModified), 'hours')
         if (gap > 12) {
-          return 'https://ipfs.io/ipfs/' + this.game.coverImage.hash
+          return PUBLIC_IPFS_SERVER_URL + this.game.coverImage.hash
         } else {
           return process.env.IPFS_SERVER_URL + this.game.coverImage.hash
         }
