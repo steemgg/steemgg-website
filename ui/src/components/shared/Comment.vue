@@ -14,8 +14,7 @@
             <span class="author">{{comment.author}}</span>
             <span class="time">{{lateUpdate}}</span>
           </div>
-          <div class="body">
-            {{commentBody}}
+          <div class="body" v-html="commentBody">
           </div>
           <div class="metadata">
             <span class="votes">
