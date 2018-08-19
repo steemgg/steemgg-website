@@ -18,13 +18,13 @@ The Official Web Site of [steemgg](https://steemgg.com)
 # How to run the UI
 ```bash
 # get source code
-$git clone https://github.com/steemgg/steemgg-website.git
+$ git clone https://github.com/steemgg/steemgg-website.git
 # cd to the ui folder  
-$cd steemgg-website/ui
+$ cd steemgg-website/ui
 # install package dependencies
-$npm install 
+$ npm install 
 # start ui
-$npm run start 
+$ npm run start 
 ```
 * Visit http://localhost:8080 or http://127.0.0.1:8080
 
@@ -36,11 +36,11 @@ $npm run start
 
 ```bash
 # get source code
-$git clone https://github.com/steemgg/steemgg-website.git
+$ git clone https://github.com/steemgg/steemgg-website.git
 # enter docker-compose folder
-$cd steemgg-website/docker
+$ cd steemgg-website/docker
 # start server
-$docker-compose up -d
+$ docker-compose up -d
 ```
 * Visit http://localhost/api/v1/game or http://127.0.0.1/api/v1/game
 
