@@ -14,8 +14,7 @@
             <span class="author">{{comment.author}}</span>
             <span class="time">{{lateUpdate}}</span>
           </div>
-          <div class="body">
-            {{comment.body}}
+          <div class="body" v-html="commentBody">
           </div>
           <div class="metadata">
             <span class="votes">
@@ -174,6 +173,10 @@
         return this.comment.active_votes.map(votes => {
           return votes.author
         })
+      },
+
+      commentBody () {
+        return this.comment.body.replace(/\n/g, '<br/>')
       },
 
       payout () {
