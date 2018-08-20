@@ -330,7 +330,7 @@
         if (this.game) {
           this.latestPost = null
           if (this.game && this.game.activities && this.game.activities.length > 0) {
-            this.latestPost = this.game.activities[this.game.activities.length - 1]
+            this.latestPost = this.game.activities[0]
           }
           gameService.fetchSteemitMetadata(this.game).then(response => {
             console.log('get steem data', response)
