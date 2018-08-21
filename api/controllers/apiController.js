@@ -18,30 +18,39 @@ import {DBError} from '../errors/DBError';
 
 
 exports.upload = function(req, res) {
-    var userid = req.session.user.userid;
-    var uploadDir = config.get('steemit.app.uploadurl');
-    var form = new formidable.IncomingForm(),uploadStatus;
+    let userid = req.session.user.userid;
+    let uploadDir = config.get('steemit.app.uploadurl');
+    let form = new formidable.IncomingForm(),uploadStatus;
+    let zipMineTypes = ['zip', 'octet-stream','x-zip','x-zip-compressed','zip-compressed'];
+    let errInfo = '';
     form.multiples = true;
     form.keepExtensions = true;
     form.uploadDir = uploadDir;
-    form.maxFileSize = config.get('steemit.app.maxUploadSize') * 1024 * 1024;
 
-    uploadStatus = true;
+    uploadStatus = 1;
     form.on('error', function(err) {
-        return res.status(500).json({ resCode:CODE.FILE_MAX_SIZE_ERROR.RESCODE, err: CODE.FILE_MAX_SIZE_ERROR.DESC });
+        errInfo = err.toString();
+        if(errInfo.indexOf("maxFileSize")>0) {
+            uploadStatus = 3;
+        } else {
+            uploadStatus = 4;
+        }
     }).on('fileBegin', function (name, file) {
         let fileType = file.type.split('/').pop();
         if(fileType == 'jpg' || fileType == 'png' || fileType == 'jpeg' || fileType == 'gif' ){
+            form.maxFileSize = config.get('steemit.app.maxImgUploadSize') * 1024 * 1024;
             file.path = path.join(uploadDir, '/image/', `${new Date().getTime()}_${req.session.user.account}.${fileType}`)
-        } else if (fileType == 'zip') {
+        } else if (zipMineTypes.indexOf(fileType)>=0) {
+            form.maxFileSize = config.get('steemit.app.maxUploadSize') * 1024 * 1024;
             file.path = path.join(uploadDir, '/zip/', `${new Date().getTime()}_${req.session.user.account}.zip`)
         } else {
-            uploadStatus = false;
+            uploadStatus = 2;
         }
     }).on('file', function(field, file) {
-        if (uploadStatus) {
+        if (uploadStatus == 1) {
+            let fileType = file.type.split('/').pop();
             let ipfs = ipfsAPI({host: config.get('steemit.ipfs.ip'), port: config.get('steemit.ipfs.port'), protocol: 'http'});
-            if(file.type == 'application/zip') {
+            if(zipMineTypes.indexOf(fileType)>=0) {
                 unzipFile(file.path, userid, function cb(err,unzips){
                     if (err) {
                         console.error(err);
@@ -94,8 +103,12 @@ exports.upload = function(req, res) {
                     return res.status(200).json(result);
                 })
             }
+        } else if(uploadStatus == 2){
+            return res.status(500).json({ resultCode:CODE.FILE_TYPE_ERROR.RESCODE, err: CODE.FILE_TYPE_ERROR.DESC });
+        } else if(uploadStatus == 3){
+            return res.status(500).json({ resultCode:CODE.FILE_MAX_SIZE_ERROR.RESCODE, err: CODE.FILE_MAX_SIZE_ERROR.DESC });
         } else {
-            return res.status(500).json({ resCode:CODE.FILE_TYPE_ERROR.RESCODE, err: CODE.FILE_TYPE_ERROR.DESC });
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err: errInfo });
         }
     });
     form.parse(req);
