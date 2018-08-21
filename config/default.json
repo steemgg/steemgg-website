@@ -24,8 +24,9 @@
       "voteInterval": "3",
       "sessionTime": "86400",
       "allowedOrigins": ["http://127.0.0.1"],
-      "domain":"127.0.0.1"
-
+      "domain":"127.0.0.1",
+      "maxUploadSize" :"20",
+      "maxImgUploadSize" :"1"
     },
     "sc": {
       "app": "steemgg.app",
