@@ -8,16 +8,20 @@
       <el-main>
         <!--<game-slider></game-slider>-->
         <div class="game-list">
-          <div class="list-title-wrapper" ><span class="list-name">Popular Games</span><span class="view-more"><router-link :to="{ name: 'browseGame', params: {}}" tag="span" >Show More...</router-link></span></div>
-          <game-list :queryParameter="popularParam"></game-list>
-        </div>
-        <div class="game-list">
-          <div class="list-title-wrapper" ><span class="list-name">Recommended Games</span><span class="view-more"><router-link :to="{ name: 'browseGame', params: {}}" tag="span" >Show More...</router-link></span></div>
+          <div class="list-title-wrapper" ><span class="list-name">The Recommended Games</span><span class="view-more"><router-link :to="{ name: 'browseGame', params: {}}" tag="span" >Show More...</router-link></span></div>
           <game-list :queryParameter="recommendParam"></game-list>
         </div>
         <div class="game-list">
-          <div class="list-title-wrapper" ><span class="list-name">New Games</span><span class="view-more"><router-link :to="{ name: 'browseGame', params: {}}" tag="span">Show More...</router-link></span></div>
+          <div class="list-title-wrapper" ><span class="list-name">The Latest Games</span><span class="view-more"><router-link :to="{ name: 'browseGame', params: {}}" tag="span">Show More...</router-link></span></div>
           <game-list :queryParameter="newGameParam"></game-list>
+        </div>
+        <div class="game-list">
+          <div class="list-title-wrapper" ><span class="list-name">Most Popular Games</span><span class="view-more"><router-link :to="{ name: 'browseGame', params: {}}" tag="span" >Show More...</router-link></span></div>
+          <game-list :queryParameter="popularParam"></game-list>
+        </div>
+        <div class="game-list">
+          <div class="list-title-wrapper" ><span class="list-name">Top Payout Games</span><span class="view-more"><router-link :to="{ name: 'browseGame', params: {}}" tag="span" >Show More...</router-link></span></div>
+          <game-list :queryParameter="topPayoutParam"></game-list>
         </div>
         <div v-if="$store.getters.showCookieAlert" class="cookieAlert componentDynamicWidth">
           <span>This website uses cookies to ensure you get the best experience on our website. <router-link class="cookieLink" :to="{name: 'cookiePolicy'}" tag="a">Learn more</router-link></span><span class="cookieDismiss" @click="dismissCookieAlert">Got it</span>
@@ -64,6 +68,10 @@
         newGameParam: {
           // status: 1,
           sort: 'created_desc',
+          limit: 10
+        },
+        topPayoutParam: {
+          sort: 'payout_desc',
           limit: 10
         }
       }

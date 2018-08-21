@@ -296,13 +296,13 @@
         },
         dropzoneOptions: {
           url: (process.env.API_SERVER_URL.endsWith('/') ? process.env.API_SERVER_URL.slice(0, -1) : process.env.API_SERVER_URL + '/api/v1/upload') + '/api/v1/upload',
-          maxFilesize: 4,
+          maxFilesize: 1,
           maxFiles: 1,
           thumbnailWidth: 330,
           addRemoveLinks: true,
           withCredentials: true,
           acceptedFiles: 'image/*',
-          dictDefaultMessage: "<i class='fa fa-cloud-upload'></i> Upload a cover image for the game, max file size is 4MB",
+          dictDefaultMessage: "<i class='fa fa-cloud-upload'></i> Upload a cover image for the game, max file size is 1MB",
           init: function () {
             // Register for the thumbnail callback.
             // When the thumbnail is created the image dimensions are set.

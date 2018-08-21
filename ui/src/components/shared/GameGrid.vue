@@ -19,10 +19,16 @@
           <!--<span data-icon="B">124</span>-->
           <!--<a href="#" class="info">Play</a>-->
         <!--</div>-->
+        <span class="vote">
+          <i class="fa fa-thumbs-o-up" aria-hidden="true" ></i>
+          <span class="vote-number">{{game.vote}}</span>
+        </span>
+
         <span class="payout">
           <i class="fa fa-usd" aria-hidden="true"></i>
           <span class="payout-amount">{{game.payout}}</span>
         </span>
+
         <router-link v-if="mode != 'edit'" :to="{ name: 'viewGame', params: { id: game.id }}" tag="a" class="play">→</router-link>
         <router-link v-if="mode == 'edit'" :to="{ name: 'editGame', params: { id: game.id }}" tag="a" class="play">→</router-link>
       </div>
@@ -32,6 +38,7 @@
 
 <script>
   import moment from 'moment'
+  const PUBLIC_IPFS_SERVER_URL = 'http://ipfs.io/ipfs/'
   export default {
     components: {
     },
@@ -52,7 +59,7 @@
         // else, use the public IPFS server
         let gap = moment().diff(moment(this.game.lastModified), 'hours')
         if (gap > 12) {
-          return 'https://ipfs.io/ipfs/' + this.game.coverImage.hash
+          return PUBLIC_IPFS_SERVER_URL + this.game.coverImage.hash
         } else {
           return process.env.IPFS_SERVER_URL + this.game.coverImage.hash
         }
@@ -103,13 +110,28 @@
     position: absolute;
     bottom: 10px;
     right: 60px;
-    color: black;
+    font-size: 1.4em;
   }
   .game-info-view .payout i {
-    color: black;
+    color: white;
   }
   .game-info-view .payout .payout-amount {
-    font-size: 14px;
+    color: orange;
+    font-weight: bold;
+  }
+
+  .game-info-view .vote {
+    position: absolute;
+    bottom: 10px;
+    right: 100px;
+    font-size: 1.4em;
+  }
+  .game-info-view .vote i {
+    color: white;
+  }
+  .game-info-view .vote .vote-number {
+    font-weight: bold;
+    color: orange;
   }
 
   .game-info-view h2 {

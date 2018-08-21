@@ -41,7 +41,7 @@
             <h2>Trade your reward Now</h2>
           </div>
           <div class="blocktrade">
-            <iframe class="blocktrades" src="https://widget.blocktrades.us?affiliate_id=9c246782-6e0f-44f7-977d-e0f8c365b8d5&show_powered_by_blocktrades=false" height="600" width="90%" style="border: none;">Can't load Exchange widget.</iframe>
+            <iframe class="blocktrades" src="https://widget.blocktrades.us?affiliate_id=9c246782-6e0f-44f7-977d-e0f8c365b8d5" height="700" width="90%" style="border: none;">Can't load Exchange widget.</iframe>
           </div>
         </el-tab-pane>
       </el-tabs>

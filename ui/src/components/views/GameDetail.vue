@@ -26,7 +26,7 @@
                 </div>
                 <div class="gameMetadata">
                   <span class="modifiedTime">Added on {{postedTime}}</span>
-                  <span class="totalPayout">${{metadata.totalPayout}}</span>
+                  <span class="totalPayout">${{totalPayout}}</span>
                   <span class="activeVotes">
                     <el-tooltip class="item" effect="dark" content="Vote" placement="top">
                       <i v-if="alreadyVoted" class="fa fa-thumbs-up" aria-hidden="true" @click="alreadyVotedMessage"></i>
@@ -175,6 +175,7 @@
         fullscreen: false,
         defaultVotingWeight: 100,
         votingWeightVisible: false,
+        totalPayout: 0.000,
 
         form: {
           comment: '',
@@ -192,9 +193,6 @@
           return ''
         }
       },
-//      thumbnail () {
-//        return 'http://ipfs.io/ipfs/' + this.game.coverImage.hash
-//      },
       postedTime () {
         return moment(this.game.lastModified).fromNow()
       },
@@ -223,9 +221,6 @@
       }
     },
     methods: {
-      // onVotingPopoverDisplay () {
-      //
-      // }
       openDialog () {
         this.dialogFormVisible = true
       },
@@ -317,6 +312,8 @@
               body: this.gameComment,
               last_update: moment().toISOString()
             })
+            this.gameComment = ''
+            this.$message.success('Comment added successfully.')
           }).catch(error => {
             if (error.response.data.resultCode === 402) {
               this.$message.error('You just added comment, please wait for a while.')
@@ -333,11 +330,12 @@
         if (this.game) {
           this.latestPost = null
           if (this.game && this.game.activities && this.game.activities.length > 0) {
-            this.latestPost = this.game.activities[this.game.activities.length - 1]
+            this.latestPost = this.game.activities[0]
           }
           gameService.fetchSteemitMetadata(this.game).then(response => {
             console.log('get steem data', response)
             this.metadata = response
+            this.totalPayout = this.metadata.totalPayout.toFixed(3)
           }).catch(error => {
             console.log('fail to get steem data', error.response)
           })
