@@ -277,7 +277,7 @@
             { required: true, message: 'Please select game type', trigger: 'change' }
           ],
           coverImage: [
-            { type: 'object', required: true, message: 'Please upload game image', trigger: 'change' }
+            { type: 'object', required: true, message: 'Please upload a valid game image', trigger: 'change' }
           ],
           gameUrl: [
             { type: 'object', required: true, message: 'Please upload game file', trigger: 'change' }
