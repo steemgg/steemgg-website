@@ -30,7 +30,7 @@
                         :options="dropzoneOptions">
                     </vue-dropzone>
                     </el-tooltip>
-                    <div><i class="fa fa-info-circle" aria-hidden="true"></i> To get the best result, we suggest the image ratios to be 3:2.</div>
+                    <div><i class="fa fa-info-circle" aria-hidden="true"></i> Image dimension must be: width:300px Height:200px</div>
                   </el-form-item>
                   <el-form-item label='Game width' prop="width">
                     <el-tooltip content="Min: 300px; Max: 3000px" placement="top" effect="light">
