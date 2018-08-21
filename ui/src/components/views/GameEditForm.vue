@@ -60,7 +60,6 @@
                         :on-remove="onFileRemoved"
                         :file-list="fileList"
                         :limit="1"
-                        :ref="gameFileUpload"
                         accept="application/zip"
                         :on-success="onFileUploaded"
                         :before-upload="beforeFileUpload"
@@ -519,15 +518,12 @@
         this.game.gameUrl.name = file.name
       },
       beforeFileUpload (file) {
-        console.log(file)
-        debugger
         if (file.size > gameFileConfig.size) {
           this.$message.error('The max file size is 20MB.')
           return false
         }
       },
       onFileExceedMax (file) {
-        // this.$refs.gameFileUpload.clearFiles()
         this.$message.warning('Please remove the current file first')
       },
       onFileUploadFail (error, file) {
