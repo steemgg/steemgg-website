@@ -30,7 +30,7 @@
                         :options="dropzoneOptions">
                     </vue-dropzone>
                     </el-tooltip>
-                    <div><i class="fa fa-info-circle" aria-hidden="true"></i> To get the best result, we suggest the image ratios to be 3:2.</div>
+                    <div><i class="fa fa-info-circle" aria-hidden="true"></i> Image dimension must be: width:300px Height:200px</div>
                   </el-form-item>
                   <el-form-item label='Game width' prop="width">
                     <el-tooltip content="Min: 300px; Max: 3000px" placement="top" effect="light">
@@ -60,7 +60,6 @@
                         :on-remove="onFileRemoved"
                         :file-list="fileList"
                         :limit="1"
-                        :ref="gameFileUpload"
                         accept="application/zip"
                         :on-success="onFileUploaded"
                         :before-upload="beforeFileUpload"
@@ -278,7 +277,7 @@
             { required: true, message: 'Please select game type', trigger: 'change' }
           ],
           coverImage: [
-            { type: 'object', required: true, message: 'Please upload game image', trigger: 'change' }
+            { type: 'object', required: true, message: 'Please upload a valid game image', trigger: 'change' }
           ],
           gameUrl: [
             { type: 'object', required: true, message: 'Please upload game file', trigger: 'change' }
@@ -519,15 +518,12 @@
         this.game.gameUrl.name = file.name
       },
       beforeFileUpload (file) {
-        console.log(file)
-        debugger
         if (file.size > gameFileConfig.size) {
           this.$message.error('The max file size is 20MB.')
           return false
         }
       },
       onFileExceedMax (file) {
-        // this.$refs.gameFileUpload.clearFiles()
         this.$message.warning('Please remove the current file first')
       },
       onFileUploadFail (error, file) {

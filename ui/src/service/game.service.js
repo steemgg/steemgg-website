@@ -119,7 +119,6 @@ export default class GameService {
   }
 
   vote (author, permlink, weight) {
-    // debugger
     return axiosInstance.post(`/api/v1/vote/${author}/${permlink}`, {weight: weight}).then(response => {
       return response.data
     })
