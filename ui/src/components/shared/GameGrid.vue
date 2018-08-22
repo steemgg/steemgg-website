@@ -38,7 +38,7 @@
 
 <script>
   import moment from 'moment'
-  const PUBLIC_IPFS_SERVER_URL = 'http://ipfs.io/ipfs/'
+  const PUBLIC_IPFS_SERVER_URL = 'https://ipfs.io/ipfs/'
   export default {
     components: {
     },
