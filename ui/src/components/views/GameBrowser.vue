@@ -29,7 +29,7 @@
         </span>
       </div>
       <div class="common-content" infinite-scroll-immediate-check="false" v-infinite-scroll="loadMore" infinite-scroll-disabled="infiniteScrollDisabled" infinite-scroll-distance="10">
-        <div class="game-list-container">
+        <div class="game-list-container" v-loading="loading">
           <game-grid v-for="game in items" :game="game" :key="game.id"></game-grid>
         </div>
       </div>
@@ -75,14 +75,15 @@
     data () {
       return {
         categories: GAME_CATEGORY,
+        loading: false,
         sortBy: [
           {
             label: 'Latest',
             value: 'created_desc'
           },
           {
-            label: 'Top Voted',
-            value: 'voted_desc'
+            label: 'Most Popular',
+            value: 'vote_desc'
           },
           {
             label: 'Top Payout',
@@ -123,9 +124,11 @@
       },
       loadData () {
         console.log('load data with queryParameter', this.queryParameter)
+        this.loading = true
         gameService.query(this.queryParameter).then(result => {
           this.items = this.items.concat(result.items)
           this.totalCount = result.totalCount
+          this.loading = false
           if (result.next == null || result.next === '') {
             this.hasMore = false
           } else {
@@ -133,6 +136,7 @@
           }
         }).catch(error => {
           console.log(error.response)
+          this.loading = false
           this.$message.error('Fail to load game data, please try again later')
         })
       }
@@ -148,6 +152,7 @@
   .game-list-container {
     display: flex;
     flex-wrap: wrap;
+    min-height: 100px;
   }
   .games-container {
     padding: 0 20px;
