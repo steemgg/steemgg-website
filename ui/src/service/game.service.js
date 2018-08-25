@@ -102,12 +102,18 @@ export default class GameService {
     clonnedActivity.gameid = gameId
     delete clonnedActivity.award
     delete clonnedActivity.permlink
+    clonnedActivity.tags = [...new Set([...clonnedActivity.tags.map(tag => {
+      return tag.toLowerCase()
+    })])]
     return axiosInstance.post('/api/v1/post', clonnedActivity).then(response => {
       return response.data
     })
   }
 
   updateActivity (gameId, activity) {
+    activity.tags = [...new Set([...activity.tags.map(tag => {
+      return tag.toLowerCase()
+    })])]
     return axiosInstance.put('/api/v1/post', {'gameId': gameId, 'activity': activity})
   }
 
