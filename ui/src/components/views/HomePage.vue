@@ -57,22 +57,22 @@
         popularParam: {
           // status: 1,
           sort: 'vote_desc',
-          limit: 10,
+          limit: 12,
           type: 'index'
         },
         recommendParam: {
           // status: 1,
           recommend: 1,
-          limit: 10
+          limit: 12
         },
         newGameParam: {
           // status: 1,
           sort: 'created_desc',
-          limit: 10
+          limit: 12
         },
         topPayoutParam: {
           sort: 'payout_desc',
-          limit: 10
+          limit: 12
         }
       }
     },
