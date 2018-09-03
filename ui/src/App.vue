@@ -9,8 +9,8 @@ export default {
   name: 'app',
   data: {},
   metaInfo: {
-    title: 'steemGG STEEM blockchain HTML5 game publishing distribution platform',
-    titleTemplate: '%s ← steemGG STEEM blockchain HTML5 game',
+    title: 'SteemGG - STEEM Blockchain Based HTML5 Gaming Platform',
+    titleTemplate: '%s ← SteemGG - STEEM Blockchain Based HTML5 Gaming Platform',
     meta: [
       {
         'http-equiv': 'Content-Type',
