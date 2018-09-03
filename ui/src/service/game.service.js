@@ -102,12 +102,18 @@ export default class GameService {
     clonnedActivity.gameid = gameId
     delete clonnedActivity.award
     delete clonnedActivity.permlink
+    clonnedActivity.tags = [...new Set([...clonnedActivity.tags.map(tag => {
+      return tag.toLowerCase()
+    })])]
     return axiosInstance.post('/api/v1/post', clonnedActivity).then(response => {
       return response.data
     })
   }
 
   updateActivity (gameId, activity) {
+    activity.tags = [...new Set([...activity.tags.map(tag => {
+      return tag.toLowerCase()
+    })])]
     return axiosInstance.put('/api/v1/post', {'gameId': gameId, 'activity': activity})
   }
 
@@ -227,6 +233,13 @@ export default class GameService {
         result.activeVotes = response.active_votes
       }
       return result
+    })
+  }
+
+  getDiscussionByAuthor (author, limit) {
+    return steemApi.getDiscussionsByAuthorBeforeDateAsync(author, '', '2100-01-01T00:00:00', limit).then(response => {
+      console.log(response)
+      return response
     })
   }
 

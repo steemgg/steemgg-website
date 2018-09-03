@@ -7,27 +7,23 @@
         <div class="mask mask-2"></div>
         <div class="content">
           <h2>{{game.title}}</h2>
-          <p>{{game.desc}}</p>
-          <p> Author : {{game.account}}</p>
+          <!--hide the description for now-->
+          <!--<div class="description">{{game.description}}</div>-->
+          <p class="author"> Author : {{game.account}}</p>
         </div>
 
-        <!--<div class="mask">-->
-          <!--<h2>{{game.title}}</h2>-->
-          <!--<p>{{game.desc}}</p>-->
-          <!--<p> Author : {{game.account}}</p>-->
-          <!--<span data-icon="A">566</span>-->
-          <!--<span data-icon="B">124</span>-->
-          <!--<a href="#" class="info">Play</a>-->
-        <!--</div>-->
-        <span class="vote">
-          <i class="fa fa-thumbs-o-up" aria-hidden="true" ></i>
-          <span class="vote-number">{{game.vote}}</span>
+        <span class="gameMetadata">
+          <span class="vote">
+            <i class="fa fa-thumbs-o-up" aria-hidden="true" ></i>
+            <span class="vote-number">{{game.vote}}</span>
+          </span>
+
+          <span class="payout">
+            <i class="fa fa-usd" aria-hidden="true"></i>
+            <span class="payout-amount">{{game.payout.toFixed(3)}}</span>
+          </span>
         </span>
 
-        <span class="payout">
-          <i class="fa fa-usd" aria-hidden="true"></i>
-          <span class="payout-amount">{{game.payout}}</span>
-        </span>
 
         <router-link v-if="mode != 'edit'" :to="{ name: 'viewGame', params: { id: game.id }}" tag="a" class="play">→</router-link>
         <router-link v-if="mode == 'edit'" :to="{ name: 'editGame', params: { id: game.id }}" tag="a" class="play">→</router-link>
@@ -71,10 +67,7 @@
   }
 </script>
 
-<style scoped>
-  .game-cover-image {
-
-  }
+<style lang="scss" scoped>
 
   .game-info-view {
     width: 300px;
@@ -90,87 +83,94 @@
     box-shadow: 2px 2px 4px #e6e6e6;
     cursor: default;
     word-break: break-all;
-    /*background: #fff url(../images/bgimg.jpg) no-repeat center center;*/
+
+    .mask, .content {
+      width: 300px;
+      height: 200px;
+      position: absolute;
+      overflow: hidden;
+      top: 0;
+      left: 0;
+    }
+    .content {
+      .description {
+        -ms-text-overflow: ellipsis;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+    }
+    img {
+      display: block;
+      position: relative;
+      width: 300px;
+      height: 200px;
+    }
+
+    .gameMetadata {
+      position: absolute;
+      bottom: 10px;
+      left: 20px;
+      font-size: 1.4em;
+      color: orange;
+      font-weight: bold;
+      i {
+        color: white;
+      }
+    }
+    h2 {
+      text-transform: uppercase;
+      color: #fff;
+      text-align: center;
+      position: relative;
+      font-size: 17px;
+      padding: 10px 25px 10px 10px;
+      background: rgba(0, 0, 0, 0.8);
+      margin: 20px 0 0 0;
+    }
+    .author, .description {
+      font-family: Georgia, serif;
+      font-style: italic;
+      font-size: 12px;
+      position: relative;
+      color: #fff;
+      padding: 10px 20px 20px;
+      text-align: center;
+    }
+    a.info {
+      display: inline-block;
+      text-decoration: none;
+      padding: 7px 14px;
+      background: #000;
+      color: #fff;
+      text-transform: uppercase;
+      -webkit-box-shadow: 0 0 1px #000;
+      -moz-box-shadow: 0 0 1px #000;
+      box-shadow: 0 0 1px #000;
+    }
+    a.info:hover {
+      -webkit-box-shadow: 0 0 5px #000;
+      -moz-box-shadow: 0 0 5px #000;
+      box-shadow: 0 0 5px #000;
+    }
   }
-  .game-info-view .mask,.game-info-view .content {
-    width: 300px;
-    height: 200px;
-    position: absolute;
-    overflow: hidden;
-    top: 0;
-    left: 0;
-  }
-  .game-info-view img {
+
+  .play {
     display: block;
-    position: relative;
-    width:300px;
-    height: 200px;
-  }
-  .game-info-view .payout {
+    font-size: 18px;
+    color: rgba(255,255,255,0.8);
     position: absolute;
-    bottom: 10px;
-    right: 60px;
-    font-size: 1.4em;
-  }
-  .game-info-view .payout i {
-    color: white;
-  }
-  .game-info-view .payout .payout-amount {
-    color: orange;
-    font-weight: bold;
-  }
-
-  .game-info-view .vote {
-    position: absolute;
-    bottom: 10px;
-    right: 100px;
-    font-size: 1.4em;
-  }
-  .game-info-view .vote i {
-    color: white;
-  }
-  .game-info-view .vote .vote-number {
-    font-weight: bold;
-    color: orange;
-  }
-
-  .game-info-view h2 {
-    text-transform: uppercase;
-    color: #fff;
+    right: 5px;
+    bottom: 5px;
+    border: 2px solid rgba(255,255,255,0.8);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 26px;
     text-align: center;
-    position: relative;
-    font-size: 17px;
-    padding: 10px 25px 10px 10px;
-    background: rgba(0, 0, 0, 0.8);
-    margin: 20px 0 0 0;
-  }
-  .game-info-view p {
-    font-family: Georgia, serif;
-    font-style: italic;
-    font-size: 12px;
-    position: relative;
-    color: #fff;
-    padding: 10px 20px 20px;
-    text-align: center;
-  }
-  .game-info-view a.info {
-    display: inline-block;
-    text-decoration: none;
-    padding: 7px 14px;
-    background: #000;
-    color: #fff;
-    text-transform: uppercase;
-    -webkit-box-shadow: 0 0 1px #000;
-    -moz-box-shadow: 0 0 1px #000;
-    box-shadow: 0 0 1px #000;
-  }
-  .game-info-view a.info:hover {
-    -webkit-box-shadow: 0 0 5px #000;
-    -moz-box-shadow: 0 0 5px #000;
-    box-shadow: 0 0 5px #000;
+    font-weight: 700;
+    z-index: 10000;
   }
 
-  /* NINTH EXAMPLE*/
   .view-ninth .mask-1, .view-ninth .mask-2 {
     background-color: rgba(0, 0, 0, 0.5);
     height: 361px;
@@ -276,23 +276,6 @@
     -o-transform: rotate(56.5deg) translateX(-1px);
     -ms-transform: rotate(56.5deg) translateX(-1px);
     transform: rotate(56.5deg) translateX(-1px);
-  }
-
-  .play {
-    display: block;
-    font-size: 18px;
-    color: rgba(255,255,255,0.8);
-    position: absolute;
-    right: 5px;
-    bottom: 5px;
-    border: 2px solid rgba(255,255,255,0.8);
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    line-height: 26px;
-    text-align: center;
-    font-weight: 700;
-    z-index: 10000;
   }
 
 </style>

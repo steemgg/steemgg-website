@@ -6,7 +6,26 @@
 
 <script>
 export default {
-  name: 'app'
+  name: 'app',
+  data: {},
+  metaInfo: {
+    title: 'SteemGG - STEEM Blockchain Based HTML5 Gaming Platform',
+    titleTemplate: '%s ← SteemGG - STEEM Blockchain Based HTML5 Gaming Platform',
+    meta: [
+      {
+        'http-equiv': 'Content-Type',
+        content: 'text/html; charset=utf-8'
+      },
+      {
+        name: 'viewport',
+        content: 'width=device-width, initial-scale=1'
+      },
+      {
+        name: 'description',
+        content: 'SteemGG is STEEM blockchain based HTML5 Game distribution platform, allowing Game Developers to gain monetary rewards directly from Gamers\' upvotes and likes. In return Gamers will receive rewards for actively upvoting games and posting game related contents.'
+      }
+    ]
+  }
 }
 </script>
 

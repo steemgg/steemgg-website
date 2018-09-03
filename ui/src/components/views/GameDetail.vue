@@ -494,6 +494,7 @@
     display: flex;
     flex-wrap:wrap;
     .gameTag {
+      text-transform: lowercase;
       display: inline;
       margin-right: 12px;
       margin-top:12px;
