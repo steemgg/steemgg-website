@@ -236,6 +236,13 @@ export default class GameService {
     })
   }
 
+  getDiscussionByAuthor (author, limit) {
+    return steemApi.getDiscussionsByAuthorBeforeDateAsync(author, '', '2100-01-01T00:00:00', limit).then(response => {
+      console.log(response)
+      return response
+    })
+  }
+
   getCommentsChildrenLists = (apiRes) => {
     const listsById = {}
     Object.keys(apiRes.content).forEach((commentKey) => {

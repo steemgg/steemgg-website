@@ -3,6 +3,7 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import Meta from 'vue-meta'
 
 import 'swiper/dist/css/swiper.css'
 import './assets/style/bootstrap.css'
@@ -70,6 +71,7 @@ import 'mavon-editor/dist/css/index.css'
 import 'element-ui/lib/theme-chalk/display.css'
 import fullscreen from 'vue-fullscreen'
 
+Vue.use(Meta)
 Vue.use(FormItem)
 Vue.use(Form)
 Vue.use(Button)
