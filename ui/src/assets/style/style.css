@@ -1,0 +1,59 @@
+.navbar-dark .navbar-nav .nav-link.router-link-exact-active {
+  font-weight: bold;
+  color: white;
+}
+
+#app .el-header {
+  height: auto;
+}
+
+#app .el-main {
+  padding: 0 20px;
+}
+
+.login-tip {
+  display: flex;
+  text-align: left;
+}
+
+@media (min-width: 0px) {
+  .componentDynamicWidth {
+    width: 310px;
+  }
+}
+@media (min-width: 660px) {
+  .componentDynamicWidth {
+    width: 620px;
+  }
+}
+@media (min-width: 970px) {
+  .componentDynamicWidth {
+    width: 930px;
+  }
+}
+@media (min-width: 1280px) {
+  .componentDynamicWidth {
+    width: 1240px;
+  }
+}
+
+@media (min-width: 0px) {
+  .pageDynamicWidth {
+    width: 350px;
+  }
+}
+@media (min-width: 660px) {
+  .pageDynamicWidth {
+    width: 660px;
+  }
+}
+@media (min-width: 970px) {
+  .pageDynamicWidth {
+    width: 970px;
+  }
+}
+@media (min-width: 1280px) {
+  .pageDynamicWidth {
+    width: 1280px;
+  }
+}

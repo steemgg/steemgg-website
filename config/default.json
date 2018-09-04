@@ -1,0 +1,43 @@
+{
+  "steemit": {
+    "db": {
+      "host": "db",
+      "port": 3306,
+      "dbName": "steemgg",
+      "dbUser": "root",
+      "dbPass": "111111"
+    },
+    "redis": {
+      "host": "redis",
+      "port": 6379
+    },
+    "app": {
+      "uploadurl": "/src/upload",
+      "gameurl": "/src/public/games",
+      "rooturl": "/src",
+      "sc2": "https://v2.steemconnect.com",
+      "secret": "steemgg",
+      "saveToken": true,
+      "gamePostingInterval": "500",
+      "postingInterval": "300",
+      "commentInterval": "10",
+      "voteInterval": "3",
+      "sessionTime": "86400",
+      "allowedOrigins": ["http://127.0.0.1"],
+      "domain":"127.0.0.1",
+      "maxUploadSize" :"20",
+      "maxImgUploadSize" :"1"
+    },
+    "sc": {
+      "app": "steemgg.app",
+      "cburl": "http://127.0.0.1/callback",
+      "url": "https://v2.steemconnect.com",
+      "secret":"your steemconnect secret",
+      "scope": ["login","vote","comment","comment_options","custom_json","claim_reward_balance"]
+    },
+    "ipfs":{
+      "ip": "172.20.128.5",
+      "port": "5001"
+    }
+  }
+}
