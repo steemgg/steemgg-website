@@ -1,2 +1,6 @@
 upload/
 config/
+
+ui/.idea/*
+ui/node_modules/*
+ui/dist/*
