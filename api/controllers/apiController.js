@@ -149,8 +149,6 @@ exports.postGame = async function(req, res, next) {
         if( postTTL>0 ){
             return res.status(400).json({ resultCode: CODE.POST_INTERVAL_ERROR.RESCODE, err: CODE.POST_INTERVAL_ERROR.DESC, ttl:postTTL });
         }
-        let author = req.session.user.account;
-        let permLink = steem.createPermlink(data.activityTitle, author);
         let tag = config.get('steemit.sc.tag')
         let tags = data.tags;
         if(!tags.includes(tag) || tags.indexOf(tag)>5){
@@ -160,14 +158,32 @@ exports.postGame = async function(req, res, next) {
             tags.pop();
         }
         let coverImage = JSON.parse(dbRes[0]['coverImage']);
+        let author = req.session.user.account;
+        let permLink = steem.createPermlink(data.activityTitle, author);
         let content = '[<img src="https://ipfs.io/ipfs/'+coverImage.hash+'" />](https://steemgg.com/#/game/play/'+data.gameid+')  \n\n' +
                     '['+dbRes[0]['title']+'](https://steemgg.com/#/game/play/'+data.gameid+')' +  '\n\n' +
                     data.activityDescription + '\n\n' +
                     '---\n' +
-                    'Posted on [steemgg - The World\'s 1st Blockchain HTML5 Game Platform](https://steemgg.com/#/game/play/'+data.gameid+')\n';
-        let result = await steem.post(req.session.accessToken, author, data.activityTitle, content, data.reward, tags,permLink, tag);
+                    'Posted on [SteemGG - STEEM Blockchain Based HTML5 Gaming Platform](https://steemgg.com/#/game/play/'+data.gameid+')\n';
+        let type = 1;
+        if (dbRes[0]['activities']>0) {
+            type = 2;
+            content = '[<img src="https://ipfs.io/ipfs/'+coverImage.hash+'" />](https://steemgg.com/#/game/play/'+data.gameid+')  \n\n' +
+                    '['+data.activityTitle+'](https://steemgg.com/#/game/play/'+data.gameid+')' +  '\n\n' +
+                    data.activityDescription + '\n\n' +
+                    '---\n' +
+                    'Posted on [SteemGG - STEEM Blockchain Based HTML5 Gaming Platform](https://steemgg.com/#/game/play/'+data.gameid+')\n';
+            let recentlyActivity = await game.getRecentlyActivity(data.gameid);
+            permLink = steem.createCommentPermlink(recentlyActivity[0].account,recentlyActivity[0].permlink);
+            let parentAuthor = recentlyActivity[0].account;
+            let parentPermlink = recentlyActivity[0].permlink;
+            await steem.comment(req.session.accessToken, parentAuthor, parentPermlink, author, content, permLink, tag);
+        } else {
+            await steem.post(req.session.accessToken, author, data.activityTitle, content, data.reward, tags, permLink, tag);
+        }
+
         let unix = Math.round(+new Date()/1000);
-        let activity = {userid:req.session.user.userid, account:req.session.user.account,gameid: data.gameid,lastModified: unix, permlink:permLink,activityTitle:data.activityTitle };
+        let activity = {userid:req.session.user.userid, account:req.session.user.account,gameid: data.gameid,lastModified: unix, permlink:permLink,activityTitle:data.activityTitle, type:type };
         await game.addActivity(activity);
         await game.updateActivityCount([data.gameid,req.session.user.userid]);
         let iso = new Date(unix*1000).toISOString();

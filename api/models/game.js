@@ -101,7 +101,7 @@ exports.addActivity = async function(activity) {
 }
 
 exports.getRecentlyActivity = async function(gameId) {
-    let rows = await db.execute(db.READ, 'select id,gameid,account,userid,permlink,activityTitle,vote,payout,status,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from activities where gameid=? order by lastModified desc limit 1', gameId);
+    let rows = await db.execute(db.READ, 'select id,gameid,account,userid,permlink,activityTitle,vote,payout,status,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified from activities where gameid=? and type=1 order by lastModified desc limit 1', gameId);
     return rows;
 }
 

@@ -6,11 +6,19 @@ import getSlug from 'speakingurl';
 import secureRandom from 'secure-random';
 
 exports.comment = function(accessToken, parentAuthor, parentPermlink, author, content, permlink, tag) {
+    let extensions = [[0, {
+        beneficiaries: [
+            {
+                account: 'steemgg',
+                weight: 2500
+            }
+        ]
+    }]];
     let operations = [];
     let metaData = {
         community: tag,
         tags: [tag],
-        app: `steemgg.app/test`
+        app: `steemgg.app`
     };
     let commentOp = [
         'comment',
@@ -25,6 +33,20 @@ exports.comment = function(accessToken, parentAuthor, parentPermlink, author, co
         },
     ];
     operations.push(commentOp);
+    let commentOptionsConfig = {
+        author: author,
+        permlink,
+        allow_votes: true,
+        allow_curation_rewards: true,
+        extensions,
+    };
+
+    if (extensions) {
+        commentOptionsConfig.extensions = extensions;
+        commentOptionsConfig.percent_steem_dollars = 0;
+        commentOptionsConfig.max_accepted_payout = '1000000.000 SBD';
+        operations.push(['comment_options', commentOptionsConfig]);
+    }
     let result = sc2.instance.broadcast(accessToken, operations);
     return result;
 }
