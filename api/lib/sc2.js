@@ -8,7 +8,7 @@ exports.instance = null;
 
 function SteemConnect() {
   this.options = {
-    baseURL: 'https://v2.steemconnect.com',
+    baseURL: 'https://steemconnect.com',
     app: '',
     callbackURL: '',
     secret: '',
