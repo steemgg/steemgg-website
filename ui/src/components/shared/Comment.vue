@@ -5,7 +5,7 @@
         <!--<avatar :accountName="comment.author"></avatar>-->
       <!--</el-col>-->
       <!--<el-col :xs="16" :sm="16" :md="22" :lg="22" :xl="22">-->
-      <el-col :xs="3" :sm="3" :md="2" :lg="1" :xl="1" class="avatar-placeholder">
+      <el-col :xs="3" :sm="3" :md="2" :lg="2" :xl="2" class="avatar-placeholder">
         <avatar :account="comment.author"></avatar>
       </el-col >
       <el-col :xs="21" :sm="21" :md="22" :lg="22" :xl="22">
@@ -203,13 +203,13 @@
 </script>
 <style lang="scss">
   .avatar-placeholder {
-    width: 50px;
+    /*width: 50px;*/
   }
   .commentWrapper {
     min-width: 600px;
-    & > div {
-      display: flex;
-    }
+    /*& > div {*/
+      /*display: flex;*/
+    /*}*/
 
 
     .commentAuthor {
