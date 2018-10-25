@@ -3,6 +3,7 @@
       ".git",
       ".svn",
       "public",
+      "upload",
       "docker",
       "node_modules/**/node_modules"
   ],
