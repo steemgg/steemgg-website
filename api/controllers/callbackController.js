@@ -7,16 +7,9 @@ import config from 'config';
 
 exports.auth = async function(req, res, next) {
     try {
-        if (typeof req.query.code === 'undefined') {
-            return res.status(401).json({resCode:CODE.NEED_LOGIN_ERROR.RESCODE, err:CODE.NEED_LOGIN_ERROR.DESC});
-        }
-        let code = req.query.code;
-        let result = await steem.getToken(code);
-        let access_token = result.access_token;
-        let refresh_token = result.refresh_token;
-        let expires_in = result.expires_in;
+        let access_token = req.query.access_token;
         let state =  (typeof req.query.state !== 'undefined') ?  req.query.state : '';
-        result = await steem.me(access_token);
+        let result = await steem.me(access_token);
         let dbRes = await user.getUserByAccount(result.user);
         let unix = Math.round(+new Date()/1000);
         let userInfo = dbRes[0];
@@ -28,7 +21,7 @@ exports.auth = async function(req, res, next) {
         }
         if (config.get('steemit.app.saveToken')){
             await user.setUserToken("token:userid:"+userInfo.userid, access_token);
-            await user.setTokenExpire("token:userid:"+userInfo.userid, expires_in);
+            await user.setTokenExpire("token:userid:"+userInfo.userid, 86400*7);
             if(typeof refresh_token !== 'undefined') {
                 await user.setUserToken("token:refresh:userid:"+userInfo.userid, refresh_token);
             }
