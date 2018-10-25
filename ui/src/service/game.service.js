@@ -215,10 +215,12 @@ export default class GameService {
         let metadata = JSON.parse(response.json_metadata)
         if (metadata && metadata.tags) {
           if (metadata.tags instanceof Array) {
-            result.tags = metadata.tags
+            result.tags = metadata.tags.map(tag => {
+              return tag.toLowerCase()
+            })
           } else if (typeof metadata.tags === 'string') {
             // when there is only one tag, seems it returns a string
-            result.tags = [metadata.tags]
+            result.tags = [metadata.tags.toLowerCase()]
           }
         }
       }
