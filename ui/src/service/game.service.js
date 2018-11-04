@@ -24,10 +24,6 @@ export default class GameService {
     })
   }
 
-  delete (id) {
-    return axiosInstance.delete('/api/v1/game/' + id)
-  }
-
   update (game) {
     return axiosInstance.put('/api/v1/game/' + game.id, this.convertGameToJson(game))
   }
@@ -60,6 +56,12 @@ export default class GameService {
   approve (gameId, comment) {
     return axiosInstance.post(`/api/v1/audit/${gameId}`, {
       status: 1,
+      comment: comment
+    })
+  }
+
+  delete (gameId, comment) {
+    return axiosInstance.delete(`/api/v1/game/${gameId}`, {
       comment: comment
     })
   }
