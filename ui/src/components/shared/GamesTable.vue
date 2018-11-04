@@ -29,10 +29,11 @@
       </el-table-column>
       <el-table-column label="Operations" fixed="right">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.status == 0 && type == 'audit'" @click="openDialog(scope.$index, 'Approve')" type="success"  size="mini">Approve</el-button>
-          <div class="gameActionButton" v-if="scope.row.status == 1"><el-button  @click="openDialog(scope.$index, 'Deny Game')" type="danger"  size="mini" v-if="type == 'report' || type == 'live'">Deny Game</el-button></div>
-          <div class="gameActionButton" v-if="scope.row.report == 1"><el-button @click="openDialog(scope.$index, 'Dismiss Report')" type="primary"  size="mini" v-if="type == 'report'">Dismiss Report</el-button></div>
-          <div class="gameActionButton" v-if="scope.row.status == 1 && type == 'recommended'"><el-button  @click="removeGameFromRecomended(scope.$index)" type="danger" size="mini" v-if="type == 'recommended'">Remove</el-button></div>
+          <el-button v-if="scope.row.status == 0 && type == 'audit'" @click="openDialog(scope.$index, 'approve', 'Approve the game')" type="success"  size="mini">Approve</el-button>
+          <el-button v-if="scope.row.status == 0 && type == 'stale'" @click="openDialog(scope.$index, 'delete', 'Delete the game')" type="danger"  size="mini">Delete</el-button>
+          <div class="gameActionButton" v-if="scope.row.status == 1"><el-button  @click="openDialog(scope.$index, 'deny', 'Deny Game')" type="danger"  size="mini" v-if="type == 'report' || type == 'live'">Deny Game</el-button></div>
+          <div class="gameActionButton" v-if="scope.row.report == 1"><el-button @click="openDialog(scope.$index, 'dismiss', 'Dismiss Report')" type="primary"  size="mini" v-if="type == 'report'">Dismiss Report</el-button></div>
+          <div class="gameActionButton" v-if="scope.row.status == 0 && type == 'stale' "><el-button @click="openDialog(scope.$index, 'Dismiss Report')" type="primary"  size="mini" v-if="type == 'report'">Dismiss Report</el-button></div>
         </template>
       </el-table-column>
     </el-table>
@@ -68,6 +69,7 @@
         dialogFormVisible: false,
         activeIndex: null,
         actionTitle: '',
+        actionType: '',
         form: {
           comment: ''
         },
@@ -85,10 +87,11 @@
           }
         })
       },
-      openDialog (index, type) {
+      openDialog (index, type, title) {
         this.dialogFormVisible = true
         this.activeIndex = index
-        this.actionTitle = type
+        this.actionType = type
+        this.actionTitle = title
       },
       confirmDialogCancel () {
         this.dialogFormVisible = false
@@ -98,11 +101,13 @@
         if (this.form.comment.trim().length === 0) {
           this.$alert('Comment cannot be empty!')
         } else {
-          if (this.actionTitle === 'Approve') {
+          if (this.actionType === 'approve') {
             this.approve()
-          } else if (this.actionTitle === 'Deny Game') {
+          } else if (this.actionType === 'delete') {
+            this.delete()
+          } else if (this.actionType === 'deny') {
             this.deny()
-          } else if (this.actionTitle === 'Dismiss Report') {
+          } else if (this.actionType === 'dismiss') {
             this.clear()
           }
           this.form.comment = ''
@@ -116,6 +121,22 @@
           this.$message.success('Game is approved.')
           this.items.splice(this.activeIndex, 1)
           this.$emit('gameApproved')
+        }).catch(error => {
+          console.log(error)
+          this.$message.error('Approve action failed.')
+        }).finally(() => {
+          this.form.comment = ''
+          this.loading = false
+        })
+      },
+      delete () {
+        this.dialogFormVisible = false
+        console.log(`delete game of ${this.activeIndex} with comment`)
+        this.loading = true
+        gameService.delete(this.items[this.activeIndex].id, this.form.comment).then(() => {
+          this.$message.success('Game is deleted.')
+          this.items.splice(this.activeIndex, 1)
+          this.$emit('gameDeleted')
         }).catch(error => {
           console.log(error)
           this.$message.error('Approve action failed.')

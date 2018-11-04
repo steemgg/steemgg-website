@@ -6,6 +6,7 @@
     <div class="listContainer">
       <el-tabs v-model="activeTab" type="border-card" v-loading="loading">
         <el-tab-pane label="Pending Game" name="audit"><app-game-table :items="auditItems" type="audit" @gameApproved="updateLiveGames"  class="audit-table"></app-game-table></el-tab-pane>
+        <el-tab-pane label="Stale Pending Game" name="stale"><app-game-table :items="stalePendingItems" type="stale" @gameDeleted="updatePendingGames"  class="audit-table"></app-game-table></el-tab-pane>
         <el-tab-pane label="Reported Game" name="report"><app-game-table :items="reportItems" type="report" @gameDenied="updatePendingGames" class="audit-table"></app-game-table></el-tab-pane>
         <el-tab-pane label="Live Game" name="live"><app-game-table :items="liveItems" type="live" @gameDenied="updatePendingGames" class="audit-table"></app-game-table></el-tab-pane>
         <el-tab-pane v-if="$store.getters.isAdmin" label="Recommended Game" type="recommend">
@@ -29,6 +30,7 @@
   import GamesTable from '../shared/GamesTable.vue'
   import CommonHeader from '../common/CommonHeader'
   import CommonFooter from '../common/CommonFooter'
+  import moment from 'moment'
 
   const gameService = new GameService()
   export default {
@@ -42,6 +44,7 @@
     data () {
       return {
         auditItems: null,
+        stalePendingItems: [],
         reportItems: null,
         liveItems: null,
         recommendedItems: null,
@@ -56,7 +59,6 @@
     methods: {
       updateLiveGames () {
         gameService.query({status: 1, limit: 1000, includeComment: true}).then(result => {
-          console.log(result)
           this.liveItems = result.items
           console.log('get the game item list', this.reportItems)
         })
@@ -64,7 +66,6 @@
 
       updateReportGames () {
         gameService.query({report: 1, limit: 1000, includeComment: true}).then(result => {
-          console.log(result)
           this.reportItems = result.items
           console.log('get the game item list', this.reportItems)
         })
@@ -73,15 +74,24 @@
       updatePendingGames () {
         this.loading = true
         gameService.query({status: 0, limit: 1000, includeComment: true}).then(result => {
-          console.log(result)
           this.auditItems = result.items
           console.log('get the pending game list', this.auditItems)
+          this.updateStalePendingGames()
         }).catch(error => {
           this.$message.error('Fail to load pending game data')
           console.log(error.response)
         }).finally(() => {
           this.loading = false
         })
+      },
+
+      updateStalePendingGames () {
+        this.stalePendingItems = this.auditItems.map(item => {
+          if ( moment().diff(item.lastModified, 'days') > 30) {
+            return item
+          }
+        })
+        console.log('get the stale pending item list', this.stalePendingItems)
       },
 
       updateRecommendedGames () {
