@@ -319,7 +319,13 @@ exports.updateGame = async function(req, res, next) {
 
 exports.deleteGame = async function(req, res, next) {
     try{
-        let dbRes = await game.deleteGame([req.params.id, req.session.user.userid]);
+        let userInfo = req.session.user;
+        let dbRes = null;
+        if (userInfo.role == 1 || userInfo.role == 2) {
+            dbRes = await game.deleteGameByAdmin([req.params.id]);
+        } else {
+            dbRes = await game.deleteGame([req.params.id, req.session.user.userid]);
+        }
         if (dbRes.changedRows == 1){
             return res.status(200).send();
         } else {
