@@ -19,6 +19,10 @@
           <game-list :queryParameter="newGameParam"></game-list>
         </div>
         <div class="game-list">
+          <div class="list-title-wrapper" ><span class="list-name">Latest Updated Games</span><span class="view-more"><router-link :to="{ name: 'browseGame', params: {}}" tag="span">Show More...</router-link></span></div>
+          <game-list :queryParameter="lastUpdatedParam"></game-list>
+        </div>
+        <div class="game-list">
           <div class="list-title-wrapper" ><span class="list-name">Most Popular Games</span><span class="view-more"><router-link :to="{ name: 'browseGame', params: {}}" tag="span" >Show More...</router-link></span></div>
           <game-list :queryParameter="popularParam"></game-list>
         </div>
@@ -78,6 +82,10 @@
         },
         topPayoutParam: {
           sort: 'payout_desc',
+          limit: 12
+        },
+        lastUpdatedParam: {
+          sort: 'lastModified_desc',
           limit: 12
         }
       }

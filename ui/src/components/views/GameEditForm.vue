@@ -84,7 +84,7 @@
                 </el-form>
               </div>
             </el-collapse-item>
-            <el-collapse-item v-if="game && game.activities && game.activities.length > 0" title="Game Posts" name="existingPosts">
+            <el-collapse-item v-if="game && game.activities && game.activities.length > 0" title="Game Dev Logs" name="existingPosts">
               <div class="activityList" >
                 <div class="activityHeader">
                   <span class="linkTitle">Perm Link</span>
@@ -98,18 +98,17 @@
                 </div>
               </div>
             </el-collapse-item>
-            <el-collapse-item title="New Post for game" name="newPost">
+            <el-collapse-item title="New Dev Log for Game" name="newPost">
               <div>
                 <h3> Create Post in Steemit</h3>
                 <el-form ref='activity' :rules='activityRules' :model='activity' label-width='150px'>
-                  <el-form-item label='Post Content' >
+                  <el-form-item label='Dev Log Content' >
                     <el-switch
                                v-model="useGameInfoAsPost"
                                active-text="Use Game Info"
                                inactive-text="Customize">
                     </el-switch>
                   </el-form-item>
-                  <a :href="game.permLink" v-if="game.permLink">Open Steemit Post</a>
                   <el-form-item label='Activity Title' prop="activityTitle" v-if="!useGameInfoAsPost">
                     <el-input :disabled="useGameInfoAsPost" v-model='activity.activityTitle'></el-input>
                   </el-form-item>
@@ -120,7 +119,7 @@
                     <input-tag :on-change='onTagChange' :tags.sync='activity.tags' limit="4" placeholder="Use 'Enter', 'comma' or 'tab' to separate tags"></input-tag>
                   </el-form-item>
                   <el-form-item label="reward">
-                    <el-select v-model="activity.reward" placeholder="请选择">
+                    <el-select v-model="activity.reward" placeholder="Please select">
                       <el-option
                         :key="50"
                         :label="'50% SBD / 50% SP'"

@@ -207,10 +207,6 @@
   }
   .commentWrapper {
     min-width: 600px;
-    & > div {
-      display: flex;
-    }
-
 
     .commentAuthor {
       .author {
