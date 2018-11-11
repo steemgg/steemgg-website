@@ -6,7 +6,7 @@
     <div class="listContainer">
       <el-tabs v-model="activeTab" type="border-card" v-loading="loading">
         <el-tab-pane label="Pending Game" name="audit"><app-game-table :items="auditItems" type="audit" @gameApproved="updateLiveGames"  class="audit-table"></app-game-table></el-tab-pane>
-        <el-tab-pane label="Stale Pending Game" name="stale"><app-game-table :items="stalePendingItems" type="stale" @gameDeleted="updatePendingGames"  class="audit-table"></app-game-table></el-tab-pane>
+        <el-tab-pane v-if="$store.getters.user.role == 2" label="Stale Pending Game" name="stale"><app-game-table :items="stalePendingItems" type="stale" @gameDeleted="updatePendingGames"  class="audit-table"></app-game-table></el-tab-pane>
         <el-tab-pane label="Reported Game" name="report"><app-game-table :items="reportItems" type="report" @gameDenied="updatePendingGames" class="audit-table"></app-game-table></el-tab-pane>
         <el-tab-pane label="Live Game" name="live"><app-game-table :items="liveItems" type="live" @gameDenied="updatePendingGames" class="audit-table"></app-game-table></el-tab-pane>
         <el-tab-pane v-if="$store.getters.isAdmin" label="Recommended Game" type="recommend">
@@ -87,7 +87,7 @@
 
       updateStalePendingGames () {
         this.stalePendingItems = this.auditItems.map(item => {
-          if ( moment().diff(item.lastModified, 'days') > 30) {
+          if (moment().diff(item.lastModified, 'days') > 30) {
             return item
           }
         })
