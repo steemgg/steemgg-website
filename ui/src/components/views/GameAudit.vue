@@ -87,9 +87,7 @@
 
       updateStalePendingGames () {
         this.stalePendingItems = this.auditItems.filter(item => {
-          if (moment().diff(item.lastModified, 'days') > 30) {
-            return item
-          }
+          return moment().diff(item.lastModified, 'days') > 30
         })
         console.log('get the stale pending item list', this.stalePendingItems)
       },
