@@ -86,7 +86,7 @@
       },
 
       updateStalePendingGames () {
-        this.stalePendingItems = this.auditItems.map(item => {
+        this.stalePendingItems = this.auditItems.filter(item => {
           if (moment().diff(item.lastModified, 'days') > 30) {
             return item
           }
