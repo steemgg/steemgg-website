@@ -166,7 +166,7 @@ exports.postGame = async function(req, res, next) {
                     '---\n' +
                     'Posted on [SteemGG - STEEM Blockchain Based HTML5 Gaming Platform](https://steemgg.com/#/game/play/'+data.gameid+')\n';
         let type = 1;
-        if (dbRes[0]['activities']>0) {
+        if (dbRes[0]['activities']>0 && !data.post) {
             type = 2;
             content = '[<img src="https://ipfs.io/ipfs/'+coverImage.hash+'" />](https://steemgg.com/#/game/play/'+data.gameid+')  \n\n' +
                     '['+data.activityTitle+'](https://steemgg.com/#/game/play/'+data.gameid+')' +  '\n\n' +
@@ -319,7 +319,13 @@ exports.updateGame = async function(req, res, next) {
 
 exports.deleteGame = async function(req, res, next) {
     try{
-        let dbRes = await game.deleteGame([req.params.id, req.session.user.userid]);
+        let userInfo = req.session.user;
+        let dbRes = null;
+        if (userInfo.role == 2) {
+            dbRes = await game.deleteGameByAdmin([req.params.id]);
+        } else {
+            dbRes = await game.deleteGame([req.params.id, req.session.user.userid]);
+        }
         if (dbRes.changedRows == 1){
             return res.status(200).send();
         } else {
