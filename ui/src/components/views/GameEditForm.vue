@@ -100,13 +100,21 @@
             </el-collapse-item>
             <el-collapse-item title="New Dev Log for Game" name="newPost">
               <div>
-                <h3> Create Post in Steemit</h3>
+                <h3 v-if="createNewPost"> Create Post in Steemit</h3>
+                <h3 v-if="!createNewPost"> Create Comment in Steemit</h3>
                 <el-form ref='activity' :rules='activityRules' :model='activity' label-width='150px'>
+                  <el-form-item label='Content type:' v-if="gameExists">
+                    <el-switch
+                      v-model="createNewPost"
+                      active-text="Post"
+                      inactive-text="Comment">
+                    </el-switch>
+                  </el-form-item>
                   <el-form-item label='Dev Log Content' >
                     <el-switch
-                               v-model="useGameInfoAsPost"
-                               active-text="Use Game Info"
-                               inactive-text="Customize">
+                       v-model="useGameInfoAsPost"
+                       active-text="Use Game Info"
+                       inactive-text="Customize">
                     </el-switch>
                   </el-form-item>
                   <el-form-item label='Activity Title' prop="activityTitle" v-if="!useGameInfoAsPost">
@@ -134,20 +142,20 @@
                     <!--<el-slider v-model="activity.reward"></el-slider>-->
                   </el-form-item>
                   <el-form-item>
-                    <div>
-                    <count-down :time="postingWaitTime" v-if="postingWaitTime > 0" @countdownend="this.postingWaitTime = -1">
-                      <template slot-scope="props">
-                        <div role="alert postingIntervalMessage" class="el-alert el-alert--warning">
-                          <i class="el-alert__icon el-icon-warning"></i>
-                          <div class="el-alert__content">
-                            <span class="el-alert__title">You need to wait for {{ props.hours }}:{{ props.minutes }}:{{ props.seconds }} before creating your next post.</span>
+                    <div class="postCountdown">
+                      <count-down :time="postingWaitTime" v-if="postingWaitTime > 0" @countdownend="this.postingWaitTime = -1">
+                        <template slot-scope="props">
+                          <div role="alert postingIntervalMessage" class="el-alert el-alert--warning">
+                            <i class="el-alert__icon el-icon-warning"></i>
+                            <div class="el-alert__content">
+                              <span class="el-alert__title">You need to wait for {{ props.hours }}:{{ props.minutes }}:{{ props.seconds }} before creating your next post.</span>
+                            </div>
                           </div>
-                        </div>
-                      </template>
-                    </count-down>
+                        </template>
+                      </count-down>
                     </div>
                     <!--<el-button type='primary' v-if="activity.permLink != null" @click="submitActivity(false)">Update</el-button>-->
-                    <el-button type='primary' :disabled="game.id == null || this.postingWaitTime > 0" :loading="postingInProgress" @click="submitActivity(true)">New Post</el-button>
+                    <el-button type='primary' :disabled="game.id == null || this.postingWaitTime > 0" :loading="postingInProgress" @click="submitActivity(true)">New Dev Log</el-button>
                     <!--<el-button @click="cancelForm()">Cancel</el-button>-->
                   </el-form-item>
                 </el-form>
@@ -214,6 +222,7 @@
         gameActionInProgress: false,
         errorMessage: '',
         useGameInfoAsPost: true,
+        createNewPost: true,
         hidePostTip: false,
         postTipDialogVisible: false,
         actionText: 'Create',
@@ -337,11 +346,9 @@
     },
     methods: {
       submitForm () {
-        console.log(this.game)
         this.$refs['game'].validate((valid) => {
           if (valid) {
-            console.log('submit')
-            console.log(this.game)
+            console.log('submit', this.game)
             if (this.game.id == null) {
               this.gameActionInProgress = true
               gameService.create(this.game).then((game) => {
@@ -362,7 +369,7 @@
                   this.postTipDialogVisible = true
                 }
               }).catch(error => {
-                console.log(error)
+                console.log('submit form error', error)
                 this.gameActionInProgress = false
                 this.$notify.error({
                   title: 'Oops!',
@@ -418,14 +425,18 @@
         console.log('Entering updateActivityInterval')
         this.postingWaitTime = -1
         if (this.game.activities && this.game.activities.length > 0) {
-          let lastPostTime = this.game.activities[this.game.activities.length - 1].lastModified
-          console.log(moment(lastPostTime).valueOf())
+          let lastPostTime = this.game.activities[0].lastModified
+          console.log('last post creation time', moment(lastPostTime).valueOf())
           console.log(moment(lastPostTime).valueOf() + this.$store.getters.user.gamePostingInterval * 1000 - moment().valueOf())
 
           this.postingWaitTime = moment(lastPostTime).valueOf() + this.$store.getters.user.gamePostingInterval * 1000 - moment().valueOf()
         }
         console.log('Existing updateActivityInterval')
       },
+      /**
+       *
+       * @param isNew - currently not used
+       */
       submitActivity (isNew) {
         if (this.game.id) {
           let post = Object.assign({}, this.activity)
@@ -435,26 +446,36 @@
           }
           if (isNew) {
             this.postingInProgress = true
-            gameService.createActivity(this.game.id, post).then(response => {
+            gameService.createActivity(this.game.id, post, this.createNewPost).then(response => {
               this.resetActivity()
               this.postingInProgress = false
-              this.game.activities.push(response)
-              this.updateActivityInterval()
-              this.$notify({
-                title: 'Post Created',
-                message: 'You have created a post in steemit successfully!. You can find the post link in "Game Posts" section',
-                type: 'success',
-                offset: 100
-              })
+              if (this.createNewPost) {
+                // only push a new record if it's a post
+                this.game.activities.push(response)
+                this.updateActivityInterval()
+                this.$notify({
+                  title: 'Post Created',
+                  message: 'You have created a post in steemit successfully!. You can find the post link in "Game Dev Logs" section',
+                  type: 'success',
+                  offset: 100
+                })
+              } else {
+                this.$notify({
+                  title: 'Comment Created',
+                  message: 'You have created a new comment on the latest post successfully!. You can find the post link in "Game Dev Logs" section',
+                  type: 'success',
+                  offset: 100
+                })
+              }
               this.activeNames = ['existingPosts', 'gameInfo']
             }).catch(error => {
-              console.log(error)
               this.postingInProgress = false
               console.error('fail to post', error.response)
               if (error.response.data.resultCode === 400) {
-                this.$message.warning('You just create a post, please wait for a while.')
+                this.updateActivityInterval()
+                this.$message.warning('You just post a content, please wait for a while.')
               } else {
-                this.$message.error('Fail to create post in steemit.')
+                this.$message.error('Fail to create content in steemit.')
               }
             })
           } else {
@@ -497,21 +518,16 @@
       },
 
       onTagChange () {
-        console.log('tag changed')
         if (this.activity.tags.length > 4) {
           this.activity.tags.splice(4)
           this.$message.info('Only allow up to 4 tags.')
         }
       },
       onFileRemoved (file, fileList) {
-        console.log(file, fileList)
         this.fileList = []
         this.game.gameUrl = null
       },
       onFileUploaded (response, file, fileList) {
-        console.log(response)
-        console.log(file)
-        console.log(fileList)
         this.fileList = [file]
         this.game.gameUrl = response[0]
         this.game.gameUrl.name = file.name
@@ -543,12 +559,12 @@
         }
       },
       onImageRemoved (file, error, xhr) {
-        console.log('image removed', file)
         this.game.coverImage = null
       },
 
       initData () {
         if (this.id != null) {
+          this.createNewPost = false
           gameService.getById(this.id).then(game => {
             // only the game creator or admin can edit game
             if (this.$store.getters.isAdmin || game.account === this.$store.getters.user.account) {
@@ -566,9 +582,8 @@
                 name: 'home'
               })
             }
-          }).catch(error => {
+          }).catch(() => {
             this.$message.error('Fail to load the game data, make sure the game exist!')
-            console.log(error)
           })
         } else {
           this.activeNames = ['gameInfo']
@@ -585,7 +600,6 @@
       }
     },
     mounted () {
-      console.log(this.$store.state.loggedIn)
       if (!this.$store.state.loggedIn) {
         this.$message.warning('Please log in first to create game.')
       }
@@ -694,6 +708,9 @@
       }
       .upload_tip {
         line-height: 20px;
+      }
+      .postCountdown {
+        margin-bottom: 10px;
       }
     }
   }

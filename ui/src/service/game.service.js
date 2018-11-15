@@ -99,7 +99,14 @@ export default class GameService {
     })
   }
 
-  createActivity (gameId, activity) {
+  /**
+   *
+   * @param gameId
+   * @param activity
+   * @param isComment
+   * @return {Promise<AxiosResponse<any>>}
+   */
+  createActivity (gameId, activity, isPost) {
     let clonnedActivity = Object.assign({}, activity)
     clonnedActivity.gameid = gameId
     delete clonnedActivity.award
@@ -107,7 +114,7 @@ export default class GameService {
     clonnedActivity.tags = [...new Set([...clonnedActivity.tags.map(tag => {
       return tag.toLowerCase()
     })])]
-    return axiosInstance.post('/api/v1/post', clonnedActivity).then(response => {
+    return axiosInstance.post('/api/v1/post', clonnedActivity, {params: {post: isPost}}).then(response => {
       return response.data
     })
   }

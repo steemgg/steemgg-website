@@ -16,7 +16,7 @@ module.exports = {
         secure: false,
         changeOrigin: true,
         onProxyReq: function(proxyReq, req, res) {
-          console.log("set coookie", req)
+          // console.log("set coookie", req)
           proxyReq.setHeader('cookie', 'at=steemitgame.test');
         }
       }
