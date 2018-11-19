@@ -398,7 +398,7 @@
               })
             }
           } else {
-            console.log('error submit!!')
+            console.log('error submit!')
             return false
           }
         })
@@ -455,14 +455,14 @@
                 this.updateActivityInterval()
                 this.$notify({
                   title: 'Post Created',
-                  message: 'You have created a post in steemit successfully!. You can find the post link in "Game Dev Logs" section',
+                  message: 'You have created a post in steemit successfully. You can find the post link in "Game Dev Logs" section',
                   type: 'success',
                   offset: 100
                 })
               } else {
                 this.$notify({
                   title: 'Comment Created',
-                  message: 'You have created a new comment on the latest post successfully!. You can find the post link in "Game Dev Logs" section',
+                  message: 'You have created a new comment on the latest post successfully. You can find the post link in "Game Dev Logs" section',
                   type: 'success',
                   offset: 100
                 })
@@ -487,7 +487,7 @@
             })
           }
         } else {
-          this.$message.error('Please create the game first!')
+          this.$message.error('Please create the game first.')
         }
       },
 
@@ -583,7 +583,7 @@
               })
             }
           }).catch(() => {
-            this.$message.error('Fail to load the game data, make sure the game exist!')
+            this.$message.error('Fail to load the game data, make sure the game exist.')
           })
         } else {
           this.activeNames = ['gameInfo']
