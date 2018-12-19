@@ -1,21 +1,25 @@
 'use strict';
 
+import fs from 'fs';
+import path from 'path';
+import url from 'url';
+import util from 'util';
+import config from 'config';
+import ipfsAPI from 'ipfs-api';
+import CODE from '../lib/code';
+import decompress from 'decompress';
+import formidable from 'formidable';
 import user from '../models/user';
 import steem from '../models/steem';
 import game from '../models/game';
-import config from 'config';
 import querystring from 'querystring';
-import decode from '../lib/decode';
-import CODE from '../lib/code';
 import {SDKError} from '../errors/SDKError';
 import {DBError} from '../errors/DBError';
 
-exports.save = async function(req, res, next) {
+exports.saveGame = async function(req, res, next) {
     try{
+        console.log(req.body.data);
         let dbRes = await game.getGameById(req.params.id);
-        if(typeof dbRes[0] === 'undefined') {
-            return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
-        }
         if(dbRes[0]['status']!=1) {
             return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
         }
@@ -41,6 +45,3 @@ exports.save = async function(req, res, next) {
         }
     }
 };
-
-
-

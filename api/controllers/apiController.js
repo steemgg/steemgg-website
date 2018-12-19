@@ -117,6 +117,7 @@ exports.upload = function(req, res) {
 exports.me = async function(req, res) {
     try {
         let userInfo = req.session.user;
+        console.log(userInfo);
         userInfo.gamePostingInterval = config.get('steemit.app.gamePostingInterval');
         return res.status(200).json(userInfo);
     } catch(err) {
@@ -208,7 +209,7 @@ exports.addGame = async function(req, res, next) {
         let userInfo = req.session.user;
         let data = req.body;
         let unix = Math.round(+new Date()/1000);
-        let gameInfo = {userid:userInfo.userid,account:userInfo.account,created:unix,lastModified:unix,gameUrl:data.gameUrl,coverImage:data.coverImage,version:data.version,title:data.title,category:data.category,description:data.description,width:data.width,height:data.height};
+        let gameInfo = {userid:userInfo.userid,account:userInfo.account,created:unix,lastModified:unix,gameUrl:data.gameUrl,coverImage:data.coverImage,version:data.version,title:data.title,category:data.category,description:data.description,width:data.width,height:data.height,key:data.key};
         let dbRes = await game.addGame(gameInfo);
         let iso = new Date(unix*1000).toISOString();
         gameInfo.id = dbRes.insertId;
@@ -254,11 +255,19 @@ exports.getGameDetail = async function(req, res, next) {
         if(typeof dbRes[0] === 'undefined') {
             return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
         }
+        let userInfo = req.session.user;
+        console.log(userInfo);
+        if(userInfo) {
+            if (userInfo.account !== dbRes[0]['account']) {
+                delete dbRes[0]['key'];
+            }
+        } else {
+            delete dbRes[0]['key'];
+        }
         if(dbRes[0]['status']!=1) {
             if (typeof req.session.user == 'undefined') {
                 return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
             } else {
-                let userInfo = req.session.user;
                 if (userInfo.account !== dbRes[0]['account']) {
                     if( userInfo.role == 0 ) {
                         return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
@@ -266,6 +275,7 @@ exports.getGameDetail = async function(req, res, next) {
                 }
             }
         }
+
         let steemitRes = await game.getActivitiesByGameId(req.params.id);
         if(steemitRes.length>0){
             dbRes[0]['activities'] = steemitRes;
@@ -293,7 +303,7 @@ exports.updateGame = async function(req, res, next) {
     try{
         let unix = Math.round(+new Date()/1000);
         let data = req.body;
-        let updateCloumns = ['title','coverImage','description','category','version','gameUrl','width','height'];
+        let updateCloumns = ['title','coverImage','description','category','version','gameUrl','width','height','key'];
         let dbRes = null;
         for(let attributename in data){
             if(updateCloumns.indexOf(attributename)<0) {
