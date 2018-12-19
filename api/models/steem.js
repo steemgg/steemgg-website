@@ -144,6 +144,24 @@ exports.claimRewardBalance = async function(accessToken, account, rewardSteem, r
     return result;
 }
 
+exports.saveCustomJson = async function(accessToken, account, id, json) {
+    let operations = [];
+    let postingAuths = [];
+    postingAuths.push(account);
+    let customOp = [
+        'custom_json',
+        {
+            required_auths:[],
+            required_posting_auths:postingAuths,
+            id:id,
+            json:json
+        },
+    ];
+    operations.push(customOp);
+    let result = sc2.instance.broadcast(accessToken, operations);
+    return result;
+}
+
 exports.createPermlink = function(title, author) {
     let permlink;
     let prefix;

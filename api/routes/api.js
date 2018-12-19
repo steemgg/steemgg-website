@@ -7,6 +7,7 @@ import steem from '../models/steem';
 import api from '../controllers/apiController';
 import admin from '../controllers/adminController';
 import callback from '../controllers/callbackController';
+import sdk from '../controllers/sdkController';
 
 module.exports = function(app) {
   app.all('*',function (req, res, next) {
@@ -45,7 +46,7 @@ module.exports = function(app) {
   app.get('/api/v1/auditor', [morkSessionMiddleware, userMiddleware], admin.listAuditor);
   app.delete('/api/v1/auditor/:account', [morkSessionMiddleware, userMiddleware], admin.unsetAuditor);
   app.put('/api/v1/auditor/:account', [morkSessionMiddleware, userMiddleware], admin.setAuditor);
-  app.put('/api/v1/recommend/:id', [morkSessionMiddleware, userMiddleware], admin.recommendGame);
+  app.post('/sdk/v1/save/:id', [morkSessionMiddleware, userMiddleware], sdk.save);
 };
 
 function morkSessionMiddleware (req, res, next) {

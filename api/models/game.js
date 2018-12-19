@@ -90,7 +90,7 @@ exports.getGameById = async function(gameId) {
     if(rows) {
         return JSON.parse(rows);
     }
-    rows = await db.execute(db.READ, 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend,activities,width,height from games where id=?', gameId);
+    rows = await db.execute(db.READ, 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend,activities,width,height,`key`,privatekey,leaderboard from games where id=?', gameId);
     if(typeof rows[0] !== 'undefined') {
         await redis.instance.set(key, JSON.stringify(rows));
     }
