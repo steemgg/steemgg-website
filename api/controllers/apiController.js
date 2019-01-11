@@ -209,12 +209,13 @@ exports.addGame = async function(req, res, next) {
         let userInfo = req.session.user;
         let data = req.body;
         let unix = Math.round(+new Date()/1000);
-        let gameInfo = {userid:userInfo.userid,account:userInfo.account,created:unix,lastModified:unix,gameUrl:data.gameUrl,coverImage:data.coverImage,version:data.version,title:data.title,category:data.category,description:data.description,width:data.width,height:data.height,key:data.key};
+        let gameInfo = {userid:userInfo.userid,account:userInfo.account,created:unix,lastModified:unix,gameUrl:data.gameUrl,coverImage:data.coverImage,version:data.version,title:data.title,category:data.category,description:data.description,width:data.width,height:data.height,key:data.key,privatekey:Math.random().toString(36).substring(2)};
         let dbRes = await game.addGame(gameInfo);
         let iso = new Date(unix*1000).toISOString();
         gameInfo.id = dbRes.insertId;
         gameInfo.lastModified = iso;
         gameInfo.created = iso;
+        delete gameInfo.privatekey;
         return res.status(200).json(gameInfo);
     } catch(err) {
         console.error(err);
@@ -264,6 +265,7 @@ exports.getGameDetail = async function(req, res, next) {
         } else {
             delete dbRes[0]['key'];
         }
+        delete dbRes[0]['privatekey'];
         if(dbRes[0]['status']!=1) {
             if (typeof req.session.user == 'undefined') {
                 return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
