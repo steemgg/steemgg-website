@@ -71,7 +71,7 @@
                       </el-upload>
                     </div>
                   </el-form-item>
-                  <el-form-item label="API Key" prop="apiKey">
+                  <el-form-item label="API Key" prop="key">
                     <div class="apiKeyInput"><el-input maxlength="64" minlength="64" placeholder="Please generate a new key" :value="apiKey" :disabled="true"></el-input> <el-button type='primary' size="mini" @click="generateRandomKey()">Generate a new kay</el-button> </div>
                   </el-form-item>
                   <!--<el-form-item>-->
@@ -243,7 +243,8 @@
           lastModified: null,
           account: null,
           width: 1024,
-          height: 768
+          height: 768,
+          key: null
         },
         activity: {
           activityTitle: '',
@@ -294,10 +295,9 @@
           gameUrl: [
             { type: 'object', required: true, message: 'Please upload game file', trigger: 'change' }
           ],
-          apiKey: [
-            { required: true, message: 'Please generate a API Key', trigger: 'blur' },
+          key: [
+            { required: true, message: 'Please generate a API Key'}
           ]
-
         },
         activityRules: {
           activityTitle: [
@@ -519,7 +519,8 @@
           lastModified: null,
           account: null,
           width: 1024,
-          height: 768
+          height: 768,
+          key: null,
         }
         this.generateRandomKey()
         this.fileList = []
@@ -583,6 +584,9 @@
             // only the game creator or admin can edit game
             if (this.$store.getters.isAdmin || game.account === this.$store.getters.user.account) {
               this.game = game
+              if (this.game.key == null) {
+                this.generateRandomKey()
+              }
               this.$refs.coverImageDropzone.dropzone.emit('addedfile', this.game.coverImage)
               this.$refs.coverImageDropzone.dropzone.options.thumbnail.call(this.$refs.coverImageDropzone, this.game.coverImage, process.env.IPFS_SERVER_URL + game.coverImage.hash)
               this.$refs.coverImageDropzone.dropzone.emit('complete', this.game.coverImage)
