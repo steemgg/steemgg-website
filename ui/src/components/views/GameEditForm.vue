@@ -71,6 +71,9 @@
                       </el-upload>
                     </div>
                   </el-form-item>
+                  <el-form-item label="API Key" prop="apiKey">
+                    <div class="apiKeyInput"><el-input maxlength="64" minlength="64" placeholder="Please generate a new key" :value="apiKey" :disabled="true"></el-input> <el-button type='primary' size="mini" @click="generateRandomKey()">Generate a new kay</el-button> </div>
+                  </el-form-item>
                   <!--<el-form-item>-->
                   <div class="copyRightWrapper" v-if="!gameExists">
                     <el-checkbox  v-model="copyRightClaim"></el-checkbox>
@@ -228,6 +231,7 @@
         actionText: 'Create',
         postingWaitTime: -1,
         copyRightClaim: false,
+        apiKey: '',
         uploadTarget: (process.env.API_SERVER_URL.endsWith('/') ? process.env.API_SERVER_URL.slice(0, -1) : process.env.API_SERVER_URL) + '/api/v1/upload',
         game: {
           title: '',
@@ -289,7 +293,11 @@
           ],
           gameUrl: [
             { type: 'object', required: true, message: 'Please upload game file', trigger: 'change' }
+          ],
+          apiKey: [
+            { required: true, message: 'Please generate a API Key', trigger: 'blur' },
           ]
+
         },
         activityRules: {
           activityTitle: [
@@ -513,8 +521,14 @@
           width: 1024,
           height: 768
         }
+        this.generateRandomKey()
         this.fileList = []
         this.$refs.coverImageDropzone.dropzone.removeAllFiles(true)
+      },
+
+      generateRandomKey () {
+        this.game.key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+        this.apiKey = this.game.key
       },
 
       onTagChange () {
@@ -711,6 +725,11 @@
       }
       .postCountdown {
         margin-bottom: 10px;
+      }
+      .apiKeyInput {
+        input {
+          width: auto;
+        }
       }
     }
   }

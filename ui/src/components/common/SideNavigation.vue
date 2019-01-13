@@ -62,7 +62,6 @@
     computed: {
     },
     mounted () {
-      console.log('this is current swiper instance object', this.swiper)
     },
     methods: {
       handleOpen (key, keyPath) {
