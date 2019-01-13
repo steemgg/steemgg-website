@@ -728,7 +728,7 @@
       }
       .apiKeyInput {
         input {
-          width: auto;
+          width: 400px;
         }
       }
     }
