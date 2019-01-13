@@ -72,7 +72,7 @@
                     </div>
                   </el-form-item>
                   <el-form-item label="API Key" prop="key">
-                    <div class="apiKeyInput"><el-input maxlength="64" minlength="64" placeholder="Please generate a new key" :value="apiKey" :disabled="true"></el-input> <el-button type='primary' size="mini" @click="generateRandomKey()">Generate a new kay</el-button> </div>
+                    <div class="apiKeyInput"><el-input maxlength="64" minlength="64" placeholder="Please generate a new key" :value="apiKey" :disabled="true"></el-input> <el-button type='primary' size="mini" @click="confirmNewKey()">Generate a new kay</el-button> </div>
                   </el-form-item>
                   <!--<el-form-item>-->
                   <div class="copyRightWrapper" v-if="!gameExists">
@@ -527,6 +527,19 @@
         this.$refs.coverImageDropzone.dropzone.removeAllFiles(true)
       },
 
+      confirmNewKey () {
+        this.$confirm(`This will generate a new API Key, if you update the game with it,
+          your game file will not be able to use the sdk successfully unit it's updated to use the new key. Are you sure you want to proceed?`, 'Confirm changing API Key',
+          {
+            confirmButtonText: 'Yes, change it.',
+            cancelButtonText: 'Cancel',
+            type: 'warning'
+          }).then(() => {
+            this.generateRandomKey()
+          }).catch(() => {
+          })
+      },
+
       generateRandomKey () {
         this.game.key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
         this.apiKey = this.game.key
@@ -586,6 +599,8 @@
               this.game = game
               if (this.game.key == null) {
                 this.generateRandomKey()
+              } else {
+                this.apiKey = this.game.key
               }
               this.$refs.coverImageDropzone.dropzone.emit('addedfile', this.game.coverImage)
               this.$refs.coverImageDropzone.dropzone.options.thumbnail.call(this.$refs.coverImageDropzone, this.game.coverImage, process.env.IPFS_SERVER_URL + game.coverImage.hash)

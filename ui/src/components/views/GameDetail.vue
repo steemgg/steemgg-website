@@ -418,15 +418,19 @@
             }
             // let listener = postRobot.listener({ window: this.extensionIFrame})
             this.gameSDKListener = postRobot.listener({window: this.gameIFrame.contentWindow})
+            this.gameSDKListener.on('getGameLeaderBoard', event => {
+              console.log('Game SDK: receive getGameLeaderBoard: ', event.data.value)
+              return this.fetchGameLeaderBoard(this.id, event.data.value)
+            })
             this.gameSDKListener.on('updateGameRecord', event => {
-              this.gameRecord = event.data.record
-              console.log('Game SDK: receive updateValue: ', event.data.record)
-              this.updateGameRecord(event.data.value)
+              this.gameRecord = event.data.value
+              console.log('Game SDK: receive updateGameRecord: ', event.data.value)
+              return this.updateGameRecord(event.data.value)
             })
 
             this.gameSDKListener.on('getGameRecord', event => {
-              console.log('Game SDK: receive getValue, return: ', this.gameRecord)
-              return this.gameRecord
+              console.log('Game SDK: receive getGameRecord, return: ', this.gameRecord)
+              return this.fetchGameRecord()
             })
 
             this.gameSDKListener.on('getGameMetadata', event => {
@@ -458,6 +462,14 @@
             this.initSKDListener()
           }
         }, 100)
+      },
+      updateGameRecord () {
+        return gameService.updateGameRecord(this.id, this.gameRecord)
+      },
+      fetchGameRecord () {
+        gameService.fetchGameRecord(this.id).then((record) => {
+          this.gameRecord = record
+        })
       }
     },
     watch: {
