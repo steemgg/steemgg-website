@@ -296,7 +296,7 @@
             { type: 'object', required: true, message: 'Please upload game file', trigger: 'change' }
           ],
           key: [
-            { required: true, message: 'Please generate a API Key'}
+            { required: true, message: 'Please generate a API Key' }
           ]
         },
         activityRules: {
