@@ -1,4 +1,3 @@
-
 <html>
 <head>
     <script src="https://unpkg.com/post-robot@9.0.30/dist/post-robot.min.js"></script>
@@ -30,14 +29,23 @@
             background-color: #f5f5f5;
             text-align: right;
         }
+        .gameIFrameWrapper {
+            padding: 10px;
+            background-color: aqua;
+        }
     </style>
 </head>
 <body>
 <div class="title">
     <h1>SteemGG SDK development toolkit</h1>
+    <p>This is a emulated steemGG environment which your can use to test those SDK APIs from your game.</p>
+    <p>Simply input the URL of your games index.html path into the <b>Game URL: </b>input and click "Load game".</p>
+    <p>Then the SDK request from your game call will be communicating with the 'Left Side'. </p>
+    <p>You can load the sample sdk page and inpect the source code for details as well.</p>
 </div>
 <div class="row">
     <div class='form-wrap col-6'>
+        <h4>Mocked Server Data: </h4>
         <div class='input' id='valueWrapper'>
             <div class="contentLabel"><label for='value' >Game Record</label></div>
             <div>It's a JSON object in following format. </div>
@@ -76,13 +84,13 @@
     </div>
     <div class="gameWrapper col-6">
         <div class="gameInputWrapper">
-            <label for="gameURL">Game URL: </label><input id="gameURL" size="50" value="https://steemgg.github.io/steemgg-website/sdk-sample.html"/>
+            <label for="gameURL">Game URL: </label><input id="gameURL" size="50" value="http://localhost:63342/steemgg-sdk/sdk-sample.html"/>
             <div class="submitButton">
-                <button class="loadButton" onclick="loadGameWithURL()">Load the game</button>
+                <button class="loadButton" onclick="loadGameWithURL()">Load game</button>
             </div>
         </div>
+        <h4>Game Area: </h4>
         <div class="gameIFrameWrapper" id="gameIFrameWrapper">
-
         </div>
     </div>
 </div>
