@@ -520,7 +520,7 @@
           account: null,
           width: 1024,
           height: 768,
-          key: null,
+          key: null
         }
         this.generateRandomKey()
         this.fileList = []
