@@ -1,0 +1,210 @@
+
+<html>
+<head>
+    <script src="https://unpkg.com/post-robot@9.0.30/dist/post-robot.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    <style>
+        .form-wrap {
+            padding: 20px 20px 20px 40px;
+            border-right: dashed #4CAF50;
+            text-align: center;
+        }
+        .gameWrapper {
+        }
+        .title {
+            text-align: center;
+            margin: 10px 0 20px;
+            border-bottom: solid gray 1px;
+        }
+        .submitButton {
+            margin: 20px;
+        }
+        .submitButton button {
+            margin: 5px;
+        }
+        .footer {
+            width: 100%;
+            height: 40px;
+            line-height: 40px;
+            color: #4CAF50;
+            background-color: #f5f5f5;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+<div class="title">
+    <h1>SteemGG SDK development toolkit</h1>
+</div>
+<div class="row">
+    <div class='form-wrap col-6'>
+        <div class='input' id='valueWrapper'>
+            <div class="contentLabel"><label for='value' >Game Record</label></div>
+            <div>It's a JSON object in following format. </div>
+            <div>You can store any data using the customJson field</div>
+            <textarea id='value' autocomplete='off' rows="10" cols="50">
+{
+    "id":1234,
+    "data": {
+        "gameId": 5678,
+        "steemId": "steemgg",
+        "customJson": {
+            "score": 90
+        }
+    }
+}
+            </textarea>
+        </div>
+        <div class='input' id='leaderBoardWrapper'>
+            <div class="contentLabel"><label for='leaderBoard' >Game Leader Board </label></div>
+            <div>It's a Javascript Array object</div>
+            <textarea id='leaderBoard' autocomplete='off' rows="10" cols="50">
+[
+    "user1",
+    "200",
+    "user2",
+    "200",
+    "user3",
+    "99"
+]
+</textarea>
+        </div>
+        <div class='input' id='userWrapper'>
+            <div class="contentLabel"><label for='user' class="contentLabel">user</label></div>
+            <input type="user" id='user' autocomplete='off' cols="50" value="fakeUser"/>
+        </div>
+    </div>
+    <div class="gameWrapper col-6">
+        <div class="gameInputWrapper">
+            <label for="gameURL">Game URL: </label><input id="gameURL" size="50" value="https://steemgg.github.io/steemgg-website/sdk-sample.html"/>
+            <div class="submitButton">
+                <button class="loadButton" onclick="loadGameWithURL()">Load the game</button>
+            </div>
+        </div>
+        <div class="gameIFrameWrapper" id="gameIFrameWrapper">
+
+        </div>
+    </div>
+</div>
+<div class="footer">
+    Powered by bizheng@gmail.com
+</div>
+<script>
+  'use strict';
+  var valueInput = document.querySelector('#value');
+  var boardInput = document.querySelector('#leaderBoard');
+  var userInput = document.querySelector('#user');
+  var gameURLInput = document.querySelector('#gameURL');
+  var gameIFrameWrapper = document.querySelector('#gameIFrameWrapper');
+  var gameIFrame;
+  var gameListener;
+  var listenerArray = new Array();
+
+  function initGame() {
+    setTimeout(function () {
+      gameIFrame = document.querySelector('#game-frame');
+      if (gameIFrame) {
+        console.log('game iFrame exist now', gameIFrame)
+
+        // let listener = postRobot.listener({ window: gameIFrame});
+        gameListener = postRobot.listener({window: gameIFrame.contentWindow});
+        listenerArray.push(gameListener.on('updateGameRecord', event => {
+          console.log('SteemGG SDK: receive updateGameRecord, get: ', event.data);
+          var textValue;
+          try {
+            textValue = JSON.stringify(event.data.value, null, 4)
+          } catch (e) {
+            alert('Error parsing the JSON sent from the sdk')
+          }
+          valueInput.value = textValue;
+        }));
+
+        listenerArray.push(gameListener.on('getGameRecord', event => {
+          console.log('SteemGG SDK: receive getGameRecord, return: ', valueInput.value);
+          var jsonValue;
+          return new Promise((resolve, reject) => {
+            try {
+              debugger;
+              jsonValue = JSON.parse(valueInput.value)
+              jsonValue.content = JSON.stringify(jsonValue.content)
+            } catch (e) {
+              alert('Error parsing the value JSON.')
+            }
+            console.log('SteemGG SDK: receive getGameRecord, return: ', jsonValue);
+            setTimeout(() => {
+              resolve(jsonValue)
+            }, 500)
+          })
+        }));
+
+        listenerArray.push(gameListener.on('getGameLeaderBoard', event => {
+          console.log('SteemGG SDK: receive getGameLeaderBoard, return: ', boardInput.value);
+          var jsonValue;
+          return new Promise((resolve, reject) => {
+            try {
+              jsonValue = eval(boardInput.value)
+            } catch (e) {
+              alert('Error parsing the value JSON.')
+            }
+            console.log('SteemGG SDK: receive getGameLeaderBoard, return: ', jsonValue);
+            setTimeout(() => {
+              resolve(jsonValue)
+            }, 500)
+          })
+        }));
+
+        listenerArray.push(gameListener.on('getCurrentUser', event => {
+          console.log('SteemGG SDK: receive getCurrentUser, return: ', userInput.value);
+          return userInput.value;
+        }));
+
+        listenerArray.push(gameListener.on('updateHeight', event => {
+          if (event && event.data && event.data.height) {
+            console.log('SteemGG SDK: receive updateHeight: ', event.data.height);
+            gameIFrame.setAttribute('height', event.data.height);
+          } else {
+            console.log('SteemGG SDK: receive updateHeight with invalid data format: ', event);
+          }
+        }));
+      } else {
+        console.log('sdk iFrame not exist yet, try again')
+        initGame();
+      }
+    }, 100);
+  }
+
+  function loadGameWithURL(url) {
+    var rawUrl = url;
+    if (rawUrl == null) {
+      rawUrl = gameURLInput.value;
+    }
+    if (rawUrl.trim() === '' || rawUrl.indexOf('http') !== 0) {
+      alert('invalid game url')
+      return;
+    }
+    gameIFrameWrapper.innerHTML = '';
+    if (gameListener) {
+      listenerArray.forEach(function(listener) {
+        listener.cancel();
+        listener = null;
+      });
+      listenerArray = new Array();
+      gameListener = null;
+    }
+    var queryParamChar = !rawUrl.includes('?') ? '?' : '&';
+    var uniqueUrl = rawUrl + queryParamChar + 'unique=' + getNumberFromMilliseconds(4);
+    var iframeInnerHTML = `<iframe iframe width='100%' height='600px' frameborder='0' src=${uniqueUrl} id='game-frame' name='game-frame'></iframe>`;
+    gameIFrameWrapper.innerHTML = iframeInnerHTML;
+    initGame();
+  }
+
+  function getNumberFromMilliseconds(digits = 4) {
+    let time = new Date().getTime().toString();
+    if (time.length >= digits) {
+      time = time.substr(time.length - digits);
+    }
+    return time;
+  }
+
+</script></body>
+</html>

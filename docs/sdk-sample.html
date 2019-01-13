@@ -1,0 +1,121 @@
+<html>
+
+<head>
+    <script src="https://unpkg.com/steemgg-sdk/dist/steemgg.sdk.js"></script>
+    <style>
+        .contentLabel {
+            font-weight: bold;
+            margin: 20px 0;
+
+        }
+
+        .inspect {
+            display: none;
+        }
+
+        .submitButton {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+<div class='inspect'>
+    <div>
+        <pre>
+            <code id='userName'>
+            </code>
+        </pre>
+    </div>
+    <div>
+        <pre>
+            <code id='record'>
+            </code>
+        </pre>
+    </div>
+</div>
+
+<div class='form-wrap'>
+    <div class='input' id='valueWrapper'>
+        <div class="contentLabel"><label for='value' >Game Record</label></div>
+        <textarea id='value' autocomplete='off' rows="10" cols="50"></textarea>
+        <div class="submitButton">
+            <button onclick="setGameRecord()">Set Game</button>
+        </div>
+        <div class="submitButton">
+            <button onclick="getGameRecord()">Get Game</button>
+        </div>
+    </div>
+    <div class='input' id='boardWrapper'>
+        <div class="contentLabel"><label for='leaderBoard' >Game Leader Board</label></div>
+        <textarea id='leaderBoard' autocomplete='off' rows="10" cols="50"></textarea>
+        <div class="submitButton">
+            <button onclick="getLeaderBoard()">Get Leader Board</button>
+        </div>
+    </div>
+    <div class='input' id='typeWrapper'>
+        <div class="contentLabel"><label for='user' class="contentLabel">User</label></div>
+        <input type="text" id='user' name='user' autocomplete='off' readonly></input>
+        <div class="submitButton">
+            <button onclick="getCurrentUser()">Get User</button>
+        </div>
+    </div>
+    </div>
+</div>
+<script>
+  'use strict';
+  var valueInput = document.querySelector('#value');
+  var boardInput = document.querySelector('#leaderBoard');
+  var userInput = document.querySelector('#user');
+
+  /**
+   * submit value when the value is changed
+   * @param newValue
+   */
+  function setGameRecord() {
+    console.log("value: ", valueInput.value)
+    console.log("value parse:", JSON.parse(valueInput.value))
+    steemGG.setGameRecord(JSON.parse(valueInput.value));
+  }
+
+  function getGameRecord() {
+    steemGG.getGameRecord(true).then((value) => {
+      if (value) {
+        console.log("get game record:", value);
+        valueInput.value = JSON.stringify(value, null, 4);
+      }
+    });
+  }
+
+  function getLeaderBoard() {
+    steemGG.getLeaderBoard().then(board => {
+      boardInput.value = '[' + board.toString() + ']';
+    })
+  }
+
+  function getCurrentUser() {
+    steemGG.getCurrentUser().then((user) => {
+      if (user) {
+        userInput.value = user;
+      }
+    });
+  }
+
+  (function(){
+    // get value and user
+    steemGG.setDebugMode(true)
+    // steemGG.getCurrentUser().then((user) => {
+    //   if (user) {
+    //     userInput.value = user;
+    //   }
+    //   steemGG.getGameRecord().then((value) => {
+    //     if (value) {
+    //       valueInput.value = JSON.stringify(value, null, 4);
+    //     }
+    //   });
+    // });
+    // steemGG.requestResizeFrame(1000);
+  })();
+</script>
+</body>
+</html>
