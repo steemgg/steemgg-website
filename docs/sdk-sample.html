@@ -1,10 +1,7 @@
 <html>
 
 <head>
-    <!--<script src="https://unpkg.com/steemgg-sdk/dist/steemgg.sdk.js"></script>-->
-    <script src="./dist/steemgg.sdk.js"></script>
-    <!--<script src="./src/client/sdk.js"></script>-->
-
+    <script src="https://unpkg.com/steemgg-sdk/dist/steemgg.sdk.js"></script>
     <style>
         .contentLabel {
             font-weight: bold;
@@ -63,17 +60,6 @@
             <button onclick="getCurrentUser()">Get User</button>
         </div>
     </div>
-    <!--<div class='input' id='statusWrapper'>-->
-        <!--<div class="contentLabel"><label for='status' class="contentLabel">Element is valid:</label></div>-->
-        <!--<select id="status" style="font-size: 20px;">-->
-            <!--<option value="true">true</option>-->
-            <!--<option value="saab">false</option>-->
-        <!--</select>-->
-        <!--<div id="statusMessage">-->
-        <!--</div>-->
-        <!--<div class="submitButton">-->
-            <!--<button onclick="submitValidate()">Set Status</button>-->
-        <!--</div>-->
     </div>
 </div>
 <script>
@@ -81,7 +67,6 @@
   var valueInput = document.querySelector('#value');
   var boardInput = document.querySelector('#leaderBoard');
   var userInput = document.querySelector('#user');
-  // var statusInput = document.querySelector('#status');
 
   /**
    * submit value when the value is changed
