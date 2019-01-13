@@ -11,7 +11,7 @@
               <fullscreen ref="fullscreen" @change="fullscreenChange" class="full-screen-container" >
                 <div class="frameWrapper" :style="{ width: this.fullscreen ? '100%' : (game.width + 'px'),  height: this.fullscreen ? '100%' : (game.height + 'px')}">
                   <!--<img :src="game.coverImg" class="game-cover-image"/>-->
-                  <iframe msallowfullscreen="true" allowfullscreen="true" id="game_drop" :width="this.fullscreen ? '100%' : game.width" :height="this.fullscreen ? '100%' : game.height" frameborder="0" scrolling="no" allowtransparency="true" webkitallowfullscreen="true" mozallowfullscreen="true" :src="gameUrl" ></iframe>
+                  <iframe msallowfullscreen="true" allowfullscreen="true" id="game_container" :width="this.fullscreen ? '100%' : game.width" :height="this.fullscreen ? '100%' : game.height" frameborder="0" scrolling="no" allowtransparency="true" webkitallowfullscreen="true" mozallowfullscreen="true" :src="gameUrl" ></iframe>
                 </div>
                 <!--<button type="button" @click="toggle" >Full Screen</button>-->
                 <button type="button" @click="toggle" class="btn btn-default btn-game-fullscreen">
@@ -142,6 +142,7 @@
   import marked from 'marked'
   import vueSlider from 'vue-slider-component'
   import GameService from '../../service/game.service'
+  import * as postRobot from 'post-robot'
   const gameService = new GameService()
 
   export default {
@@ -158,6 +159,7 @@
         isAuditMode: false,
         similarGames: [],
         game: {},
+        gameRecord: null,
         gameUrl: '',
         gameComment: '',
         comments: [],
@@ -173,6 +175,8 @@
         dialogFormVisible: false,
         approveDialogFormVisible: false,
         fullscreen: false,
+        gameSDKListener: null,
+        gameIFrame: null,
         defaultVotingWeight: 100,
         votingWeightVisible: false,
         totalPayout: 0.000,
@@ -362,6 +366,7 @@
         if (this.id) {
           gameService.getById(this.id).then(response => {
             this.game = response
+            this.initSKDListener()
             if (this.game.status === 1 || this.$store.getters.isAuditor || (this.$store.state.loggedIn && this.$store.getters.user.account === this.game.account)) {
               this.gameUrl = process.env.IPFS_SERVER_URL + this.game.gameUrl.hash
               if (this.$store.state.loggedIn) {
@@ -402,6 +407,69 @@
       },
       fullscreenChange (fullscreen) {
         this.fullscreen = fullscreen
+      },
+      initSKDListener () {
+        setTimeout(() => {
+          if (document.getElementById('game_container')) {
+            this.gameIFrame = document.getElementById('game_container')
+            console.log('game iFrame exist now', this.gameIFrame)
+            if (this.gameSDKListener) {
+              this.gameSDKListener.cancel()
+            }
+            // let listener = postRobot.listener({ window: this.extensionIFrame})
+            this.gameSDKListener = postRobot.listener({window: this.gameIFrame.contentWindow})
+            this.gameSDKListener.on('getGameLeaderBoard', event => {
+              console.log('Game SDK: receive getGameLeaderBoard: ', event.data.value)
+              return this.fetchGameLeaderBoard(this.id, event.data.value)
+            })
+            this.gameSDKListener.on('updateGameRecord', event => {
+              this.gameRecord = event.data.value
+              console.log('Game SDK: receive updateGameRecord: ', event.data.value)
+              return this.updateGameRecord(event.data.value)
+            })
+
+            this.gameSDKListener.on('getGameRecord', event => {
+              console.log('Game SDK: receive getGameRecord, return: ', this.gameRecord)
+              return this.fetchGameRecord()
+            })
+
+            this.gameSDKListener.on('getGameMetadata', event => {
+              console.log('Game SDK: receive getGameMetadata, return: ', this.game)
+              return this.game
+            })
+
+            this.gameSDKListener.on('getCurrentLocale', event => {
+              let locale = navigator.language
+              console.log('Game SDK: receive getCurrentLocale return: ', locale)
+              return locale
+            })
+
+            this.gameSDKListener.on('getCurrentUser', event => {
+              console.log('Game SDK: receive getCurrentUser, return: ', this.$store.state.user.account)
+              return this.$store.state.user.account
+            })
+
+            this.gameSDKListener.on('updateHeight', event => {
+              if (event && event.data && event.data.height) {
+                console.log('Game SDK: receive updateHeight: ', event.data.height)
+                this.gameIFrame.setAttribute('height', event.data.height)
+              } else {
+                console.log('Game SDK: receive updateHeight with invalid data format: ', event)
+              }
+            })
+          } else {
+            console.log('Extension iFrame not exist yet, try again')
+            this.initSKDListener()
+          }
+        }, 100)
+      },
+      updateGameRecord () {
+        return gameService.updateGameRecord(this.id, this.gameRecord)
+      },
+      fetchGameRecord () {
+        gameService.fetchGameRecord(this.id).then((record) => {
+          this.gameRecord = record
+        })
       }
     },
     watch: {
@@ -411,6 +479,11 @@
     },
     mounted () {
       this.fetchGame()
+    },
+    beforeDestroy () {
+      if (this.gameSDKListener) {
+        this.gameSDKListener.cancel()
+      }
     }
   }
 </script>
@@ -425,8 +498,8 @@
     margin: 20px;
   }
   .gamePlayer {
-    background-color: #5bc0de;
-    /*height: 400px;*/
+    background-color: #5bc0de
+    /*height: 400px*/
   }
 
   .gameInfo {
@@ -443,7 +516,7 @@
         margin-top: 20px;
         margin-bottom: 20px;
         .commentActionTitle {
-          display:flex;
+          display:flex
         }
         .commentActionText {
           display:flex;
@@ -458,7 +531,7 @@
     }
   }
   .full-screen-container {
-    /*height: 400px;*/
+    /*height: 400px*/
     width: 100%;
     position: relative;
     margin-left: auto;
@@ -476,7 +549,7 @@
       font-size:36px;
       line-height:1px;
       text-align:center;
-      outline:none
+      outline:none;
     }
 
     &.fullscreen {
@@ -498,7 +571,7 @@
       display: inline;
       margin-right: 12px;
       margin-top:12px;
-      /*line-height: 32px;*/
+      /*line-height: 32px*/
       padding: 4px 6px;
       background: rgba(94,109,130,.1);
       border: 1px solid rgba(94,109,130,.2);
@@ -522,7 +595,7 @@
     .activeVotes, .report {
       float: right;
       i {
-        cursor: pointer;
+        cursor: pointer
       }
     }
 
