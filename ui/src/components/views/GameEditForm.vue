@@ -71,6 +71,9 @@
                       </el-upload>
                     </div>
                   </el-form-item>
+                  <el-form-item label="API Key" prop="key">
+                    <div class="apiKeyInput"><el-input maxlength="64" minlength="64" placeholder="Please generate a new key" :value="apiKey" :disabled="true"></el-input> <el-button type='primary' size="mini" @click="confirmNewKey()">Generate a new kay</el-button> </div>
+                  </el-form-item>
                   <!--<el-form-item>-->
                   <div class="copyRightWrapper" v-if="!gameExists">
                     <el-checkbox  v-model="copyRightClaim"></el-checkbox>
@@ -228,6 +231,7 @@
         actionText: 'Create',
         postingWaitTime: -1,
         copyRightClaim: false,
+        apiKey: '',
         uploadTarget: (process.env.API_SERVER_URL.endsWith('/') ? process.env.API_SERVER_URL.slice(0, -1) : process.env.API_SERVER_URL) + '/api/v1/upload',
         game: {
           title: '',
@@ -239,7 +243,8 @@
           lastModified: null,
           account: null,
           width: 1024,
-          height: 768
+          height: 768,
+          key: null
         },
         activity: {
           activityTitle: '',
@@ -289,6 +294,9 @@
           ],
           gameUrl: [
             { type: 'object', required: true, message: 'Please upload game file', trigger: 'change' }
+          ],
+          key: [
+            { required: true, message: 'Please generate a API Key' }
           ]
         },
         activityRules: {
@@ -398,7 +406,7 @@
               })
             }
           } else {
-            console.log('error submit!!')
+            console.log('error submit!')
             return false
           }
         })
@@ -455,14 +463,14 @@
                 this.updateActivityInterval()
                 this.$notify({
                   title: 'Post Created',
-                  message: 'You have created a post in steemit successfully!. You can find the post link in "Game Dev Logs" section',
+                  message: 'You have created a post in steemit successfully. You can find the post link in "Game Dev Logs" section',
                   type: 'success',
                   offset: 100
                 })
               } else {
                 this.$notify({
                   title: 'Comment Created',
-                  message: 'You have created a new comment on the latest post successfully!. You can find the post link in "Game Dev Logs" section',
+                  message: 'You have created a new comment on the latest post successfully. You can find the post link in "Game Dev Logs" section',
                   type: 'success',
                   offset: 100
                 })
@@ -487,7 +495,7 @@
             })
           }
         } else {
-          this.$message.error('Please create the game first!')
+          this.$message.error('Please create the game first.')
         }
       },
 
@@ -511,10 +519,30 @@
           lastModified: null,
           account: null,
           width: 1024,
-          height: 768
+          height: 768,
+          key: null
         }
+        this.generateRandomKey()
         this.fileList = []
         this.$refs.coverImageDropzone.dropzone.removeAllFiles(true)
+      },
+
+      confirmNewKey () {
+        this.$confirm(`This will generate a new API Key, if you update the game with it,
+          your game file will not be able to use the sdk successfully unit it's updated to use the new key. Are you sure you want to proceed?`, 'Confirm changing API Key',
+          {
+            confirmButtonText: 'Yes, change it.',
+            cancelButtonText: 'Cancel',
+            type: 'warning'
+          }).then(() => {
+            this.generateRandomKey()
+          }).catch(() => {
+          })
+      },
+
+      generateRandomKey () {
+        this.game.key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+        this.apiKey = this.game.key
       },
 
       onTagChange () {
@@ -569,6 +597,11 @@
             // only the game creator or admin can edit game
             if (this.$store.getters.isAdmin || game.account === this.$store.getters.user.account) {
               this.game = game
+              if (this.game.key == null) {
+                this.generateRandomKey()
+              } else {
+                this.apiKey = this.game.key
+              }
               this.$refs.coverImageDropzone.dropzone.emit('addedfile', this.game.coverImage)
               this.$refs.coverImageDropzone.dropzone.options.thumbnail.call(this.$refs.coverImageDropzone, this.game.coverImage, process.env.IPFS_SERVER_URL + game.coverImage.hash)
               this.$refs.coverImageDropzone.dropzone.emit('complete', this.game.coverImage)
@@ -583,7 +616,7 @@
               })
             }
           }).catch(() => {
-            this.$message.error('Fail to load the game data, make sure the game exist!')
+            this.$message.error('Fail to load the game data, make sure the game exist.')
           })
         } else {
           this.activeNames = ['gameInfo']
@@ -711,6 +744,11 @@
       }
       .postCountdown {
         margin-bottom: 10px;
+      }
+      .apiKeyInput {
+        input {
+          width: 400px;
+        }
       }
     }
   }
