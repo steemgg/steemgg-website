@@ -27,7 +27,7 @@
     "mavon-editor": "^2.6.17",
     "moment": "^2.22.2",
     "owl.carousel": "^2.3.4",
-    "post-robot": "^9.0.3",
+    "post-robot": "9.0.30",
     "steem": "^0.6.7",
     "vue": "^2.5.17",
     "vue-awesome-swiper": "^2.6.7",

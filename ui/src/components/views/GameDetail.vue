@@ -470,6 +470,9 @@
         gameService.fetchGameRecord(this.id).then((record) => {
           this.gameRecord = record
         })
+      },
+      fetchGameLeaderBoard () {
+        return gameService.fetchGameLeaderBoard(this.id)
       }
     },
     watch: {

@@ -100,24 +100,17 @@ export default class GameService {
   }
 
   updateGameRecord (gameId, gameRecord) {
-    return axiosInstance.put(`/sdk/v1/save/${gameId}`, gameRecord)
+    return axiosInstance.put(`/sdk/v1/game/record/${gameId}`, gameRecord)
   }
 
   fetchGameRecord (gameId) {
-    return axiosInstance.get(`/sdk/v1/save/${gameId}`)
+    return axiosInstance.get(`/sdk/v1/game/record/${gameId}`)
   }
 
   fetchGameLeaderBoard (gameId, params) {
-    // let reqParams = {
-    //   rank: "score",
-    //   start: 0,
-    //   end: 10
-    // }
-    // if (params != null) {
-    //   // apply default value
-    //   reqParams = Object.assign(reqParams, params);
-    // }
-    return axiosInstance.get(`api/v1/leaderboard/${gameId}`, {params: params})
+    return axiosInstance.get(`api/v1/leaderboard/${gameId}`, {params: params}).then(response => {
+      return response.data
+    })
   }
 
   /**
