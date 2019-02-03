@@ -19,6 +19,15 @@ module.exports = {
           // console.log("set coookie", req)
           proxyReq.setHeader('cookie', 'at=steemitgame.test');
         }
+      },
+      '/sdk/v1/**': {
+        target: 'https://api-dev.steemgg.com/',
+        secure: false,
+        changeOrigin: true,
+        onProxyReq: function(proxyReq, req, res) {
+          // console.log("set coookie", req)
+          proxyReq.setHeader('cookie', 'at=steemitgame.test');
+        }
       }
     },
 
