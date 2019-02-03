@@ -104,7 +104,9 @@ export default class GameService {
   }
 
   fetchGameRecord (gameId) {
-    return axiosInstance.get(`/sdk/v1/game/record/${gameId}`)
+    return axiosInstance.get(`/sdk/v1/game/record/${gameId}`).then(response => {
+      return response.data
+    })
   }
 
   fetchGameLeaderBoard (gameId, params) {

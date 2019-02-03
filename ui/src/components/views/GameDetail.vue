@@ -429,7 +429,6 @@
             })
 
             this.gameSDKListener.on('getGameRecord', event => {
-              console.log('Game SDK: receive getGameRecord, return: ', this.gameRecord)
               return this.fetchGameRecord()
             })
 
@@ -445,8 +444,12 @@
             })
 
             this.gameSDKListener.on('getCurrentUser', event => {
-              console.log('Game SDK: receive getCurrentUser, return: ', this.$store.state.user.account)
-              return this.$store.state.user.account
+              if (this.$store.state.loggedIn) {
+                console.log('Game SDK: receive getCurrentUser, return: ', this.$store.state.user.account)
+                return this.$store.state.user.account
+              } else {
+                return null
+              }
             })
 
             this.gameSDKListener.on('updateHeight', event => {
@@ -467,8 +470,9 @@
         return gameService.updateGameRecord(this.id, this.gameRecord)
       },
       fetchGameRecord () {
-        gameService.fetchGameRecord(this.id).then((record) => {
+        return gameService.fetchGameRecord(this.id).then((record) => {
           this.gameRecord = record
+          return this.gameRecord
         })
       },
       fetchGameLeaderBoard () {
