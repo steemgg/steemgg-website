@@ -72,7 +72,14 @@
                     </div>
                   </el-form-item>
                   <el-form-item label="API Key" prop="key">
-                    <div class="apiKeyInput"><el-input maxlength="64" minlength="64" placeholder="Please generate a new key" :value="apiKey" :disabled="true"></el-input> <el-button type='primary' size="mini" @click="confirmNewKey()">Generate a new kay</el-button> </div>
+                    <div class="apiKeyInput">
+                      <el-input maxlength="64" minlength="64" size="medium" placeholder="Please generate a new key" :value="apiKey" ref="apiKeyInput" :disabled="true">
+                        <el-tooltip placement="top" slot="append">
+                          <div slot="content">Copy the API key to the clipboard</div>
+                          <i class="fa fa-clipboard"  aria-hidden="true" @click="copyApiKeyToClipBoard()"></i>
+                        </el-tooltip>
+                      </el-input>
+                      <el-button type='primary' size="mini" @click="confirmNewKey()">Generate a new kay</el-button> </div>
                   </el-form-item>
                   <!--<el-form-item>-->
                   <div class="copyRightWrapper" v-if="!gameExists">
@@ -419,6 +426,21 @@
           }
         })
       },
+      copyApiKeyToClipBoard () {
+        var dummy = document.createElement('input')
+        document.body.appendChild(dummy)
+        dummy.setAttribute('value', this.apiKey)
+        dummy.select()
+        document.execCommand('copy')
+        document.body.removeChild(dummy)
+        this.$notify({
+          title: 'API Key is copied successfully',
+          message: '',
+          type: 'success',
+          offset: 100,
+          duration: 1500
+        })
+      },
       doNotShowTip () {
         if (this.hidePostTip) {
           this.$store.commit('hidePostTip')
@@ -746,8 +768,12 @@
         margin-bottom: 10px;
       }
       .apiKeyInput {
-        input {
-          width: 400px;
+        .el-input {
+          padding-left: 100px;
+          padding-right: 50px;
+        }
+        .fa-clipboard {
+          cursor: pointer;
         }
       }
     }
