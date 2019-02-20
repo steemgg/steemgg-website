@@ -3,6 +3,7 @@
 import config from 'config';
 import fetch from 'isomorphic-fetch';
 import {SDKError} from '../errors/SDKError'
+const request = require('request');
 
 exports.instance = null;
 
@@ -98,6 +99,9 @@ SteemConnect.prototype.refreshToken = async function(refreshToken){
     },'');
 }
 
+SteemConnect.prototype.getHistory = async function(options){
+    return  await this.condenserApi(options);
+}
 SteemConnect.prototype.send = async function send(route, method, body, accessToken) {
     let url = `${this.options.baseURL}/api/${route}`;
     let res = await fetch(url, {
@@ -114,6 +118,17 @@ SteemConnect.prototype.send = async function send(route, method, body, accessTok
         throw new SDKError("call steemit api error",data)
     }
     return data;
+};
+
+SteemConnect.prototype.condenserApi = async function condenserApi(options) {
+    return new Promise(async (resolve, reject) => {
+        let req = request.post(options, function (e, r, body) {
+            if(e) {
+                reject( e );
+            }
+            resolve(body);
+        });
+    });
 };
 
 exports.Initialize = function Initialize(config) {

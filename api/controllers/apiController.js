@@ -531,6 +531,25 @@ exports.logout = async function(req, res, next) {
     }
 };
 
+exports.leaderboard = async function(req, res) {
+    try {
+        let rank = (typeof req.query.rank !== 'undefined') ? req.query.rank : 'score';
+        let start = (typeof req.query.start !== 'undefined') ? req.query.start : 0;
+        let end = (typeof req.query.end !== 'undefined') ? req.query.end : 50;
+        let result = await game.getRanks(req.params.id, rank, start, end);
+        console.log(result);
+        return res.status(200).json(result);
+    } catch(err) {
+        if (err instanceof DBError) {
+            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
+        } else if (err instanceof SDKError) {
+            return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
+        } else {
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
+        }
+    }
+};
+
 function unzipFile(file, userid, cb) {
     var ret = decompress(file, config.get('steemit.app.gameurl')+"/"+userid,{
         filter: file => path.extname(file.path) !== '.exe'
