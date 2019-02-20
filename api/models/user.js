@@ -50,3 +50,8 @@ exports.getInterval = async function(key) {
 exports.getTTL = async function(key) {
     return await redis.instance.ttl(key);
 }
+
+exports.setUserGameInfo = async function(key, value) {
+    let result = await redis.instance.set(key, value);
+    return result;
+}

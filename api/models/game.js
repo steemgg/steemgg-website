@@ -2,6 +2,7 @@
 
 import db from '../lib/db'
 import redis from '../lib/redis';
+import steem from '../models/steem';
 
 exports.addGame = async function(game) {
     let rows = await db.execute(db.WRITE, 'INSERT INTO games SET ?', game);
@@ -90,7 +91,7 @@ exports.getGameById = async function(gameId) {
     if(rows) {
         return JSON.parse(rows);
     }
-    rows = await db.execute(db.READ, 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend,activities,width,height from games where id=?', gameId);
+    rows = await db.execute(db.READ, 'select id,account,userid,title,coverImage,description,category,version,gameUrl,vote,payout,from_unixtime(created,\'%Y-%m-%dT%TZ\') as created,from_unixtime(lastModified,\'%Y-%m-%dT%TZ\') as lastModified,report,status,recommend,activities,width,height,`key`,privatekey,leaderboard from games where id=?', gameId);
     if(typeof rows[0] !== 'undefined') {
         await redis.instance.set(key, JSON.stringify(rows));
     }
@@ -177,6 +178,38 @@ exports.gameList = async function(params) {
     }
     return rows;
 }
+
+exports.setLeaderboard = async function(game, content, account) {
+    let arr = game['leaderboard'].split(",");
+    arr.map(async function (val) {
+        if(typeof content[val] == "number"){
+            //console.log('save ', val, content[val], game['id'], account);
+            let key = 'rank_'+game['id']+'_'+val;
+            await redis.instance.zadd(key, content[val], account);
+            await redis.instance.expire(key, 86400*100);
+        }
+    });
+    return true;
+}
+
+exports.getRanks = async function(gameId, rank, start, end) {
+    let key = 'rank_'+gameId+'_'+rank;
+    return await redis.instance.zrevrange(key, start, end);
+}
+
+exports.getGameUserInfo = async function(gameId, account) {
+    let key = 'gameUserInfo_'+ account+'_'+gameId
+    let userInfo = await redis.instance.get(key);
+    //console.log(userInfo);
+    return JSON.parse(userInfo);
+}
+
+exports.setGameUserInfo = async function(gameId, account, data) {
+    let key = 'gameUserInfo_'+ account+'_'+gameId
+    await redis.instance.set(key, data);
+    await redis.instance.expire(key, 86400*365);
+}
+
 exports.clearCache = async function() {
     let gameListKey = 'game:list';
     let gameCountKey = 'game:count';

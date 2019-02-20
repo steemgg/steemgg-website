@@ -117,6 +117,7 @@ exports.upload = function(req, res) {
 exports.me = async function(req, res) {
     try {
         let userInfo = req.session.user;
+        console.log(userInfo);
         userInfo.gamePostingInterval = config.get('steemit.app.gamePostingInterval');
         return res.status(200).json(userInfo);
     } catch(err) {
@@ -208,12 +209,13 @@ exports.addGame = async function(req, res, next) {
         let userInfo = req.session.user;
         let data = req.body;
         let unix = Math.round(+new Date()/1000);
-        let gameInfo = {userid:userInfo.userid,account:userInfo.account,created:unix,lastModified:unix,gameUrl:data.gameUrl,coverImage:data.coverImage,version:data.version,title:data.title,category:data.category,description:data.description,width:data.width,height:data.height};
+        let gameInfo = {userid:userInfo.userid,account:userInfo.account,created:unix,lastModified:unix,gameUrl:data.gameUrl,coverImage:data.coverImage,version:data.version,title:data.title,category:data.category,description:data.description,width:data.width,height:data.height,key:data.key,privatekey:Math.random().toString(36).substring(2)};
         let dbRes = await game.addGame(gameInfo);
         let iso = new Date(unix*1000).toISOString();
         gameInfo.id = dbRes.insertId;
         gameInfo.lastModified = iso;
         gameInfo.created = iso;
+        delete gameInfo.privatekey;
         return res.status(200).json(gameInfo);
     } catch(err) {
         console.error(err);
@@ -254,11 +256,20 @@ exports.getGameDetail = async function(req, res, next) {
         if(typeof dbRes[0] === 'undefined') {
             return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
         }
+        let userInfo = req.session.user;
+        console.log(userInfo);
+        if(userInfo) {
+            if (userInfo.account !== dbRes[0]['account']) {
+                delete dbRes[0]['key'];
+            }
+        } else {
+            delete dbRes[0]['key'];
+        }
+        delete dbRes[0]['privatekey'];
         if(dbRes[0]['status']!=1) {
             if (typeof req.session.user == 'undefined') {
                 return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
             } else {
-                let userInfo = req.session.user;
                 if (userInfo.account !== dbRes[0]['account']) {
                     if( userInfo.role == 0 ) {
                         return res.status(404).json({ resultCode: CODE.NOFOUND_GAME_ERROR.RESCODE, err: CODE.NOFOUND_GAME_ERROR.DESC });
@@ -266,6 +277,7 @@ exports.getGameDetail = async function(req, res, next) {
                 }
             }
         }
+
         let steemitRes = await game.getActivitiesByGameId(req.params.id);
         if(steemitRes.length>0){
             dbRes[0]['activities'] = steemitRes;
@@ -293,7 +305,7 @@ exports.updateGame = async function(req, res, next) {
     try{
         let unix = Math.round(+new Date()/1000);
         let data = req.body;
-        let updateCloumns = ['title','coverImage','description','category','version','gameUrl','width','height'];
+        let updateCloumns = ['title','coverImage','description','category','version','gameUrl','width','height','key'];
         let dbRes = null;
         for(let attributename in data){
             if(updateCloumns.indexOf(attributename)<0) {
@@ -509,6 +521,25 @@ exports.logout = async function(req, res, next) {
         res.status(200).send();
     } catch(err){
         console.error(err);
+        if (err instanceof DBError) {
+            return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
+        } else if (err instanceof SDKError) {
+            return res.status(500).json({ resultCode: CODE.STEEMIT_API_ERROR.RESCODE, err:err.description });
+        } else {
+            return res.status(500).json({ resultCode: CODE.ERROR.RESCODE, err:err.toString() });
+        }
+    }
+};
+
+exports.leaderboard = async function(req, res) {
+    try {
+        let rank = (typeof req.query.rank !== 'undefined') ? req.query.rank : 'score';
+        let start = (typeof req.query.start !== 'undefined') ? req.query.start : 0;
+        let end = (typeof req.query.end !== 'undefined') ? req.query.end : 50;
+        let result = await game.getRanks(req.params.id, rank, start, end);
+        console.log(result);
+        return res.status(200).json(result);
+    } catch(err) {
         if (err instanceof DBError) {
             return res.status(500).json({ resultCode: CODE.DB_ERROR.RESCODE, err: err.description });
         } else if (err instanceof SDKError) {

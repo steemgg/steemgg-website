@@ -144,6 +144,24 @@ exports.claimRewardBalance = async function(accessToken, account, rewardSteem, r
     return result;
 }
 
+exports.saveCustomJson = async function(accessToken, account, id, json) {
+    let operations = [];
+    let postingAuths = [];
+    postingAuths.push(account);
+    let customOp = [
+        'custom_json',
+        {
+            required_auths:[],
+            required_posting_auths:postingAuths,
+            id:id,
+            json:json
+        },
+    ];
+    operations.push(customOp);
+    let result = sc2.instance.broadcast(accessToken, operations);
+    return result;
+}
+
 exports.createPermlink = function(title, author) {
     let permlink;
     let prefix;
@@ -163,6 +181,32 @@ exports.createCommentPermlink = function(parentAuthor, parentPermlink) {
     permlink = `re-${parentAuthor}-${newParentPermlink}-${timeStr}`;
     return checkPermLinkLength(permlink);
 };
+
+exports.getCustomJson = async function(gameId, account) {
+    let options = {
+        url: ' https://api.steemit.com',
+        method: 'POST',
+        json: {
+            jsonrpc: '2.0',
+            method: 'condenser_api.get_account_history',
+            params: [account, -1, 10000],
+            id: 1
+        }
+    };
+    let r = await sc2.instance.getHistory(options);
+    let res = r.result;
+    let result = {};
+    for(let k  in res) {
+        let t =  res[k][1].timestamp;
+        let tran = res[k][1].op;
+        if(tran[0] == 'custom_json') {
+            if(tran[1].id == 'userInfo_'+gameId) {
+                result = tran[1].json;
+            }
+        }
+    }
+    return result;
+}
 
 function checkPermLinkLength(permlink) {
   if (permlink.length > 255) {

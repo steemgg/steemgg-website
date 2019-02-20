@@ -7,6 +7,7 @@ import steem from '../models/steem';
 import api from '../controllers/apiController';
 import admin from '../controllers/adminController';
 import callback from '../controllers/callbackController';
+import sdk from '../controllers/sdkController';
 
 module.exports = function(app) {
   app.all('*',function (req, res, next) {
@@ -31,7 +32,7 @@ module.exports = function(app) {
   app.post('/api/v1/game', [morkSessionMiddleware, userMiddleware], api.addGame);
   app.post('/api/v1/post', [morkSessionMiddleware, userMiddleware], api.postGame);
   app.get('/api/v1/claimReward', [morkSessionMiddleware, userMiddleware], api.claimReward);
-  app.get('/api/v1/game/:id', [], api.getGameDetail);
+  app.get('/api/v1/game/:id', [morkSessionMiddleware], api.getGameDetail);
   app.put('/api/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.updateGame);
   app.delete('/api/v1/game/:id', [morkSessionMiddleware, userMiddleware], api.deleteGame);
   app.post('/api/v1/comment/:author/:permlink', [morkSessionMiddleware, userMiddleware], api.commentGame);
@@ -40,19 +41,23 @@ module.exports = function(app) {
   app.get('/api/v1/me', [morkSessionMiddleware, userMiddleware], api.me);
   app.get('/api/v1/logout', api.logout);
   app.get('/callback', callback.auth);
+  app.get('/api/v1/leaderboard/:id', [morkSessionMiddleware, userMiddleware], api.leaderboard);
 
   app.post('/api/v1/audit/:id', [morkSessionMiddleware, userMiddleware], admin.auditGame);
   app.get('/api/v1/auditor', [morkSessionMiddleware, userMiddleware], admin.listAuditor);
   app.delete('/api/v1/auditor/:account', [morkSessionMiddleware, userMiddleware], admin.unsetAuditor);
   app.put('/api/v1/auditor/:account', [morkSessionMiddleware, userMiddleware], admin.setAuditor);
   app.put('/api/v1/recommend/:id', [morkSessionMiddleware, userMiddleware], admin.recommendGame);
+  app.put('/sdk/v1/game/record/:id', [morkSessionMiddleware, userMiddleware], sdk.saveGame);
+  app.get('/sdk/v1/game/record/:id', [morkSessionMiddleware, userMiddleware], sdk.loadGame);
+
+  app.post('/sdk/v1/test/:id', sdk.test);
 };
 
 function morkSessionMiddleware (req, res, next) {
     if (process.env.NODE_ENV === 'development' && typeof req.cookies['at'] !== 'undefined') {
         fs.readFile( config.get('steemit.app.rooturl') + '/' + req.cookies['at'] +'.json', 'utf8', async function (err, result) {
             if (err) {
-                console.log({resCode:CODE.TEST_DATA_ERROR.RESCODE, err:CODE.TEST_DATA_ERROR.DESC});
                 next();
             } else {
                 let userInfo = JSON.parse(result);
