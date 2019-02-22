@@ -34,6 +34,7 @@
           <div class="gameActionButton" v-if="scope.row.status == 1"><el-button  @click="openDialog(scope.$index, 'deny', 'Deny Game')" type="danger"  size="mini" v-if="type == 'report' || type == 'live'">Deny Game</el-button></div>
           <div class="gameActionButton" v-if="scope.row.report == 1"><el-button @click="openDialog(scope.$index, 'dismiss', 'Dismiss Report')" type="primary"  size="mini" v-if="type == 'report'">Dismiss Report</el-button></div>
           <div class="gameActionButton" v-if="scope.row.status == 0 && type == 'stale' "><el-button @click="openDialog(scope.$index, 'Dismiss Report')" type="primary"  size="mini" v-if="type == 'report'">Dismiss Report</el-button></div>
+          <div class="gameActionButton" v-if=""><el-button @click="openDialog(scope.$index, 'removeFromRecommended', 'Remove from recommended')" type="danger"  size="mini" v-if="type == 'recommended'">Remove</el-button></div>
         </template>
       </el-table-column>
     </el-table>
@@ -109,6 +110,8 @@
             this.deny()
           } else if (this.actionType === 'dismiss') {
             this.clear()
+          } else if (this.actionType === 'removeFromRecommended') {
+            this.removeGameFromRecomended()
           }
           this.form.comment = ''
         }
@@ -177,15 +180,16 @@
           this.loading = false
         })
       },
-      removeGameFromRecomended (index) {
+      removeGameFromRecomended () {
+        this.dialogFormVisible = false
         this.loading = true
-        gameService.undoRecommend(this.items[index].id).then(() => {
+        gameService.undoRecommend(this.items[this.activeIndex].id).then(() => {
           this.$message.success('Game is removed from recommended list.')
           this.items.splice(this.activeIndex, 1)
           this.$emit('gameUndoRecommended')
         }).catch(error => {
           console.log(error)
-          this.$message.error('remove game from recommended list action failed.')
+          this.$message.error('Failed to remove game from recommended list.')
         }).finally(() => {
           this.loading = false
         })
